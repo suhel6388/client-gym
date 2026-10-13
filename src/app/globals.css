@@ -1,26 +1,166 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ---------------------------------------------------------------------------
+   Ironclad CRM — "Black & Gold" design tokens
+   --------------------------------------------------------------------------- */
+@theme {
+  /* Surfaces */
+  --color-canvas: #0b0b0d;
+  --color-panel: #171719;
+  --color-nav: #202023;
+  --color-card: #1c1c1f;
+  --color-card-hover: #252528;
+  --color-elevated: #202024;
+
+  /* Gold accent */
+  --color-gold: #e8b84d;
+  --color-gold-bright: #ffc857;
+  --color-gold-deep: #b8862d;
+  --color-gold-soft: #f6d477;
+
+  /* Text */
+  --color-ink: #f5f5f5;
+  --color-subtle: #a1a1aa;
+  --color-faint: #71717a;
+
+  /* Lines */
+  --color-line: #303034;
+  --color-line-soft: #26262a;
+  --color-line-strong: #3f3f46;
+
+  /* Status */
+  --color-success: #4ade80;
+  --color-warning: #fbbf24;
+  --color-danger: #f87171;
+
+  /* Typography */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", Roboto, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo,
+    monospace;
+
+  /* Shape */
+  --radius-card: 12px;
+
+  /* Elevation */
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.5),
+    0 14px 30px -22px rgba(0, 0, 0, 0.9);
+  --shadow-pop: 0 18px 44px -14px rgba(0, 0, 0, 0.9),
+    0 0 0 1px rgba(48, 48, 52, 0.9);
+  --shadow-gold: 0 10px 28px -14px rgba(232, 184, 77, 0.55);
+
+  /* Motion */
+  --animate-fade-up: fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-fade-in: fade-in 0.4s ease-out both;
+  --animate-pop: pop 0.16s ease-out both;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 10px, 0);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pop {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -4px, 0) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: rgba(232, 184, 77, 0.28);
+    color: #ffffff;
+  }
+
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 2px solid var(--color-gold);
+    outline-offset: 2px;
+    border-radius: 8px;
+  }
+
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--color-faint);
+  }
+}
+
+/* Solid gold gradient used on primary buttons, brand marks and chart bars. */
+@utility gold-surface {
+  background-color: #e8b84d;
+  background-image: linear-gradient(135deg, #f6d477 0%, #e8b84d 50%, #b8862d 100%);
+}
+
+/* Gradient text for brand wordmarks. */
+@utility gold-text {
+  background-image: linear-gradient(135deg, #f6d477 0%, #e8b84d 55%, #b8862d 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+.scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: #303034 transparent;
+}
+
+.scroll-thin::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.scroll-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scroll-thin::-webkit-scrollbar-thumb {
+  background-color: #303034;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background-clip: content-box;
+}
+
+.scroll-thin::-webkit-scrollbar-thumb:hover {
+  background-color: #45454c;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
 }
