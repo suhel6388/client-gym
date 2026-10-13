@@ -12,6 +12,7 @@ import { usePathname } from "next/navigation";
 import { navGroups } from "@/lib/nav";
 import { cn } from "@/lib/cn";
 import { Button } from "./ui/Button";
+import { DarkGoldMark } from "../../public/logo";
 
 type SidebarProps = {
   collapsed: boolean;
@@ -51,8 +52,9 @@ export function Sidebar({
       >
         {/* Brand */}
         <div className="flex h-16 shrink-0 items-center gap-3 border-b border-line/60 px-5">
-          <span className="gold-surface inline-flex size-9 shrink-0 items-center justify-center rounded-xl text-[#1A1503] shadow-gold">
-            <Dumbbell className="size-4.5" strokeWidth={2.25} aria-hidden />
+          <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-xl text-[#1A1503] shadow-gold">
+            {/* <Dumbbell className="size-4.5" strokeWidth={2.25} aria-hidden /> */}
+           <DarkGoldMark/>
           </span>
           <div
             className={cn(
@@ -61,7 +63,7 @@ export function Sidebar({
             )}
           >
             <p className="gold-text text-[17px] font-extrabold leading-none tracking-tight">
-              IRONCLAD
+              Dark Gold
             </p>
             <p className="mt-1.5 text-[9.5px] font-medium uppercase tracking-[0.22em] text-faint">
               Gym CRM
@@ -141,7 +143,7 @@ export function Sidebar({
         </nav>
 
         {/* Premium upsell */}
-        <div className={cn("px-3", collapsed && "lg:px-2")}>
+        {/* <div className={cn("px-3", collapsed && "lg:px-2")}>
           <div
             className={cn(
               "rounded-xl border border-gold/20 bg-gradient-to-b from-gold/[0.12] to-transparent p-4",
@@ -163,7 +165,7 @@ export function Sidebar({
               Upgrade plan
             </Button>
           </div>
-        </div>
+        </div> */}
 
         {/* Collapse toggle (desktop only) */}
         <div className="hidden shrink-0 border-t border-line/60 p-3 lg:block">

@@ -13,7 +13,6 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   Plus,
-  Search,
   Settings,
   TriangleAlert,
   User,
@@ -21,11 +20,13 @@ import {
 import { usePathname } from "next/navigation";
 import { useRef, useState } from "react";
 import { currentUser, notifications } from "@/lib/data";
+import { openCreateMember } from "@/lib/events";
 import { resolveNavLabel } from "@/lib/nav";
 import { cn } from "@/lib/cn";
 import { useClickOutside } from "@/hooks/use-click-outside";
 import { Avatar } from "./ui/Avatar";
 import { Button } from "./ui/Button";
+import { KBarSearchButton, KBarSearchButtonMobile } from "./KBarSearchButton";
 
 const notificationIcon = {
   success: CheckCircle2,
@@ -101,28 +102,8 @@ export function TopNavbar({
         <div className="flex-1" />
 
         {/* Search */}
-        <div className="relative hidden w-56 md:block xl:w-72">
-          <Search
-            className="pointer-events-none absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-faint"
-            strokeWidth={1.75}
-            aria-hidden
-          />
-          <input
-            type="search"
-            placeholder="Search members, payments, plans…"
-            className="h-9 w-full rounded-lg border border-line bg-card pr-12 pl-9 text-[13px] text-ink outline-none transition-colors placeholder:text-faint focus:border-gold/50"
-          />
-          <kbd className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 rounded-md border border-line bg-card-hover px-1.5 py-0.5 font-sans text-[10px] font-medium text-faint">
-            ⌘K
-          </kbd>
-        </div>
-        <button
-          type="button"
-          aria-label="Search"
-          className="inline-flex size-9 shrink-0 items-center justify-center rounded-lg text-subtle transition-colors hover:bg-card hover:text-ink md:hidden"
-        >
-          <Search className="size-4.5" strokeWidth={1.75} aria-hidden />
-        </button>
+        <KBarSearchButton />
+        <KBarSearchButtonMobile />
 
         {/* Quick actions */}
         <Button
@@ -131,11 +112,7 @@ export function TopNavbar({
           aria-label="Add member"
           title="Add member"
           className="hidden sm:inline-flex"
-          onClick={() => {
-            if (typeof window !== "undefined") {
-              window.dispatchEvent(new CustomEvent("open-add-member"));
-            }
-          }}
+          onClick={openCreateMember}
         >
           <Plus className="size-4.5" strokeWidth={2.25} aria-hidden />
         </Button>

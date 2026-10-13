@@ -3,6 +3,7 @@
 import { Calendar, Download, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/cn";
+import { openCreateMember } from "@/lib/events";
 import { Button } from "./ui/Button";
 
 const RANGES = ["7D", "30D", "90D", "12M"] as const;
@@ -46,11 +47,7 @@ export function DashboardToolbar() {
       <Button
         variant="primary"
         size="md"
-        onClick={() => {
-          if (typeof window !== "undefined") {
-            window.dispatchEvent(new CustomEvent("open-add-member"));
-          }
-        }}
+        onClick={openCreateMember}
       >
         <UserPlus className="size-4" strokeWidth={2} aria-hidden />
         Add member

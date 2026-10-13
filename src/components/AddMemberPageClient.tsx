@@ -1,141 +1,158 @@
 "use client";
 
-import { UserPlus } from "lucide-react";
+import { ArrowLeft, Loader2, UserPlus } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import { ApiError } from "@/lib/api";
+import { emitMemberCreated } from "@/lib/events";
+import {
+  emptyMemberForm,
+  toMemberInput,
+  type MemberFormValues,
+} from "@/lib/member-form";
+import {
+  amountToPaise,
+  createMember,
+  createMembership,
+  createPayment,
+  listPlans,
+  type PlanDto,
+} from "@/lib/members-api";
+import { MemberForm } from "./MemberForm";
+import { useGlobalLoading } from "./providers/LoadingProvider";
+import { useToast } from "./providers/ToastProvider";
 import { Button } from "./ui/Button";
-import { Input } from "./ui/Input";
-import { Label } from "./ui/Label";
-import { Select } from "./ui/Select";
-import { Textarea } from "./ui/Textarea";
+
+const FORM_ID = "add-member-page-form";
 
 export function AddMemberPageClient() {
   const router = useRouter();
+  const toast = useToast();
+  const loading = useGlobalLoading();
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    // In a real app, this would submit to an API
-    router.push("/members");
-  };
+  const [plans, setPlans] = useState<PlanDto[]>([]);
+  const [plansLoading, setPlansLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [serverError, setServerError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    listPlans()
+      .then((data) => active && setPlans(data))
+      .catch(() => undefined)
+      .finally(() => active && setPlansLoading(false));
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const handleSubmit = useCallback(
+    async (values: MemberFormValues) => {
+      setServerError(null);
+      setSubmitting(true);
+      try {
+        const saved = await loading.run(
+          (async () => {
+            const member = await createMember(toMemberInput(values));
+            if (values.planId) {
+              await createMembership({
+                memberId: member.id,
+                planId: values.planId,
+                startDate: values.startDate || undefined,
+                discountPaise: Math.max(
+                  0,
+                  Math.round((Number(values.discount) || 0) * 100),
+                ),
+              });
+            }
+            if (values.collectPayment) {
+              await createPayment({
+                memberId: member.id,
+                amount: amountToPaise(Number(values.amount) || 0),
+                paymentMode: values.paymentMode,
+                reference: values.reference.trim() || null,
+                paymentDate: values.paymentDate,
+                status: "SUCCESS",
+              });
+            }
+            return member;
+          })(),
+          "Adding member…",
+        );
+
+        toast.success(
+          "Member added",
+          `${saved.name} (${saved.memberCode}) was added successfully.`,
+        );
+        emitMemberCreated(saved);
+        router.push("/members");
+      } catch (caught) {
+        const message =
+          caught instanceof ApiError
+            ? caught.message
+            : "Something went wrong while saving. Please try again.";
+        setServerError(message);
+        toast.error("Couldn't save member", message);
+      } finally {
+        setSubmitting(false);
+      }
+    },
+    [loading, router, toast],
+  );
 
   return (
     <div className="mx-auto w-full max-w-[900px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
-      <div className="animate-fade-up">
-        <h1 className="text-[26px] font-bold leading-tight tracking-tight text-ink">
-          Add New Member
-        </h1>
-        <p className="mt-1.5 text-sm text-subtle">
-          Fill in the details below to add a new member.
-        </p>
+      <div className="flex items-center gap-3 animate-fade-up">
+        <Button
+          variant="ghost"
+          size="icon"
+          aria-label="Back to members"
+          onClick={() => router.push("/members")}
+        >
+          <ArrowLeft className="size-4" strokeWidth={1.75} aria-hidden />
+        </Button>
+        <div>
+          <h1 className="text-[26px] font-bold leading-tight tracking-tight text-ink">
+            Add new member
+          </h1>
+          <p className="mt-1 text-sm text-subtle">
+            Fill in the details below to add a member to your gym.
+          </p>
+        </div>
       </div>
 
-      <form
-        onSubmit={handleSubmit}
-        className="mt-6 space-y-6 rounded-card border border-line bg-card p-6 shadow-card"
-      >
-        <section>
-          <h2 className="text-xs font-semibold uppercase tracking-[0.12em] text-faint">
-            Personal Information
-          </h2>
-          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5">
-              <Label htmlFor="firstName">First name</Label>
-              <Input id="firstName" name="firstName" required />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="lastName">Last name</Label>
-              <Input id="lastName" name="lastName" required />
-            </div>
-            <div className="space-y-1.5 sm:col-span-2">
-              <Label htmlFor="email">Email address</Label>
-              <Input id="email" name="email" type="email" required />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="phone">Phone number</Label>
-              <Input id="phone" name="phone" type="tel" required />
-            </div>
-            <div className="space-y-1.5">
-              <Label htmlFor="dob">Date of birth</Label>
-              <Input id="dob" name="dob" type="date" />
-            </div>
-            <div className="space-y-1.5 sm:col-span-2">
-              <Label htmlFor="gender">Gender</Label>
-              <Select id="gender" name="gender">
-                <option value="">Select gender</option>
-                <option value="male">Male</option>
-                <option value="female">Female</option>
-                <option value="other">Other</option>
-                <option value="prefer-not-to-say">Prefer not to say</option>
-              </Select>
-            </div>
-            <div className="space-y-1.5 sm:col-span-2">
-              <Label htmlFor="address">Address</Label>
-              <Textarea id="address" name="address" rows={3} />
-            </div>
-          </div>
-        </section>
+      <div className="mt-6 rounded-card border border-line bg-card p-6 shadow-card animate-fade-up">
+        <MemberForm
+          formId={FORM_ID}
+          mode="create"
+          initialValues={emptyMemberForm()}
+          plans={plans}
+          plansLoading={plansLoading}
+          submitting={submitting}
+          serverError={serverError}
+          onSubmit={handleSubmit}
+        />
 
-        <section>
-          <h2 className="text-xs font-semibold uppercase tracking-[0.12em] text-faint">
-            Membership Details
-          </h2>
-          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5 sm:col-span-2">
-              <Label htmlFor="plan">Membership plan</Label>
-              <Select id="plan" name="plan" required>
-                <option value="">Select a plan</option>
-                <option value="monthly">Monthly Flex</option>
-                <option value="quarterly">Quarterly</option>
-                <option value="annual">Annual Pro</option>
-                <option value="student">Student</option>
-              </Select>
-            </div>
-            <div className="space-y-1.5 sm:col-span-2">
-              <Label htmlFor="startDate">Start date</Label>
-              <Input id="startDate" name="startDate" type="date" required />
-            </div>
-          </div>
-        </section>
-
-        <section>
-          <h2 className="text-xs font-semibold uppercase tracking-[0.12em] text-faint">
-            Emergency Contact
-          </h2>
-          <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <div className="space-y-1.5 sm:col-span-2">
-              <Label htmlFor="emergencyContact">Full name</Label>
-              <Input id="emergencyContact" name="emergencyContact" />
-            </div>
-            <div className="space-y-1.5 sm:col-span-2">
-              <Label htmlFor="emergencyPhone">Phone number</Label>
-              <Input id="emergencyPhone" name="emergencyPhone" type="tel" />
-            </div>
-          </div>
-        </section>
-
-        <section>
-          <h2 className="text-xs font-semibold uppercase tracking-[0.12em] text-faint">
-            Additional Notes
-          </h2>
-          <div className="mt-4">
-            <Textarea id="notes" name="notes" rows={4} />
-          </div>
-        </section>
-
-        <div className="flex justify-end gap-2 pt-2">
+        <div className="mt-7 flex flex-col-reverse gap-2 border-t border-line/60 pt-5 sm:flex-row sm:justify-end">
           <Button
             type="button"
             variant="secondary"
             size="md"
+            disabled={submitting}
             onClick={() => router.push("/members")}
           >
             Cancel
           </Button>
-          <Button type="submit" variant="primary" size="md">
-            <UserPlus className="size-4" strokeWidth={2} aria-hidden />
-            Save member
+          <Button type="submit" form={FORM_ID} variant="primary" size="md" disabled={submitting}>
+            {submitting ? (
+              <Loader2 className="size-4 animate-spin" strokeWidth={2} aria-hidden />
+            ) : (
+              <UserPlus className="size-4" strokeWidth={2} aria-hidden />
+            )}
+            {submitting ? "Saving…" : "Save member"}
           </Button>
         </div>
-      </form>
+      </div>
     </div>
   );
 }
