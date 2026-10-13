@@ -131,6 +131,11 @@ export function TopNavbar({
           aria-label="Add member"
           title="Add member"
           className="hidden sm:inline-flex"
+          onClick={() => {
+            if (typeof window !== "undefined") {
+              window.dispatchEvent(new CustomEvent("open-add-member"));
+            }
+          }}
         >
           <Plus className="size-4.5" strokeWidth={2.25} aria-hidden />
         </Button>

@@ -43,7 +43,15 @@ export function DashboardToolbar() {
         Export
       </Button>
 
-      <Button variant="primary" size="md">
+      <Button
+        variant="primary"
+        size="md"
+        onClick={() => {
+          if (typeof window !== "undefined") {
+            window.dispatchEvent(new CustomEvent("open-add-member"));
+          }
+        }}
+      >
         <UserPlus className="size-4" strokeWidth={2} aria-hidden />
         Add member
       </Button>

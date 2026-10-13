@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { AppShell } from "@/components/AppShell";
+import { AddMemberEventHandler } from "@/components/AddMemberEventHandler";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -37,6 +38,7 @@ export default function RootLayout({
     <html lang="en" className={`${inter.variable} ${geistMono.variable}`}>
       <body className="min-h-screen bg-canvas font-sans text-ink antialiased">
         <AppShell>{children}</AppShell>
+        <AddMemberEventHandler />
       </body>
     </html>
   );
