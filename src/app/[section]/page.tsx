@@ -16,7 +16,9 @@ export function generateStaticParams() {
         section !== "memberships" &&
         section !== "attendance" &&
         section !== "payments" &&
-        section !== "expenses",
+        section !== "expenses" &&
+        section !== "plans" &&
+        section !== "reports",
     )
     .map((section) => ({ section }));
 }

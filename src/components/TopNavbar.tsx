@@ -64,7 +64,7 @@ export function TopNavbar({
   useClickOutside(profileRef, () => setProfileOpen(false));
 
   return (
-    <header className="sticky top-0 z-30 border-b border-line bg-nav/95 backdrop-blur supports-[backdrop-filter]:bg-nav/85">
+    <header id="top-navbar" className="sticky top-0 z-30 border-b border-line bg-nav/95 backdrop-blur supports-[backdrop-filter]:bg-nav/85">
       <div className="flex h-16 items-center gap-2 px-4 sm:gap-3 sm:px-6">
         {/* Mobile: open drawer */}
         <button

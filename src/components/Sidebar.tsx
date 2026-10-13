@@ -42,6 +42,7 @@ export function Sidebar({
       />
 
       <aside
+        id="app-sidebar"
         className={cn(
           "fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-line bg-panel transition-[width,transform] duration-300",
           collapsed ? "lg:w-20" : "lg:w-64",

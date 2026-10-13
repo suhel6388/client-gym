@@ -164,3 +164,16 @@
     transition-duration: 0.001ms !important;
   }
 }
+
+/* Print-friendly reports: hide the app chrome and interactive controls. */
+@media print {
+  #app-sidebar,
+  #top-navbar,
+  .no-print {
+    display: none !important;
+  }
+
+  #app-content {
+    padding-left: 0 !important;
+  }
+}

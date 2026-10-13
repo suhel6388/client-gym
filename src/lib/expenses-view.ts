@@ -278,22 +278,24 @@ export type TrendPoint = {
   count: number;
 };
 
-function minKey(rows: ExpenseRow[]): string | null {
+function minKey(rows: { dateKey: string }[]): string | null {
   if (rows.length === 0) return null;
   return rows.reduce((min, row) => (row.dateKey < min ? row.dateKey : min), rows[0].dateKey);
 }
 
-function maxKey(rows: ExpenseRow[]): string | null {
+function maxKey(rows: { dateKey: string }[]): string | null {
   if (rows.length === 0) return null;
   return rows.reduce((max, row) => (row.dateKey > max ? row.dateKey : max), rows[0].dateKey);
 }
 
 /**
- * Buckets expenses for the chart: daily for short windows, weekly for medium
- * windows and monthly for long windows (so the axis never crowds).
+ * Buckets dated amounts for the chart: daily for short windows, weekly for
+ * medium windows and monthly for long windows (so the axis never crowds).
+ * Accepts any `{ dateKey, amountPaise }` rows, so revenue and expenses share
+ * the implementation.
  */
 export function buildTrendSeries(
-  rows: ExpenseRow[],
+  rows: { dateKey: string; amountPaise: number }[],
   window: DateWindow,
   today: string = todayKey(),
 ): { points: TrendPoint[]; granularity: TrendGranularity } {

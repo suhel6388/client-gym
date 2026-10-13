@@ -19,6 +19,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       />
 
       <div
+        id="app-content"
         className={cn(
           "flex min-h-screen flex-col transition-[padding] duration-300",
           collapsed ? "lg:pl-20" : "lg:pl-64",
