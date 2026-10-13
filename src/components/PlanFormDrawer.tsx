@@ -4,6 +4,7 @@ import { Layers, Loader2, Pencil, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
+import { formatCurrency } from "@/lib/format";
 import {
   amountToPaise,
   createPlan,
@@ -16,31 +17,54 @@ import { useToast } from "./providers/ToastProvider";
 import { Button } from "./ui/Button";
 import { Input } from "./ui/Input";
 import { Label } from "./ui/Label";
+import { Select } from "./ui/Select";
 
 const FORM_ID = "plan-form";
+
+type DurationUnit = "months" | "years";
 
 type PlanFormValues = {
   name: string;
   price: string;
-  durationMonths: string;
+  /** Duration expressed in the selected `durationUnit`. */
+  durationValue: string;
+  durationUnit: DurationUnit;
   isActive: boolean;
 };
 
 type PlanFormErrors = Partial<Record<keyof PlanFormValues, string>>;
 
-const DURATION_PRESETS = [1, 3, 6, 12];
+const DURATION_PRESETS: Record<DurationUnit, number[]> = {
+  months: [1, 3, 6, 12],
+  years: [1, 2, 3],
+};
 
 function emptyValues(): PlanFormValues {
-  return { name: "", price: "", durationMonths: "1", isActive: true };
+  return {
+    name: "",
+    price: "",
+    durationValue: "1",
+    durationUnit: "months",
+    isActive: true,
+  };
 }
 
 function toValues(plan: PlanDto): PlanFormValues {
+  const years = plan.durationMonths > 0 && plan.durationMonths % 12 === 0;
   return {
     name: plan.name,
     price: String(paiseToAmount(plan.pricePaise)),
-    durationMonths: String(plan.durationMonths),
+    durationValue: years ? String(plan.durationMonths / 12) : String(plan.durationMonths),
+    durationUnit: years ? "years" : "months",
     isActive: plan.isActive,
   };
+}
+
+/** Converts the typed duration (in its unit) into whole months. */
+function toMonths(values: Pick<PlanFormValues, "durationValue" | "durationUnit">): number {
+  const value = Number(values.durationValue);
+  if (Number.isNaN(value)) return NaN;
+  return values.durationUnit === "years" ? value * 12 : value;
 }
 
 function validate(values: PlanFormValues): PlanFormErrors {
@@ -50,9 +74,12 @@ function validate(values: PlanFormValues): PlanFormErrors {
   if (values.price.trim() === "" || Number.isNaN(price) || price < 0) {
     errors.price = "Enter a valid non-negative price.";
   }
-  const duration = Number(values.durationMonths);
-  if (!Number.isInteger(duration) || duration < 1 || duration > 60) {
-    errors.durationMonths = "Duration must be between 1 and 60 months.";
+  const months = toMonths(values);
+  if (!Number.isInteger(months) || months < 1 || months > 60) {
+    errors.durationValue =
+      values.durationUnit === "years"
+        ? "Duration must be between 1 month and 5 years."
+        : "Duration must be between 1 and 60 months.";
   }
   return errors;
 }
@@ -129,13 +156,11 @@ export function PlanFormDrawer({
         const input = {
           name: values.name.trim(),
           pricePaise: amountToPaise(Number(values.price) || 0),
-          durationMonths: Number(values.durationMonths),
+          durationMonths: toMonths(values),
           isActive: values.isActive,
         };
         const saved = await loading.run(
-          mode === "edit" && plan
-            ? updatePlan(plan.id, input)
-            : createPlan(input),
+          mode === "edit" && plan ? updatePlan(plan.id, input) : createPlan(input),
           mode === "edit" ? "Saving plan…" : "Creating plan…",
         );
         toast.success(
@@ -158,9 +183,10 @@ export function PlanFormDrawer({
     [loading, mode, onOpenChange, onSaved, plan, toast, values],
   );
 
+  const months = toMonths(values);
   const monthly =
-    Number(values.price) > 0 && Number(values.durationMonths) > 0
-      ? Number(values.price) / Number(values.durationMonths)
+    Number(values.price) > 0 && Number.isInteger(months) && months > 0
+      ? Number(values.price) / months
       : 0;
 
   return (
@@ -255,45 +281,57 @@ export function PlanFormDrawer({
                 ) : (
                   monthly > 0 && (
                     <p className="mt-1.5 text-[11px] text-faint">
-                      ≈ ${monthly.toFixed(2)} / month
+                      ≈ {formatCurrency(monthly)} / month
                     </p>
                   )
                 )}
               </div>
 
               <div>
-                <Label htmlFor="plan-duration">Duration (months)</Label>
-                <Input
-                  id="plan-duration"
-                  type="number"
-                  min={1}
-                  max={60}
-                  step={1}
-                  inputMode="numeric"
-                  className="mt-1.5"
-                  value={values.durationMonths}
-                  onChange={(event) => setField("durationMonths", event.target.value)}
-                  aria-invalid={Boolean(errors.durationMonths)}
-                />
-                {errors.durationMonths ? (
+                <Label htmlFor="plan-duration">Duration</Label>
+                <div className="mt-1.5 flex gap-2">
+                  <Input
+                    id="plan-duration"
+                    type="number"
+                    min={1}
+                    step={1}
+                    inputMode="numeric"
+                    value={values.durationValue}
+                    onChange={(event) => setField("durationValue", event.target.value)}
+                    aria-invalid={Boolean(errors.durationValue)}
+                  />
+                  <Select
+                    aria-label="Duration unit"
+                    className="w-32 shrink-0"
+                    value={values.durationUnit}
+                    onChange={(event) =>
+                      setField("durationUnit", event.target.value as DurationUnit)
+                    }
+                  >
+                    <option value="months">Months</option>
+                    <option value="years">Years</option>
+                  </Select>
+                </div>
+                {errors.durationValue ? (
                   <p className="mt-1.5 text-[11px] font-medium text-danger">
-                    {errors.durationMonths}
+                    {errors.durationValue}
                   </p>
                 ) : (
                   <div className="mt-2 flex flex-wrap gap-1.5">
-                    {DURATION_PRESETS.map((preset) => (
+                    {DURATION_PRESETS[values.durationUnit].map((preset) => (
                       <button
                         key={preset}
                         type="button"
-                        onClick={() => setField("durationMonths", String(preset))}
+                        onClick={() => setField("durationValue", String(preset))}
                         className={cn(
                           "rounded-md px-2 py-1 text-[11px] font-medium transition-colors",
-                          Number(values.durationMonths) === preset
+                          String(preset) === values.durationValue
                             ? "bg-gold/15 text-gold"
                             : "border border-line bg-card text-subtle hover:bg-card-hover hover:text-ink",
                         )}
                       >
-                        {preset}mo
+                        {preset}
+                        {values.durationUnit === "years" ? "y" : "mo"}
                       </button>
                     ))}
                   </div>

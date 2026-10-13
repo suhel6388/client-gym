@@ -36,6 +36,8 @@ type AssignMembershipDrawerProps = {
   members: MemberDto[];
   /** When set, the drawer renews this subscription instead of a fresh assign. */
   renewal?: SubscriptionRow | null;
+  /** Optional plan to preselect when assigning fresh. */
+  initialPlanId?: string | null;
   onOpenChange: (open: boolean) => void;
   onSaved?: () => void;
 };
@@ -55,6 +57,7 @@ export function AssignMembershipDrawer({
   plans,
   members,
   renewal = null,
+  initialPlanId = null,
   onOpenChange,
   onSaved,
 }: AssignMembershipDrawerProps) {
@@ -82,6 +85,9 @@ export function AssignMembershipDrawer({
     const renewalPlanActive = renewal
       ? plans.some((plan) => plan.id === renewal.planId)
       : false;
+    const preselect = initialPlanId && plans.some((plan) => plan.id === initialPlanId)
+      ? initialPlanId
+      : null;
     setMemberId(renewal?.memberId ?? "");
     setMemberQuery("");
     setPlanId(
@@ -89,7 +95,7 @@ export function AssignMembershipDrawer({
         ? renewal.planId
         : renewal
           ? ""
-          : (plans[0]?.id ?? ""),
+          : (preselect ?? plans[0]?.id ?? ""),
     );
     setStartDate(nextStartDate(renewal));
     setDiscount("0");
@@ -102,7 +108,7 @@ export function AssignMembershipDrawer({
     setSubmitting(false);
     setServerError(null);
     setErrors({});
-  }, [open, renewal, plans]);
+  }, [open, renewal, plans, initialPlanId]);
 
   useEffect(() => {
     if (!open) return;
@@ -246,6 +252,12 @@ export function AssignMembershipDrawer({
   );
 
   const noPlans = plans.length === 0;
+
+  const paidPreviewPaise =
+    collectPayment && amount.trim() !== "" && !Number.isNaN(Number(amount))
+      ? Math.max(0, amountToPaise(Number(amount)))
+      : 0;
+  const outstandingPreviewPaise = Math.max(0, feePaise - Math.min(paidPreviewPaise, feePaise));
 
   return (
     <>
@@ -579,6 +591,37 @@ export function AssignMembershipDrawer({
               </div>
             )}
           </div>
+
+          {/* Assignment summary */}
+          <div className="mt-6 rounded-xl border border-line bg-card-hover/20 p-4">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-faint">
+              Summary
+            </p>
+            <dl className="mt-3 space-y-2 text-[13px]">
+              <SummaryRow label="Member" value={selectedMember?.name ?? "—"} />
+              <SummaryRow label="Plan" value={selectedPlan?.name ?? "—"} />
+              <SummaryRow
+                label="Total fee"
+                value={formatCurrency(paiseToAmount(feePaise))}
+              />
+              <SummaryRow
+                label="Amount paid"
+                value={formatCurrency(paiseToAmount(paidPreviewPaise))}
+                valueClassName="text-success"
+              />
+              <div className="flex items-center justify-between border-t border-line/50 pt-2">
+                <dt className="font-medium text-subtle">Outstanding balance</dt>
+                <dd
+                  className={cn(
+                    "font-bold tabular-nums",
+                    outstandingPreviewPaise > 0 ? "text-warning" : "text-success",
+                  )}
+                >
+                  {formatCurrency(paiseToAmount(outstandingPreviewPaise))}
+                </dd>
+              </div>
+            </dl>
+          </div>
         </form>
 
         <div className="flex shrink-0 flex-col-reverse gap-2 border-t border-line/60 px-6 py-4 sm:flex-row sm:justify-end">
@@ -610,5 +653,22 @@ export function AssignMembershipDrawer({
         </div>
       </aside>
     </>
+  );
+}
+
+function SummaryRow({
+  label,
+  value,
+  valueClassName,
+}: {
+  label: string;
+  value: string;
+  valueClassName?: string;
+}) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <dt className="text-subtle">{label}</dt>
+      <dd className={cn("truncate font-medium text-ink", valueClassName)}>{value}</dd>
+    </div>
   );
 }

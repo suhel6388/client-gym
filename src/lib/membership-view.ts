@@ -33,6 +33,34 @@ export function subscriptionTone(status: SubscriptionStatus): BadgeTone {
   return SUBSCRIPTION_TONES[status] ?? "neutral";
 }
 
+/**
+ * UI-facing payment status for a membership, derived from the fee owed vs. the
+ * payments attributed to the membership window. The backend has no dedicated
+ * payment-status field, so it is computed here.
+ */
+export type PaymentStatus = "Paid" | "Partial" | "Due";
+
+const PAYMENT_STATUS_TONES: Record<PaymentStatus, BadgeTone> = {
+  Paid: "success",
+  Partial: "warning",
+  Due: "danger",
+};
+
+export function paymentTone(status: PaymentStatus): BadgeTone {
+  return PAYMENT_STATUS_TONES[status] ?? "neutral";
+}
+
+export function paymentStatusFor(
+  row: Pick<SubscriptionRow, "feePaise" | "paidPaise" | "balancePaise">,
+): PaymentStatus {
+  if (row.balancePaise <= 0) return "Paid";
+  if (row.paidPaise <= 0) return "Due";
+  return "Partial";
+}
+
+/** Date-window presets used by the expiry filter on the records table. */
+export type ExpiryFilter = "All" | "Today" | "7" | "30" | "Expired";
+
 /** Whole days from now until the given ISO date (negative once past). */
 export function daysUntil(iso: string): number {
   const time = new Date(iso).getTime();
@@ -74,6 +102,7 @@ export type SubscriptionRow = {
   memberName: string;
   memberInitials: string;
   memberCode: string;
+  memberPhone: string;
   planId: string;
   planName: string;
   durationMonths: number;
@@ -143,6 +172,7 @@ export function toSubscriptionRow(
     memberName: membership.member?.name ?? "Unknown member",
     memberInitials: getInitials(membership.member?.name ?? "?"),
     memberCode: membership.member?.memberCode ?? "—",
+    memberPhone: membership.member?.phone ?? "—",
     planId: membership.planId,
     planName: membership.plan?.name ?? "—",
     durationMonths: membership.plan?.durationMonths ?? 0,

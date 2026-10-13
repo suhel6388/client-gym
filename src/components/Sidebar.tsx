@@ -2,17 +2,15 @@
 
 import {
   ChevronLeft,
-  Dumbbell,
   PanelLeftClose,
   PanelLeftOpen,
-  Sparkles,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { navGroups } from "@/lib/nav";
 import { cn } from "@/lib/cn";
-import { Button } from "./ui/Button";
-import { DarkGoldMark } from "../../public/logo";
+import DarkGoldLogo from "../../public/logo";
+import DarkGoldLogoHorizontal from "../../public/logo_hr";
 
 type SidebarProps = {
   collapsed: boolean;
@@ -51,23 +49,35 @@ export function Sidebar({
         )}
       >
         {/* Brand */}
-        <div className="flex h-16 shrink-0 items-center gap-3 border-b border-line/60 px-5">
-          <span className="gold-surface inline-flex size-9 shrink-0 items-center justify-center rounded-xl text-[#1A1503] shadow-gold">
-            {/* <Dumbbell className="size-4.5" strokeWidth={2.25} aria-hidden /> */}
-            <DarkGoldMark className="size-4.5" strokeWidth={2.25} aria-hidden />
-          </span>
+        <div
+          className={cn(
+            "flex h-16 shrink-0 items-center gap-3 border-b border-line/60 px-5",
+            collapsed && "lg:justify-center lg:px-0",
+          )}
+        >
+          {/* Collapsed (desktop): gym logo only */}
+          <DarkGoldLogo
+            className={cn(
+              "h-11 w-auto shrink-0",
+              collapsed ? "hidden lg:block" : "hidden",
+            )}
+          />
+          {/* Expanded: full horizontal logo */}
+          <DarkGoldLogoHorizontal
+            className={cn("h-10 w-auto", collapsed && "lg:hidden")}
+          />
           <div
             className={cn(
               "min-w-0 transition-opacity",
               collapsed && "lg:pointer-events-none lg:opacity-0",
             )}
           >
-            <p className="gold-text text-[17px] font-extrabold leading-none tracking-tight">
+            {/* <p className="gold-text text-[17px] font-extrabold leading-none tracking-tight">
               Dark Gold
-            </p>
-            <p className="mt-1.5 text-[9.5px] font-medium uppercase tracking-[0.22em] text-faint">
+            </p> */}
+            {/* <p className="mt-1.5 text-[9.5px] font-medium uppercase tracking-[0.22em] text-faint">
               Gym CRM
-            </p>
+            </p> */}
           </div>
         </div>
 
