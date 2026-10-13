@@ -21,15 +21,13 @@ import { cn } from "@/lib/cn";
 import { inWindow, toDateKey, todayKey } from "@/lib/date-window";
 import { formatCurrencyInr, formatNumber } from "@/lib/format";
 import { paiseToAmount } from "@/lib/members-api";
-import {
-  listMembers,
-  listMemberships,
-  listPayments,
-  type MemberDto,
-  type MembershipWithRelationsDto,
-  type PaymentDto,
+import type {
+  MemberDto,
+  MembershipWithRelationsDto,
+  PaymentDto,
 } from "@/lib/members-api";
-import { listExpenses, type ExpenseDto } from "@/lib/expenses-api";
+import type { ExpenseDto } from "@/lib/expenses-api";
+import { REPORTS_USE_MOCK, fetchReportsData } from "@/lib/reports-service";
 import { summarizePayments, type PaymentRow } from "@/lib/payments-view";
 import {
   buildTrendSeries,
@@ -79,6 +77,13 @@ const GRANULARITY_LABEL: Record<TrendGranularity, string> = {
   month: "Monthly",
 };
 
+// Stable empty arrays — inline `[]` literals would get a new identity on
+// every render, bust `ReportDetailsTable`'s `useMemo` and retrigger its
+// `onFilteredRowsChange` effect into an update loop.
+const EMPTY_PAYMENTS: PaymentRow[] = [];
+const EMPTY_EXPENSES: ExpenseRow[] = [];
+const EMPTY_SUBSCRIPTIONS: SubscriptionRow[] = [];
+
 export function ReportsPage() {
   const toast = useToast();
   const router = useRouter();
@@ -112,17 +117,18 @@ export function ReportsPage() {
         setRefreshing(true);
       }
       try {
-        const [paymentData, expenseData, membershipData, memberData] =
-          await Promise.all([
-            listPayments(),
-            listExpenses(),
-            listMemberships(),
-            listMembers(),
-          ]);
-        setPayments(paymentData);
-        setExpenses(expenseData);
-        setMemberships(membershipData);
-        setMembers(memberData);
+        // Dummy data while REPORTS_USE_MOCK is true.
+        // Flip it (or set NEXT_PUBLIC_USE_MOCK_REPORTS=false) to hit
+        // the axios API layer with no other code changes.
+        const bundle = await fetchReportsData();
+        if (REPORTS_USE_MOCK) {
+          // Simulate network latency so skeletons still show briefly.
+          await new Promise((resolve) => setTimeout(resolve, 150));
+        }
+        setPayments(bundle.payments);
+        setExpenses(bundle.expenses);
+        setMemberships(bundle.memberships);
+        setMembers(bundle.members);
         setStatus("ready");
       } catch (caught) {
         const message =
@@ -551,8 +557,8 @@ function RevenuePanel({
             key={`revenue-${windowText}`}
             tab="revenue"
             payments={payments}
-            expenses={[]}
-            subscriptions={[]}
+            expenses={EMPTY_EXPENSES}
+            subscriptions={EMPTY_SUBSCRIPTIONS}
             loading={loading}
             windowLabel={windowText.toLowerCase()}
             onFilteredRowsChange={onFilteredRowsChange}
@@ -655,9 +661,9 @@ function ExpensesPanel({
           <ReportDetailsTable
             key={`expenses-${windowText}`}
             tab="expenses"
-            payments={[]}
+            payments={EMPTY_PAYMENTS}
             expenses={expenses}
-            subscriptions={[]}
+            subscriptions={EMPTY_SUBSCRIPTIONS}
             loading={loading}
             windowLabel={windowText.toLowerCase()}
             onFilteredRowsChange={onFilteredRowsChange}
@@ -772,8 +778,8 @@ function MembershipsPanel({
           <ReportDetailsTable
             key={`memberships-${windowText}`}
             tab="memberships"
-            payments={[]}
-            expenses={[]}
+            payments={EMPTY_PAYMENTS}
+            expenses={EMPTY_EXPENSES}
             subscriptions={subscriptions}
             loading={loading}
             windowLabel={windowText.toLowerCase()}

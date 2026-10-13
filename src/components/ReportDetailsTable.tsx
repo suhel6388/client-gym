@@ -6,7 +6,7 @@ import {
   ChevronsUpDown,
   Search,
 } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { cn } from "@/lib/cn";
 import { formatCurrencyInr, formatShortDate } from "@/lib/format";
 import { paiseToAmount } from "@/lib/members-api";
@@ -141,9 +141,17 @@ export function ReportDetailsTable({
     });
   }, [tab, payments, expenses, subscriptions, query, sort, dir]);
 
+  // Notify parent (CSV export) only when the filtered list actually changes.
+  // Without the id-key guard, parent re-renders pass new `[]` literals for
+  // the inactive tabs, which would recompute `filtered` and loop forever.
+  const lastNotifiedKey = useRef<string | null>(null);
   useEffect(() => {
-    onFilteredRowsChange(filtered);
-  }, [filtered, onFilteredRowsChange]);
+    const key = `${tab}:${filtered.map((row) => row.id).join("|")}`;
+    if (lastNotifiedKey.current !== key) {
+      lastNotifiedKey.current = key;
+      onFilteredRowsChange(filtered);
+    }
+  }, [filtered, onFilteredRowsChange, tab]);
 
   useEffect(() => {
     setPage(1);
