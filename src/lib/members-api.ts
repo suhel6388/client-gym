@@ -44,6 +44,42 @@ export type MembershipDto = {
   plan: PlanDto;
 };
 
+/** Trimmed member shape embedded on a membership row (`include: { member: true }`). */
+export type MembershipMemberDto = {
+  id: string;
+  memberCode: string;
+  name: string;
+  phone: string;
+  email: string | null;
+  archivedAt: string | null;
+};
+
+/**
+ * Membership as returned by `GET /memberships`: the base row plus the related
+ * member and a server-computed `effectiveStatus` (ACTIVE rows past their end
+ * date are reported as EXPIRED).
+ */
+export type MembershipWithRelationsDto = MembershipDto & {
+  member: MembershipMemberDto;
+  effectiveStatus: MembershipStatusDto;
+};
+
+/** Payment as returned by `GET /payments`. `amount` is stored in paise. */
+export type PaymentDto = {
+  id: string;
+  gymId: string;
+  memberId: string;
+  /** Amount in paise (minor units), matching how it was written. */
+  amount: number;
+  paymentMode: PaymentModeDto;
+  receiptNumber: string;
+  reference: string | null;
+  paymentDate: string;
+  paidAt: string;
+  status: string;
+  member?: { id: string; name: string; memberCode: string };
+};
+
 export type MemberDto = {
   id: string;
   gymId: string;
@@ -97,6 +133,16 @@ export type PaymentInput = {
   status?: string;
 };
 
+export type CreatePlanInput = {
+  name: string;
+  /** Price in paise (minor units). */
+  pricePaise: number;
+  durationMonths: number;
+  isActive?: boolean;
+};
+
+export type UpdatePlanInput = Partial<CreatePlanInput>;
+
 /* -- Requests ------------------------------------------------------------- */
 
 export function listMembers(signal?: AbortSignal): Promise<MemberDto[]> {
@@ -130,18 +176,60 @@ export function listPlans(signal?: AbortSignal): Promise<PlanDto[]> {
   return apiRequest<PlanDto[]>("/plans", { signal });
 }
 
+export function createPlan(
+  input: CreatePlanInput,
+  signal?: AbortSignal,
+): Promise<PlanDto> {
+  return apiRequest<PlanDto>("/plans", { method: "POST", body: input, signal });
+}
+
+export function updatePlan(
+  id: string,
+  input: UpdatePlanInput,
+  signal?: AbortSignal,
+): Promise<PlanDto> {
+  return apiRequest<PlanDto>(`/plans/${id}`, {
+    method: "PATCH",
+    body: input,
+    signal,
+  });
+}
+
+/** Soft-deletes a plan by marking it inactive. */
+export function deactivatePlan(id: string, signal?: AbortSignal): Promise<unknown> {
+  return apiRequest(`/plans/${id}`, { method: "DELETE", signal });
+}
+
 export function createMembership(
   input: MembershipInput,
 ): Promise<MembershipDto> {
   return apiRequest<MembershipDto>("/memberships", { method: "POST", body: input });
 }
 
+export function listMemberships(
+  params?: { status?: MembershipStatusDto },
+  signal?: AbortSignal,
+): Promise<MembershipWithRelationsDto[]> {
+  return apiRequest<MembershipWithRelationsDto[]>("/memberships", {
+    query: params?.status ? { status: params.status } : undefined,
+    signal,
+  });
+}
+
+export function freezeMembership(id: string): Promise<unknown> {
+  return apiRequest(`/memberships/${id}/freeze`, { method: "POST" });
+}
+
+export function cancelMembership(id: string): Promise<unknown> {
+  return apiRequest(`/memberships/${id}/cancel`, { method: "POST" });
+}
+
 export function createPayment(input: PaymentInput): Promise<unknown> {
   return apiRequest("/payments", { method: "POST", body: input });
 }
 
-export function listPayments(signal?: AbortSignal): Promise<unknown[]> {
-  return apiRequest("/payments", { signal });
+export function listPayments(signal?: AbortSignal): Promise<PaymentDto[]> {
+  return apiRequest<PaymentDto[]>("/payments", { signal });
 }
 
 /* -- Derived view model --------------------------------------------------- */

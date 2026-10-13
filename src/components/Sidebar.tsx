@@ -52,9 +52,9 @@ export function Sidebar({
       >
         {/* Brand */}
         <div className="flex h-16 shrink-0 items-center gap-3 border-b border-line/60 px-5">
-          <span className="inline-flex size-9 shrink-0 items-center justify-center rounded-xl text-[#1A1503] shadow-gold">
+          <span className="gold-surface inline-flex size-9 shrink-0 items-center justify-center rounded-xl text-[#1A1503] shadow-gold">
             {/* <Dumbbell className="size-4.5" strokeWidth={2.25} aria-hidden /> */}
-           <DarkGoldMark/>
+            <DarkGoldMark className="size-4.5" strokeWidth={2.25} aria-hidden />
           </span>
           <div
             className={cn(

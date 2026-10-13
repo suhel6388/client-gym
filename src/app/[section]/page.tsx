@@ -10,7 +10,7 @@ type SectionPageProps = {
 
 export function generateStaticParams() {
   return Object.keys(navIndex)
-    .filter((section) => section !== "/")
+    .filter((section) => section !== "/" && section !== "memberships")
     .map((section) => ({ section }));
 }
 
