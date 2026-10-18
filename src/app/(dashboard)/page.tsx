@@ -2,11 +2,15 @@ import { DashboardAnalytics } from "@/components/DashboardAnalytics";
 import { DashboardToolbar } from "@/components/DashboardToolbar";
 import { RecentPaymentsTable } from "@/components/RecentPaymentsTable";
 import { StatCard } from "@/components/StatCard";
+import { TrialBanner } from "@/components/TrialBanner";
 import { kpis } from "@/lib/data";
 
 export default function DashboardPage() {
   return (
     <div className="mx-auto w-full max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+      {/* Subscription / free-trial status (from the backend) */}
+      <TrialBanner className="mb-5" />
+
       {/* Page header */}
       <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
         <div className="animate-fade-up">

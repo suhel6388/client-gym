@@ -19,7 +19,7 @@ import {
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useRef, useState } from "react";
-import { currentUser, notifications } from "@/lib/data";
+import { notifications } from "@/lib/data";
 import { openCreateMember } from "@/lib/events";
 import { resolveNavLabel } from "@/lib/nav";
 import { cn } from "@/lib/cn";
@@ -27,6 +27,14 @@ import { useClickOutside } from "@/hooks/use-click-outside";
 import { Avatar } from "./ui/Avatar";
 import { Button } from "./ui/Button";
 import { KBarSearchButton, KBarSearchButtonMobile } from "./KBarSearchButton";
+import { useSession } from "./auth/SessionProvider";
+
+function initialsFrom(name: string): string {
+  const parts = name.trim().split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return "G";
+  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
+  return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+}
 
 const notificationIcon = {
   success: CheckCircle2,
@@ -53,6 +61,14 @@ export function TopNavbar({
 }: TopNavbarProps) {
   const pathname = usePathname();
   const title = resolveNavLabel(pathname);
+  const { user, signOut } = useSession();
+
+  const displayName = user?.name?.trim() || "Gym Owner";
+  const displayEmail = user?.email ?? "";
+  const displayRole =
+    user?.role === "RECEPTIONIST" ? "Receptionist" : "Owner";
+  const displayInitials = initialsFrom(displayName);
+  const [signingOut, setSigningOut] = useState(false);
 
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -200,15 +216,15 @@ export function TopNavbar({
             className="flex items-center gap-2.5 rounded-lg py-1.5 pl-1.5 pr-2 text-left transition-colors hover:bg-card"
           >
             <Avatar
-              initials={currentUser.initials}
+              initials={displayInitials}
               className="size-8 text-[10px] ring-gold/40"
             />
             <span className="hidden min-w-0 sm:block">
               <span className="block truncate text-[13px] font-semibold leading-tight text-ink">
-                {currentUser.name}
+                {displayName}
               </span>
               <span className="block truncate text-[11px] leading-tight text-faint">
-                {currentUser.role}
+                {displayRole}
               </span>
             </span>
             <ChevronDown
@@ -227,8 +243,8 @@ export function TopNavbar({
               className="absolute right-0 top-12 z-40 w-56 animate-pop overflow-hidden rounded-xl border border-line-strong bg-elevated py-1.5 shadow-pop"
             >
               <div className="border-b border-line/60 px-4 py-3">
-                <p className="text-[13px] font-semibold text-ink">{currentUser.name}</p>
-                <p className="mt-0.5 truncate text-xs text-faint">{currentUser.email}</p>
+                <p className="text-[13px] font-semibold text-ink">{displayName}</p>
+                <p className="mt-0.5 truncate text-xs text-faint">{displayEmail}</p>
               </div>
               {[
                 { icon: User, label: "My profile" },
@@ -250,10 +266,15 @@ export function TopNavbar({
                 <button
                   type="button"
                   role="menuitem"
-                  className="flex w-full items-center gap-2.5 px-4 py-2 text-left text-[13px] text-danger transition-colors hover:bg-danger/10"
+                  disabled={signingOut}
+                  onClick={() => {
+                    setSigningOut(true);
+                    void signOut();
+                  }}
+                  className="flex w-full items-center gap-2.5 px-4 py-2 text-left text-[13px] text-danger transition-colors hover:bg-danger/10 disabled:opacity-60"
                 >
                   <LogOut className="size-4" strokeWidth={1.75} aria-hidden />
-                  Sign out
+                  {signingOut ? "Signing out…" : "Sign out"}
                 </button>
               </div>
             </div>

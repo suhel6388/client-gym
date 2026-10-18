@@ -1,10 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
-import { AppShell } from "@/components/AppShell";
-import { AddMemberEventHandler } from "@/components/AddMemberEventHandler";
 import { AppProviders } from "@/components/providers/AppProviders";
-import { KBarProviderWrapper } from "@/components/KBarProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -20,8 +17,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Dark Gold — Gym CRM Dashboard",
-    template: "%s · Darkgold",
+    default: "DarkGoldGym — Gym Management",
+    template: "%s · DarkGoldGym",
   },
   description:
     "Premium gym management dashboard — members, memberships, revenue and renewals at a glance.",
@@ -39,12 +36,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${inter.variable} ${geistMono.variable}`}>
       <body className="min-h-screen bg-canvas font-sans text-ink antialiased">
-        <AppProviders>
-          <KBarProviderWrapper>
-            <AppShell>{children}</AppShell>
-            <AddMemberEventHandler />
-          </KBarProviderWrapper>
-        </AppProviders>
+        <AppProviders>{children}</AppProviders>
       </body>
     </html>
   );

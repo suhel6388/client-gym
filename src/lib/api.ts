@@ -82,11 +82,13 @@ const getErrorMessage = (
   status: number,
   body: ApiErrorBody | null,
 ): string => {
+  // Prefer the server's own message — it is always more specific than a
+  // generic per-status fallback (e.g. auth endpoints return precise errors).
+  if (body?.error) return body.error;
+  if (body?.message) return body.message;
   if (status === 401) return "Your session has expired. Please sign in again.";
   if (status === 403) return "You don't have access to this gym's data.";
   if (status === 404) return "The requested record was not found.";
-  if (body?.error) return body.error;
-  if (body?.message) return body.message;
   if (status === 0) return "Can't reach the server. Make sure the API is running.";
   return `Request failed with status ${status}.`;
 };
