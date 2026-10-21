@@ -13,7 +13,6 @@ import {
   type PaymentModeDto,
 } from "@/lib/members-api";
 import type { SubscriptionRow } from "@/lib/membership-view";
-import { useGlobalLoading } from "./providers/LoadingProvider";
 import { useToast } from "./providers/ToastProvider";
 import { Button } from "./ui/Button";
 import { Input } from "./ui/Input";
@@ -49,7 +48,6 @@ export function RecordPaymentDrawer({
   onOpenChange,
   onSaved,
 }: RecordPaymentDrawerProps) {
-  const loading = useGlobalLoading();
   const toast = useToast();
 
   const [amount, setAmount] = useState("");
@@ -106,7 +104,7 @@ export function RecordPaymentDrawer({
       setServerError(null);
       setSubmitting(true);
       try {
-        await loading.run(
+        await toast.promise(
           createPayment({
             memberId: row.memberId,
             amount: amountToPaise(value),
@@ -115,24 +113,33 @@ export function RecordPaymentDrawer({
             paymentDate,
             status: "SUCCESS",
           }),
-          "Recording payment…",
-        );
-        toast.success(
-          "Payment recorded",
-          `${formatCurrency(value)} received from ${row.memberName}.`,
+          {
+            loading: {
+              title: "Recording payment…",
+              description: "Saving the receipt on the server.",
+            },
+            success: {
+              title: "Payment recorded",
+              description: `${formatCurrency(value)} received from ${row.memberName}.`,
+            },
+            error: (caught) => ({
+              title: "Couldn't record payment",
+              description:
+                caught instanceof ApiError ? caught.message : "Please try again.",
+            }),
+          },
         );
         onSaved?.();
         onOpenChange(false);
       } catch (caught) {
-        const message =
-          caught instanceof ApiError ? caught.message : "Please try again.";
-        setServerError(message);
-        toast.error("Couldn't record payment", message);
+        setServerError(
+          caught instanceof ApiError ? caught.message : "Please try again.",
+        );
       } finally {
         setSubmitting(false);
       }
     },
-    [amount, loading, onOpenChange, onSaved, paymentDate, paymentMode, reference, row, toast],
+    [amount, onOpenChange, onSaved, paymentDate, paymentMode, reference, row, toast],
   );
 
   return (

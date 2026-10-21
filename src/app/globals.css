@@ -53,6 +53,8 @@
   --animate-fade-up: fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-fade-in: fade-in 0.4s ease-out both;
   --animate-pop: pop 0.16s ease-out both;
+  --animate-toast-in: toast-in 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-toast-out: toast-out 0.18s ease-in both;
 }
 
 @keyframes fade-up {
@@ -83,6 +85,79 @@
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, -10px, 0) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@keyframes toast-out {
+  from {
+    opacity: 1;
+    transform: none;
+  }
+  to {
+    opacity: 0;
+    transform: translate3d(0, -6px, 0) scale(0.98);
+  }
+}
+
+@keyframes toast-progress {
+  from {
+    transform: scaleX(1);
+  }
+  to {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes toast-indeterminate {
+  from {
+    transform: translateX(-120%);
+  }
+  to {
+    transform: translateX(420%);
+  }
+}
+
+/* Toast lifetime indicator. Kept as plain classes (not utilities) so the
+   animation name and fill mode stay predictable. */
+.toast-progress-bar {
+  animation-name: toast-progress;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+.toast-progress-indeterminate {
+  animation: toast-indeterminate 1.15s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Keep the enter/exit lifecycle (and its animationend event) but remove the
+     travel/scale motion. */
+  .animate-toast-in,
+  .animate-toast-out {
+    animation-duration: 1ms !important;
+  }
+
+  /* No sweeping motion: show a quiet static line instead. */
+  .toast-progress-bar {
+    animation: none !important;
+    opacity: 0.45;
+  }
+
+  .toast-progress-indeterminate {
+    animation: none !important;
+    width: 100%;
+    opacity: 0.35;
   }
 }
 

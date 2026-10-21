@@ -19,7 +19,6 @@ import {
   type PlanDto,
 } from "@/lib/members-api";
 import { MemberForm } from "./MemberForm";
-import { useGlobalLoading } from "./providers/LoadingProvider";
 import { useToast } from "./providers/ToastProvider";
 import { Button } from "./ui/Button";
 
@@ -28,7 +27,6 @@ const FORM_ID = "add-member-page-form";
 export function AddMemberPageClient() {
   const router = useRouter();
   const toast = useToast();
-  const loading = useGlobalLoading();
 
   const [plans, setPlans] = useState<PlanDto[]>([]);
   const [plansLoading, setPlansLoading] = useState(true);
@@ -51,7 +49,7 @@ export function AddMemberPageClient() {
       setServerError(null);
       setSubmitting(true);
       try {
-        const saved = await loading.run(
+        const saved = await toast.promise(
           (async () => {
             const member = await createMember(toMemberInput(values));
             if (values.planId) {
@@ -77,27 +75,40 @@ export function AddMemberPageClient() {
             }
             return member;
           })(),
-          "Adding member…",
+          {
+            loading: {
+              title: "Adding member…",
+              description: values.planId
+                ? "Creating the member, membership and payment."
+                : "Creating the member profile.",
+            },
+            success: (member) => ({
+              title: "Member added",
+              description: `${member.name} (${member.memberCode}) was added successfully.`,
+            }),
+            error: (error) => ({
+              title: "Couldn't save member",
+              description:
+                error instanceof ApiError
+                  ? error.message
+                  : "Something went wrong while saving. Please try again.",
+            }),
+          },
         );
 
-        toast.success(
-          "Member added",
-          `${saved.name} (${saved.memberCode}) was added successfully.`,
-        );
         emitMemberCreated(saved);
         router.push("/members");
       } catch (caught) {
-        const message =
+        setServerError(
           caught instanceof ApiError
             ? caught.message
-            : "Something went wrong while saving. Please try again.";
-        setServerError(message);
-        toast.error("Couldn't save member", message);
+            : "Something went wrong while saving. Please try again.",
+        );
       } finally {
         setSubmitting(false);
       }
     },
-    [loading, router, toast],
+    [router, toast],
   );
 
   return (

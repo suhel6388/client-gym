@@ -4,7 +4,7 @@ import type {
   PaymentDto,
   PlanDto,
 } from "./members-api";
-import type { ExpenseDto } from "./expenses-api";
+import type { ExpenseDto } from "./api";
 
 /**
  * Dummy data for the Reports & Analytics page.

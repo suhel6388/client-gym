@@ -1,30 +1,49 @@
 "use client";
 
-import { Suspense, useState, type FormEvent } from "react";
+import { Suspense, useMemo, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
+import { createSubmitHandler, useFormHandler } from "next-form-handler";
 import { AuthCard } from "@/components/auth/AuthCard";
 import { AuthErrorMessage } from "@/components/auth/AuthErrorMessage";
 import { PasswordInput } from "@/components/auth/PasswordInput";
 import { PasswordStrengthIndicator } from "@/components/auth/PasswordStrengthIndicator";
-import { ApiError } from "@/lib/api";
-import { resetPassword } from "@/lib/auth-api";
+import { useToast } from "@/components/providers/ToastProvider";
+import { resetPasswordAction } from "@/lib/auth-actions";
 
 function ResetPasswordScreen() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const token = searchParams.get("token") ?? "";
+  const toast = useToast();
 
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [errors, setErrors] = useState<{ password?: string; confirm?: string }>({});
   const [formError, setFormError] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  // next-form-handler runs the API call through a React action: `isPending`
+  // replaces the old manual "submitting" state.
+  const { formAction, isPending } = useFormHandler(
+    resetPasswordAction,
+    () => {
+      setDone(true);
+      toast.success(
+        "Password updated",
+        "Sign in with your new password.",
+        { dedupeKey: "password-updated" },
+      );
+      window.setTimeout(() => router.replace("/login"), 2200);
+    },
+    (state) => setFormError(state.error),
+  );
+  // Sends a plain object as FormData, inside a React transition.
+  const submit = useMemo(() => createSubmitHandler(formAction), [formAction]);
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (submitting) return;
+    if (isPending) return;
 
     const nextErrors: { password?: string; confirm?: string } = {};
     if (!password) nextErrors.password = "New password is required.";
@@ -36,19 +55,7 @@ function ResetPasswordScreen() {
     setFormError(null);
     if (Object.keys(nextErrors).length > 0) return;
 
-    setSubmitting(true);
-    try {
-      await resetPassword(token, password);
-      setDone(true);
-      window.setTimeout(() => router.replace("/login"), 2200);
-    } catch (error) {
-      if (error instanceof ApiError && error.status === 0) {
-        setFormError("Can't reach the server. Check your connection and try again.");
-      } else {
-        setFormError(error instanceof ApiError ? error.message : "Something went wrong. Please try again.");
-      }
-      setSubmitting(false);
-    }
+    submit({ token, password });
   };
 
   if (!token) {
@@ -139,11 +146,11 @@ function ResetPasswordScreen() {
 
           <button
             type="submit"
-            disabled={submitting}
-            aria-busy={submitting}
+            disabled={isPending}
+            aria-busy={isPending}
             className="gold-surface flex h-10 w-full items-center justify-center rounded-lg px-4 text-[13.5px] font-semibold text-[#1A1503] shadow-auth-gold transition-[filter] hover:brightness-110 active:brightness-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
           >
-            {submitting ? "Updating…" : "Update Password"}
+            {isPending ? "Updating…" : "Update Password"}
           </button>
         </form>
       )}

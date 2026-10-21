@@ -2,8 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { CalendarClock, Sparkles } from "lucide-react";
-import { fetchSubscription, type SubscriptionStatus } from "@/lib/auth-api";
+import { fetchSubscription, type SubscriptionStatus } from "@/lib/api";
 import { cn } from "@/lib/cn";
+import { toast } from "@/lib/toast";
 
 function formatDate(value: string | null | undefined): string | null {
   if (!value) return null;
@@ -11,6 +12,13 @@ function formatDate(value: string | null | undefined): string | null {
   if (Number.isNaN(date.getTime())) return null;
   return date.toLocaleDateString(undefined, { day: "numeric", month: "short", year: "numeric" });
 }
+
+/**
+ * The banner remounts whenever the dashboard is revisited, so a module-level
+ * guard keeps entitlement prompts to one per app session rather than showing
+ * them again after the user has dismissed them.
+ */
+const shownEntitlementNotices = new Set<string>();
 
 /**
  * SaaS entitlement strip for the dashboard. All dates and day counts come
@@ -24,7 +32,38 @@ export function TrialBanner({ className }: { className?: string }) {
     let active = true;
     fetchSubscription()
       .then((data) => {
-        if (active) setStatus(data);
+        if (!active) return;
+        setStatus(data);
+
+        // One entitlement notice per session. The banner keeps the status
+        // visible afterwards, so this is only a one-time prompt.
+        const subscription = data.subscription;
+        if (subscription?.status !== "TRIALING") return;
+
+        if (!data.entitled) {
+          if (!shownEntitlementNotices.has("trial-ended")) {
+            shownEntitlementNotices.add("trial-ended");
+            toast.subscription(
+              "Your free trial has ended",
+              "Upgrade to keep managing your gym. Your data stays safe.",
+              { dedupeKey: "trial-ended", persistent: true },
+            );
+          }
+          return;
+        }
+
+        if (data.remainingDays <= 3 && !shownEntitlementNotices.has("trial-ending-soon")) {
+          shownEntitlementNotices.add("trial-ending-soon");
+          const when =
+            data.remainingDays <= 0
+              ? "today"
+              : `in ${data.remainingDays} day${data.remainingDays === 1 ? "" : "s"}`;
+          toast.subscription(
+            "Trial ending soon",
+            `Your free trial ends ${when}. Upgrade to keep uninterrupted access.`,
+            { dedupeKey: "trial-ending-soon", duration: 8000 },
+          );
+        }
       })
       .catch(() => {
         // Entitlement display is non-critical; the backend still enforces it.

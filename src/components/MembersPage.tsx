@@ -41,7 +41,6 @@ import {
   type PlanDto,
 } from "@/lib/members-api";
 import { statusTone } from "@/lib/member-ui";
-import { useGlobalLoading } from "./providers/LoadingProvider";
 import { useToast } from "./providers/ToastProvider";
 import { Avatar } from "./ui/Avatar";
 import { Badge } from "./ui/Badge";
@@ -70,7 +69,6 @@ type SortDir = "asc" | "desc";
 
 export function MembersPage() {
   const toast = useToast();
-  const loading = useGlobalLoading();
 
   const [members, setMembers] = useState<MemberDto[]>([]);
   const [plans, setPlans] = useState<PlanDto[]>([]);
@@ -240,21 +238,31 @@ export function MembersPage() {
       if (!target) return;
       setArchiving(true);
       try {
-        await loading.run(archiveMember(target.id), "Archiving member…");
-        toast.success("Member archived", `${target.name} was removed from the roster.`);
+        await toast.promise(archiveMember(target.id), {
+          loading: {
+            title: "Archiving member…",
+            description: "Removing the member from your active roster.",
+          },
+          success: {
+            title: "Member archived",
+            description: `${target.name} was removed from the roster.`,
+          },
+          error: (caught) => ({
+            title: "Couldn't archive member",
+            description:
+              caught instanceof ApiError ? caught.message : "Please try again.",
+          }),
+        });
         setArchiveTarget(null);
         setViewMember((current) => (current?.id === target.id ? null : current));
         emitMemberArchived(target.id);
-      } catch (caught) {
-        toast.error(
-          "Couldn't archive member",
-          caught instanceof ApiError ? caught.message : "Please try again.",
-        );
+      } catch {
+        // The toast already explains the failure; keep the dialog open to retry.
       } finally {
         setArchiving(false);
       }
     },
-    [loading, toast],
+    [toast],
   );
 
   const showEmpty = status === "ready" && members.length === 0;

@@ -17,7 +17,7 @@ import {
   todayKey,
   type DateWindow,
 } from "./date-window";
-import type { ExpenseDto } from "./expenses-api";
+import type { ExpenseDto } from "./api";
 
 /* -- Categories ----------------------------------------------------------- */
 

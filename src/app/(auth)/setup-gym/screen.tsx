@@ -1,19 +1,21 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { createSubmitHandler, useFormHandler } from "next-form-handler";
 import { AuthCard } from "@/components/auth/AuthCard";
 import { AuthErrorMessage } from "@/components/auth/AuthErrorMessage";
 import { useToast } from "@/components/providers/ToastProvider";
-import { ApiError } from "@/lib/api";
 import {
+  ApiError,
+  DASHBOARD_PATH,
   clearPendingSignup,
   fetchCurrentUser,
   readPendingSignup,
-  setupGym,
   type AuthUser,
-} from "@/lib/auth-api";
+} from "@/lib/api";
+import { AUTH_ERRORS, setupGymAction } from "@/lib/auth-actions";
 
 /**
  * Post-signup onboarding: the account exists (email verified, session set)
@@ -31,7 +33,6 @@ export default function SetupGymScreen() {
   const [address, setAddress] = useState("");
   const [nameError, setNameError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -39,8 +40,14 @@ export default function SetupGymScreen() {
       try {
         const current = await fetchCurrentUser();
         if (!active) return;
+        if (current.user.emailVerified === false) {
+          router.replace(
+            `/verify-email?email=${encodeURIComponent(current.user.email)}&reason=dashboard`,
+          );
+          return;
+        }
         if (current.user.gymId) {
-          router.replace("/");
+          router.replace(DASHBOARD_PATH);
           return;
         }
         setUser(current.user);
@@ -70,9 +77,48 @@ export default function SetupGymScreen() {
     };
   }, [router]);
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  // next-form-handler runs the API call through a React action: `isPending`
+  // replaces the old manual "submitting" state, and these callbacks decide
+  // what to do with the result.
+  const { formAction, isPending } = useFormHandler(
+    setupGymAction,
+    () => {
+      clearPendingSignup();
+      router.replace(DASHBOARD_PATH);
+    },
+    (state) => {
+      // 409 = the gym already exists for this account; nothing left to do.
+      if (state.error === AUTH_ERRORS.gymExists) {
+        clearPendingSignup();
+        router.replace(DASHBOARD_PATH);
+        return;
+      }
+      // A stale/unverified session must be re-verified before setup-gym.
+      if (state.error === AUTH_ERRORS.unverified) {
+        router.replace(
+          `/verify-email?email=${encodeURIComponent(user?.email ?? "")}&reason=dashboard`,
+        );
+        return;
+      }
+      // Expired session -> sign in again, then return to onboarding.
+      if (state.error === AUTH_ERRORS.sessionExpired) {
+        router.replace("/login?next=/setup-gym");
+        return;
+      }
+      toast({
+        title: "Could not create your gym",
+        description: state.error,
+        variant: "error",
+        dedupeKey: "setup-gym-error",
+      });
+    },
+  );
+  // Sends a plain object as FormData, inside a React transition.
+  const submit = useMemo(() => createSubmitHandler(formAction), [formAction]);
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (submitting) return;
+    if (isPending) return;
 
     const trimmed = gymName.trim();
     if (trimmed.length < 2) {
@@ -81,31 +127,12 @@ export default function SetupGymScreen() {
     }
     setNameError(null);
     setFormError(null);
-    setSubmitting(true);
-    try {
-      await setupGym({
-        name: trimmed,
-        email: user?.email,
-        phone: phone.trim() || undefined,
-        address: address.trim() || undefined,
-      });
-      clearPendingSignup();
-      router.replace("/");
-    } catch (error) {
-      if (error instanceof ApiError && error.status === 409) {
-        // Gym already attached to this account — nothing left to create.
-        clearPendingSignup();
-        router.replace("/");
-        return;
-      }
-      toast({
-        title: "Could not create your gym",
-        description:
-          error instanceof ApiError ? error.message : "Check your connection and try again.",
-        variant: "error",
-      });
-      setSubmitting(false);
-    }
+    submit({
+      name: trimmed,
+      email: user?.email ?? "",
+      phone: phone.trim(),
+      address: address.trim(),
+    });
   };
 
   return (
@@ -183,11 +210,11 @@ export default function SetupGymScreen() {
 
           <button
             type="submit"
-            disabled={submitting}
-            aria-busy={submitting}
+            disabled={isPending}
+            aria-busy={isPending}
             className="gold-surface flex h-10 w-full items-center justify-center rounded-lg px-4 text-[13.5px] font-semibold text-[#1A1503] shadow-auth-gold transition-[filter] hover:brightness-110 active:brightness-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
           >
-            {submitting ? "Creating gym…" : "Create Gym & Start Trial"}
+            {isPending ? "Creating gym…" : "Create Gym & Start Trial"}
           </button>
         </form>
       )}

@@ -12,7 +12,6 @@ import {
   updatePlan,
   type PlanDto,
 } from "@/lib/members-api";
-import { useGlobalLoading } from "./providers/LoadingProvider";
 import { useToast } from "./providers/ToastProvider";
 import { Button } from "./ui/Button";
 import { Input } from "./ui/Input";
@@ -99,7 +98,6 @@ export function PlanFormDrawer({
   onSaved,
 }: PlanFormDrawerProps) {
   const mode = plan ? "edit" : "create";
-  const loading = useGlobalLoading();
   const toast = useToast();
 
   const initial = useMemo<PlanFormValues>(
@@ -159,28 +157,42 @@ export function PlanFormDrawer({
           durationMonths: toMonths(values),
           isActive: values.isActive,
         };
-        const saved = await loading.run(
+        const saved = await toast.promise(
           mode === "edit" && plan ? updatePlan(plan.id, input) : createPlan(input),
-          mode === "edit" ? "Saving plan…" : "Creating plan…",
-        );
-        toast.success(
-          mode === "edit" ? "Plan updated" : "Plan created",
-          `${saved.name} is ready to assign.`,
+          {
+            loading: {
+              title: mode === "edit" ? "Saving plan…" : "Creating plan…",
+              description:
+                mode === "edit"
+                  ? "Updating pricing and availability."
+                  : "Adding the plan to your catalogue.",
+            },
+            success: (result) => ({
+              title: mode === "edit" ? "Plan updated" : "Plan created",
+              description: `${result.name} is ready to assign.`,
+            }),
+            error: (caught) => ({
+              title: "Couldn't save plan",
+              description:
+                caught instanceof ApiError
+                  ? caught.message
+                  : "Something went wrong while saving. Please try again.",
+            }),
+          },
         );
         onSaved?.(saved);
         onOpenChange(false);
       } catch (caught) {
-        const message =
+        setServerError(
           caught instanceof ApiError
             ? caught.message
-            : "Something went wrong while saving. Please try again.";
-        setServerError(message);
-        toast.error("Couldn't save plan", message);
+            : "Something went wrong while saving. Please try again.",
+        );
       } finally {
         setSubmitting(false);
       }
     },
-    [loading, mode, onOpenChange, onSaved, plan, toast, values],
+    [mode, onOpenChange, onSaved, plan, toast, values],
   );
 
   const months = toMonths(values);

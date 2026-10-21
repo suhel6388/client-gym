@@ -10,36 +10,11 @@ import {
 } from "react";
 import { AuthErrorMessage } from "./AuthErrorMessage";
 import { ResendOtpButton } from "./ResendOtpButton";
-import { ApiError } from "@/lib/api";
-import { verifyEmailOtp } from "@/lib/auth-api";
+import { useToast } from "@/components/providers/ToastProvider";
+import { ApiError, verifyEmailOtp } from "@/lib/api";
 import { cn } from "@/lib/cn";
 
 const OTP_LENGTH = 6;
-
-type ErrorKind = "invalid" | "expired" | "locked" | "network" | null;
-
-function mapVerifyError(error: unknown): { message: string; kind: ErrorKind } {
-  if (error instanceof ApiError) {
-    if (error.status === 0) {
-      return {
-        message: "Can't reach the server. Check your connection and try again.",
-        kind: "network",
-      };
-    }
-    const text = error.message.toLowerCase();
-    if (text.includes("expired")) {
-      return { message: "That code has expired. Request a new one below.", kind: "expired" };
-    }
-    if (text.includes("too many")) {
-      return {
-        message: "Too many attempts. Request a new code and try again.",
-        kind: "locked",
-      };
-    }
-    return { message: error.message || "Invalid code. Check the 6-digit code and try again.", kind: "invalid" };
-  }
-  return { message: "Something went wrong. Please try again.", kind: "network" };
-}
 
 type OtpVerificationFormProps = {
   email: string;
@@ -55,13 +30,15 @@ type OtpVerificationFormProps = {
  */
 export function OtpVerificationForm({ email, onSuccess, className }: OtpVerificationFormProps) {
   const [digits, setDigits] = useState<string[]>(Array(OTP_LENGTH).fill(""));
-  const [verifying, setVerifying] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [errorKind, setErrorKind] = useState<ErrorKind>(null);
+  const [codeExpired, setCodeExpired] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
   const [attemptsLocked, setAttemptsLocked] = useState(false);
+  const [isVerifying, setIsVerifying] = useState(false);
   const inputsRef = useRef<Array<HTMLInputElement | null>>([]);
-  const verifyingRef = useRef(false);
+  /** One backend attempt per completed code (auto-submit and button share it). */
+  const submittedRef = useRef(false);
+  const toast = useToast();
 
   const code = digits.join("");
   const complete = code.length === OTP_LENGTH && /^\d+$/.test(code);
@@ -71,30 +48,46 @@ export function OtpVerificationForm({ email, onSuccess, className }: OtpVerifica
     inputsRef.current[index]?.select();
   }, []);
 
-  const submit = useCallback(
+  const submitCode = useCallback(
     async (value: string) => {
-      if (verifyingRef.current || value.length !== OTP_LENGTH) return;
-      verifyingRef.current = true;
-      setVerifying(true);
+      if (isVerifying || submittedRef.current || value.length !== OTP_LENGTH) return;
+      submittedRef.current = true;
+      setIsVerifying(true);
       setError(null);
-      setErrorKind(null);
+      setCodeExpired(false);
       setStatus(null);
       try {
         await verifyEmailOtp({ email, otp: value });
         onSuccess();
-      } catch (err) {
-        const mapped = mapVerifyError(err);
-        setError(mapped.message);
-        setErrorKind(mapped.kind);
-        if (mapped.kind === "locked") setAttemptsLocked(true);
+      } catch (requestError) {
+        const message =
+          requestError instanceof ApiError
+            ? requestError.message
+            : "Could not verify your email. Please try again.";
+        const normalizedMessage = message.toLowerCase();
+        const isLocked =
+          (requestError instanceof ApiError && requestError.status === 429) ||
+          normalizedMessage.includes("too many");
+        const isExpired = normalizedMessage.includes("expired");
+
+        setError(message);
+        setCodeExpired(isExpired);
+        setAttemptsLocked(isLocked);
+        if (requestError instanceof ApiError && requestError.status === 0) {
+          toast.error(
+            "Couldn't reach the server",
+            "Check your connection, then try the code again.",
+            { dedupeKey: "otp-network" },
+          );
+        }
         setDigits(Array(OTP_LENGTH).fill(""));
         focusInput(0);
       } finally {
-        verifyingRef.current = false;
-        setVerifying(false);
+        submittedRef.current = false;
+        setIsVerifying(false);
       }
     },
-    [email, focusInput, onSuccess],
+    [email, focusInput, isVerifying, onSuccess, toast],
   );
 
   const applyDigits = useCallback(
@@ -117,7 +110,7 @@ export function OtpVerificationForm({ email, onSuccess, className }: OtpVerifica
 
   const handleChange = useCallback(
     (index: number, raw: string) => {
-      if (verifying) return;
+      if (isVerifying) return;
       setStatus(null);
       const chars = raw.replace(/\D/g, "").split("").filter(Boolean);
       if (chars.length === 0) {
@@ -140,12 +133,12 @@ export function OtpVerificationForm({ email, onSuccess, className }: OtpVerifica
       // Multi-char (autofill or fast typing) — spread from this box.
       applyDigits(index, chars);
     },
-    [applyDigits, focusInput, verifying],
+    [applyDigits, focusInput, isVerifying],
   );
 
   const handleKeyDown = useCallback(
     (index: number, event: KeyboardEvent<HTMLInputElement>) => {
-      if (verifying) return;
+      if (isVerifying) return;
       if (event.key === "Backspace") {
         event.preventDefault();
         setDigits((current) => {
@@ -166,29 +159,29 @@ export function OtpVerificationForm({ email, onSuccess, className }: OtpVerifica
         focusInput(index + 1);
       }
     },
-    [focusInput, verifying],
+    [focusInput, isVerifying],
   );
 
   const handlePaste = useCallback(
     (index: number, event: ClipboardEvent<HTMLInputElement>) => {
       event.preventDefault();
-      if (verifying) return;
+      if (isVerifying) return;
       const pasted = event.clipboardData.getData("text").replace(/\D/g, "");
       if (!pasted) return;
       applyDigits(index, pasted.split("").slice(0, OTP_LENGTH));
     },
-    [applyDigits, verifying],
+    [applyDigits, isVerifying],
   );
 
   // Auto-submit as soon as all six digits are in — with a tiny delay so the
   // last box paints before the request starts.
   useEffect(() => {
-    if (!complete || verifyingRef.current || attemptsLocked) return;
-    const timer = window.setTimeout(() => void submit(code), 120);
+    if (!complete || attemptsLocked || submittedRef.current) return;
+    const timer = window.setTimeout(() => submitCode(code), 120);
     return () => window.clearTimeout(timer);
-  }, [attemptsLocked, code, complete, submit]);
+  }, [attemptsLocked, code, complete, submitCode]);
 
-  const disabled = verifying || attemptsLocked;
+  const disabled = isVerifying || attemptsLocked;
 
   return (
     <div className={cn("space-y-5", className)}>
@@ -198,7 +191,7 @@ export function OtpVerificationForm({ email, onSuccess, className }: OtpVerifica
           aria-label="6-digit verification code"
           className="flex justify-between gap-1.5 sm:gap-2"
           onKeyDown={(event) => {
-            if (event.key === "Enter" && complete && !disabled) void submit(code);
+            if (event.key === "Enter" && complete && !disabled) submitCode(code);
           }}
         >
           {digits.map((digit, index) => (
@@ -239,31 +232,32 @@ export function OtpVerificationForm({ email, onSuccess, className }: OtpVerifica
 
       <button
         type="button"
-        onClick={() => void submit(code)}
+        onClick={() => submitCode(code)}
         disabled={!complete || disabled}
-        aria-busy={verifying}
+        aria-busy={isVerifying}
         className="gold-surface flex h-10 w-full items-center justify-center rounded-lg px-4 text-[13.5px] font-semibold text-[#1A1503] shadow-auth-gold transition-[filter] hover:brightness-110 active:brightness-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
       >
-        {verifying ? "Verifying…" : "Verify Email"}
+        {isVerifying ? "Verifying…" : "Verify Email"}
       </button>
 
       <ResendOtpButton
         email={email}
-        disabled={verifying}
+        disabled={isVerifying}
         onStatus={(message) => {
           setStatus(message);
           setError(null);
-          setErrorKind(null);
+          setCodeExpired(false);
           setAttemptsLocked(false);
+          submittedRef.current = false;
           setDigits(Array(OTP_LENGTH).fill(""));
           focusInput(0);
         }}
         onError={(message) => {
           setError(message);
-          setErrorKind("network");
+          setCodeExpired(false);
         }}
       />
-      {errorKind === "expired" && (
+      {codeExpired && (
         <p className="text-center text-xs text-auth-faint">
           Codes expire 5 minutes after they are sent.
         </p>

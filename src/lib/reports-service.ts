@@ -1,4 +1,4 @@
-import { listExpenses } from "./expenses-api";
+import { listExpenses } from "./api";
 import {
   listMembers,
   listMemberships,
@@ -60,7 +60,7 @@ export async function fetchReportsData(options?: {
     listPayments(options?.signal),
     listExpenses(undefined, options?.signal),
     listMemberships(undefined, options?.signal),
-    listMembers(options?.signal),
+    listMembers(undefined, options?.signal),
   ]);
   return { payments, expenses, memberships, members };
 }

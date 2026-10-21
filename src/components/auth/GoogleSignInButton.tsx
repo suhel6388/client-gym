@@ -2,8 +2,7 @@
 
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
-import { ApiError } from "@/lib/api";
-import { getGoogleSignInUrl } from "@/lib/auth-api";
+import { ApiError, getGoogleSignInUrl } from "@/lib/api";
 import { cn } from "@/lib/cn";
 
 /** Official multi-colour Google "G" mark. */

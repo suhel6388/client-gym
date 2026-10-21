@@ -26,7 +26,7 @@ import type {
   MembershipWithRelationsDto,
   PaymentDto,
 } from "@/lib/members-api";
-import type { ExpenseDto } from "@/lib/expenses-api";
+import type { ExpenseDto } from "@/lib/api";
 import { REPORTS_USE_MOCK, fetchReportsData } from "@/lib/reports-service";
 import { summarizePayments, type PaymentRow } from "@/lib/payments-view";
 import {

@@ -1,4 +1,9 @@
-import { apiRequest, type QueryParams } from "./api";
+import {
+  checkInMember,
+  checkOutMember,
+  getAttendanceHistory,
+  type AttendanceRecord,
+} from "./api";
 import {
   addDemoCheckIn,
   addDemoCheckOut,
@@ -17,17 +22,18 @@ import {
    controller). This file defines the contract the UI expects and ships a
    clearly-labelled demo implementation so the page is fully usable today.
 
-   ⚠️ When the backend adds these endpoints, set
-      NEXT_PUBLIC_USE_REAL_ATTENDANCE_API=true
-   and the same UI will call them without any component changes:
+   ⚠️ The real routes in API.md are mounted under `/api/v1/attendence`.
+   Set `NEXT_PUBLIC_USE_REAL_ATTENDANCE_API=true` to use them:
 
-     GET    /attendance?from=&to=&status=&method=&planId=&memberId=&page=&pageSize=
-     POST   /attendance/check-in   { memberId, date, time, notes, method }
-     POST   /attendance/check-out  { recordId, time, notes }
-     GET    /attendance/device
-     GET    /attendance/enrollments
+     GET    /attendence/members/search?q=
+     POST   /attendence/check-in
+     POST   /attendence/check-out
+     GET    /attendence/open/:memberId
+     GET    /attendence/members/:memberId/history
+     GET    /attendence/summary/today
 
-   No biometric verification is simulated and no device connectivity is claimed.
+   Device/enrollment management is not exposed by the API yet, so those
+   panels stay in demo mode.
 --------------------------------------------------------------------------- */
 
 export type AttendanceMethod = "MANUAL" | "FINGERPRINT" | "DEVICE";
@@ -86,6 +92,8 @@ export type CheckInInput = {
 
 export type CheckOutInput = {
   recordId: string;
+  /** Required by the real API (`POST /attendence/check-out`). */
+  memberId?: string;
   /** `HH:mm`. */
   time: string;
   notes?: string | null;
@@ -125,9 +133,35 @@ function toRecordDto(record: DemoAttendanceRecord): AttendanceRecordDto {
   };
 }
 
+/** Maps the documented attendance row (`/attendence`) to the UI model. */
+function fromApiRecord(record: AttendanceRecord): AttendanceRecordDto {
+  const method: AttendanceMethod =
+    record.markingMethod === "QR_CODE"
+      ? "DEVICE"
+      : record.markingMethod === "BIOMETRIC"
+        ? "FINGERPRINT"
+        : "MANUAL";
+
+  return {
+    id: record.id,
+    gymId: "api",
+    memberId: record.memberId,
+    date: record.attendanceDate.slice(0, 10),
+    checkInAt: record.checkInAt,
+    checkOutAt: record.checkOutAt,
+    method,
+    status: record.checkOutAt ? "CHECKED_OUT" : "CHECKED_IN",
+    notes: record.checkInNotes ?? record.checkOutNotes ?? null,
+    createdAt: record.checkInAt,
+  };
+}
+
 /**
- * Loads attendance records for a date window. In demo mode the store is seeded
- * from the real member ids the first time it is called.
+ * Loads attendance records for a date window.
+ *
+ * The documented API exposes per-member history rather than one gym-wide list,
+ * so the real path reads the newest history for the members currently shown.
+ * Demo mode seeds its local store from the same member ids.
  */
 export async function listAttendance(
   memberIds: string[],
@@ -135,10 +169,18 @@ export async function listAttendance(
   signal?: AbortSignal,
 ): Promise<AttendanceRecordDto[]> {
   if (USE_REAL_ATTENDANCE_API) {
-    return apiRequest<AttendanceRecordDto[]>("/attendance", {
-      query: { from: params.from, to: params.to } as QueryParams,
-      signal,
-    });
+    // Keep the fan-out bounded; the attendance table only renders one day.
+    const histories = await Promise.all(
+      memberIds.slice(0, 25).map((memberId) =>
+        getAttendanceHistory(memberId, { page: 1, limit: 100 }, signal),
+      ),
+    );
+    return histories
+      .flatMap((history) => history.data)
+      .map(fromApiRecord)
+      .filter((record) => !params.from || record.date >= params.from)
+      .filter((record) => !params.to || record.date <= params.to)
+      .sort((a, b) => b.checkInAt.localeCompare(a.checkInAt));
   }
 
   ensureDemoSeeded(memberIds);
@@ -152,10 +194,13 @@ export async function listAttendance(
 
 export async function recordCheckIn(input: CheckInInput): Promise<AttendanceRecordDto> {
   if (USE_REAL_ATTENDANCE_API) {
-    return apiRequest<AttendanceRecordDto>("/attendance/check-in", {
-      method: "POST",
-      body: input,
+    const record = await checkInMember({
+      memberId: input.memberId,
+      attendanceDate: input.date,
+      notes: input.notes ?? undefined,
+      markingMethod: "MANUAL",
     });
+    return fromApiRecord(record);
   }
   const created = addDemoCheckIn({
     memberId: input.memberId,
@@ -168,10 +213,14 @@ export async function recordCheckIn(input: CheckInInput): Promise<AttendanceReco
 
 export async function recordCheckOut(input: CheckOutInput): Promise<AttendanceRecordDto> {
   if (USE_REAL_ATTENDANCE_API) {
-    return apiRequest<AttendanceRecordDto>("/attendance/check-out", {
-      method: "POST",
-      body: input,
+    if (!input.memberId) {
+      throw new Error("memberId is required to check out with the live API.");
+    }
+    const record = await checkOutMember({
+      memberId: input.memberId,
+      notes: input.notes ?? undefined,
     });
+    return fromApiRecord(record);
   }
   const updated = addDemoCheckOut(input.recordId, input.time);
   if (!updated) {
@@ -183,18 +232,13 @@ export async function recordCheckOut(input: CheckOutInput): Promise<AttendanceRe
 export async function getDeviceStatus(
   memberIds: string[] = [],
 ): Promise<AttendanceDeviceDto> {
-  if (USE_REAL_ATTENDANCE_API) {
-    return apiRequest<AttendanceDeviceDto>("/attendance/device");
-  }
+  // Device/enrollment management is not exposed by the API yet.
   return wait(demoDeviceStatus(memberIds));
 }
 
 export async function listEnrollments(
   memberIds: string[],
 ): Promise<AttendanceEnrollmentDto[]> {
-  if (USE_REAL_ATTENDANCE_API) {
-    return apiRequest<AttendanceEnrollmentDto[]>("/attendance/enrollments");
-  }
   return wait(demoEnrollments(memberIds));
 }
 

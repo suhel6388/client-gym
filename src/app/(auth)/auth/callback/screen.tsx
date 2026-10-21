@@ -6,8 +6,11 @@ import { useSearchParams } from "next/navigation";
 import { AuthCard } from "@/components/auth/AuthCard";
 import { AuthErrorMessage } from "@/components/auth/AuthErrorMessage";
 import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
-import { ApiError } from "@/lib/api";
-import { fetchCurrentUser } from "@/lib/auth-api";
+import {
+  ApiError,
+  fetchCurrentUser,
+  postAuthDestination,
+} from "@/lib/api";
 
 /** Human-readable messages for the OAuth error codes Better Auth relays back. */
 function describeOauthError(code: string | null): string {
@@ -28,6 +31,7 @@ function describeOauthError(code: string | null): string {
 function CallbackScreen() {
   const searchParams = useSearchParams();
   const oauthError = searchParams.get("error");
+  const next = searchParams.get("next");
   const [message, setMessage] = useState<string | null>(oauthError ? describeOauthError(oauthError) : null);
   const [checking, setChecking] = useState(!oauthError);
   const routedRef = useRef(false);
@@ -43,7 +47,7 @@ function CallbackScreen() {
         const current = await fetchCurrentUser();
         if (!active || routedRef.current) return;
         routedRef.current = true;
-        window.location.assign(current.user.gymId ? "/" : "/setup-gym");
+        window.location.assign(postAuthDestination(current.user, next));
       } catch (error) {
         if (!active) return;
         if (error instanceof ApiError && error.status === 401) {
@@ -60,7 +64,7 @@ function CallbackScreen() {
     return () => {
       active = false;
     };
-  }, [oauthError]);
+  }, [next, oauthError]);
 
   return (
     <AuthCard heading="Google Sign-In" subtitle="Completing your secure sign-in…">

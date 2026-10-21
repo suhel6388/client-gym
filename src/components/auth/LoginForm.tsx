@@ -1,13 +1,14 @@
 "use client";
 
-import { useCallback, useState, type FormEvent } from "react";
+import { useCallback, useMemo, useState, type FormEvent } from "react";
 import Link from "next/link";
+import { createSubmitHandler, useFormHandler } from "next-form-handler";
 import { AuthErrorMessage } from "./AuthErrorMessage";
 import { GoogleSignInButton } from "./GoogleSignInButton";
 import { PasswordInput } from "./PasswordInput";
 import { AuthDivider } from "./AuthDivider";
-import { ApiError } from "@/lib/api";
-import { login } from "@/lib/auth-api";
+import { AUTH_ERRORS, loginAction } from "@/lib/auth-actions";
+
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -28,7 +29,24 @@ export function LoginForm({ next, onSuccess, onUnverified }: LoginFormProps) {
   const [rememberMe, setRememberMe] = useState(true);
   const [errors, setErrors] = useState<FieldErrors>({});
   const [formError, setFormError] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
+
+  // next-form-handler runs the API call through a React action: `isPending`
+  // replaces the old manual "submitting" state, and these callbacks decide
+  // what to do with the result. It also handles 403 (email not verified) by
+  // sending the user to the OTP screen.
+  const { formAction, isPending } = useFormHandler(
+    loginAction,
+    () => onSuccess(next),
+    (state) => {
+      if (state.error === AUTH_ERRORS.unverified) {
+        onUnverified(email.trim().toLowerCase());
+        return;
+      }
+      setFormError(state.error);
+    },
+  );
+  // Sends a plain object as FormData, inside a React transition.
+  const submit = useMemo(() => createSubmitHandler(formAction), [formAction]);
 
   const validate = useCallback((): FieldErrors => {
     const nextErrors: FieldErrors = {};
@@ -39,40 +57,18 @@ export function LoginForm({ next, onSuccess, onUnverified }: LoginFormProps) {
   }, [email, password]);
 
   const handleSubmit = useCallback(
-    async (event: FormEvent<HTMLFormElement>) => {
+    (event: FormEvent<HTMLFormElement>) => {
       event.preventDefault();
-      if (submitting) return;
+      if (isPending) return;
 
       const nextErrors = validate();
       setErrors(nextErrors);
       setFormError(null);
       if (Object.keys(nextErrors).length > 0) return;
-
-      setSubmitting(true);
-      try {
-        await login({ email: email.trim().toLowerCase(), password, rememberMe });
-        onSuccess(next);
-      } catch (error) {
-        if (error instanceof ApiError) {
-          if (error.status === 403) {
-            onUnverified(email.trim().toLowerCase());
-            return;
-          }
-          if (error.status === 401) {
-            setFormError("Invalid email or password. Check your credentials and try again.");
-          } else if (error.status === 0) {
-            setFormError("Can't reach the server. Check your connection and try again.");
-          } else {
-            setFormError(error.message);
-          }
-        } else {
-          setFormError("Something went wrong. Please try again.");
-        }
-        setSubmitting(false);
-      }
-      // On success the page redirects, so the button stays disabled.
+      submit({ email: email.trim().toLowerCase(), password, rememberMe });
+      // On success the page redirects, so the button stays disabled (isPending).
     },
-    [email, next, onSuccess, onUnverified, password, rememberMe, submitting, validate],
+    [email, isPending, password, rememberMe, submit, validate],
   );
 
   return (
@@ -151,11 +147,11 @@ export function LoginForm({ next, onSuccess, onUnverified }: LoginFormProps) {
 
         <button
           type="submit"
-          disabled={submitting}
-          aria-busy={submitting}
+          disabled={isPending}
+          aria-busy={isPending}
           className="gold-surface flex h-10 w-full items-center justify-center rounded-lg px-4 text-[13.5px] font-semibold text-[#1A1503] shadow-auth-gold transition-[filter] hover:brightness-110 active:brightness-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
         >
-          {submitting ? "Signing in…" : "Sign In"}
+          {isPending ? "Signing in…" : "Sign In"}
         </button>
       </form>
 

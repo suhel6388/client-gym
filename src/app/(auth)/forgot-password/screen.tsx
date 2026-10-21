@@ -1,25 +1,43 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
 import Link from "next/link";
+import { createSubmitHandler, useFormHandler } from "next-form-handler";
 import { AuthCard } from "@/components/auth/AuthCard";
 import { AuthErrorMessage } from "@/components/auth/AuthErrorMessage";
-import { ApiError } from "@/lib/api";
-import { forgotPassword } from "@/lib/auth-api";
+import { useToast } from "@/components/providers/ToastProvider";
+import { forgotPasswordAction } from "@/lib/auth-actions";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 /** Step 1: request a reset link. Never reveals whether the email exists. */
 export default function ForgotPasswordScreen() {
+  const toast = useToast();
   const [email, setEmail] = useState("");
   const [emailError, setEmailError] = useState<string | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
-  const [submitting, setSubmitting] = useState(false);
   const [sent, setSent] = useState(false);
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  // next-form-handler runs the API call through a React action: `isPending`
+  // replaces the old manual "submitting" state.
+  const { formAction, isPending } = useFormHandler(
+    forgotPasswordAction,
+    () => {
+      setSent(true);
+      toast.success(
+        "Reset link sent",
+        "If an account exists for that email, a reset link is on its way.",
+        { dedupeKey: "forgot-password-sent" },
+      );
+    },
+    (state) => setFormError(state.error),
+  );
+  // Sends a plain object as FormData, inside a React transition.
+  const submit = useMemo(() => createSubmitHandler(formAction), [formAction]);
+
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (submitting) return;
+    if (isPending) return;
 
     const trimmed = email.trim().toLowerCase();
     if (!trimmed) {
@@ -33,19 +51,7 @@ export default function ForgotPasswordScreen() {
 
     setEmailError(null);
     setFormError(null);
-    setSubmitting(true);
-    try {
-      await forgotPassword(trimmed);
-      setSent(true);
-    } catch (error) {
-      if (error instanceof ApiError && error.status === 0) {
-        setFormError("Can't reach the server. Check your connection and try again.");
-      } else {
-        setFormError(error instanceof ApiError ? error.message : "Something went wrong. Please try again.");
-      }
-    } finally {
-      setSubmitting(false);
-    }
+    submit({ email: trimmed });
   };
 
   return (
@@ -101,11 +107,11 @@ export default function ForgotPasswordScreen() {
 
           <button
             type="submit"
-            disabled={submitting}
-            aria-busy={submitting}
+            disabled={isPending}
+            aria-busy={isPending}
             className="gold-surface flex h-10 w-full items-center justify-center rounded-lg px-4 text-[13.5px] font-semibold text-[#1A1503] shadow-auth-gold transition-[filter] hover:brightness-110 active:brightness-95 disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
           >
-            {submitting ? "Sending link…" : "Send Reset Link"}
+            {isPending ? "Sending link…" : "Send Reset Link"}
           </button>
         </form>
       )}

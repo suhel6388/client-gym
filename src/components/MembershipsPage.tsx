@@ -43,7 +43,6 @@ import {
   type SubscriptionRow,
   type SubscriptionStatus,
 } from "@/lib/membership-view";
-import { useGlobalLoading } from "./providers/LoadingProvider";
 import { useToast } from "./providers/ToastProvider";
 import { Button } from "./ui/Button";
 import { ConfirmDialog } from "./ConfirmDialog";
@@ -91,7 +90,6 @@ function matchesExpiryFilter(row: SubscriptionRow, filter: ExpiryFilter): boolea
 
 export function MembershipsPage() {
   const toast = useToast();
-  const loading = useGlobalLoading();
 
   const [plans, setPlans] = useState<PlanDto[]>([]);
   const [memberships, setMemberships] = useState<MembershipWithRelationsDto[]>([]);
@@ -334,56 +332,83 @@ export function MembershipsPage() {
     setConfirmBusy(true);
     try {
       const { action, row } = confirm;
-      await loading.run(
+      await toast.promise(
         action === "freeze" ? freezeMembership(row.id) : cancelMembership(row.id),
-        action === "freeze" ? "Freezing membership…" : "Cancelling membership…",
-      );
-      toast.success(
-        action === "freeze" ? "Membership frozen" : "Membership cancelled",
-        `${row.memberName}'s ${row.planName} subscription was updated.`,
+        {
+          loading: {
+            title: action === "freeze" ? "Freezing membership…" : "Cancelling membership…",
+            description: `${row.memberName}'s ${row.planName} subscription is being updated.`,
+          },
+          success: {
+            title: action === "freeze" ? "Membership frozen" : "Membership cancelled",
+            description: `${row.memberName}'s ${row.planName} subscription was updated.`,
+          },
+          error: (caught) => ({
+            title: "Action failed",
+            description:
+              caught instanceof ApiError ? caught.message : "Please try again.",
+          }),
+        },
       );
       setConfirm(null);
       setDetails((current) => (current?.id === row.id ? null : current));
       await load("refresh");
-    } catch (caught) {
-      toast.error(
-        "Action failed",
-        caught instanceof ApiError ? caught.message : "Please try again.",
-      );
+    } catch {
+      // The toast explains the failure; the dialog stays open for a retry.
     } finally {
       setConfirmBusy(false);
     }
-  }, [confirm, load, loading, toast]);
+  }, [confirm, load, toast]);
 
   const handleDeactivatePlan = useCallback(async () => {
     if (!planAction) return;
     try {
-      await loading.run(deactivatePlan(planAction.id), "Deactivating plan…");
-      toast.success("Plan deactivated", `${planAction.name} is no longer available.`);
+      await toast.promise(deactivatePlan(planAction.id), {
+        loading: {
+          title: "Deactivating plan…",
+          description: `${planAction.name} will no longer be assignable.`,
+        },
+        success: {
+          title: "Plan deactivated",
+          description: `${planAction.name} is no longer available.`,
+        },
+        error: (caught) => ({
+          title: "Couldn't deactivate plan",
+          description:
+            caught instanceof ApiError ? caught.message : "Please try again.",
+        }),
+      });
       setPlanAction(null);
       await load("refresh");
-    } catch (caught) {
-      toast.error(
-        "Couldn't deactivate plan",
-        caught instanceof ApiError ? caught.message : "Please try again.",
-      );
+    } catch {
+      // Keep the confirmation dialog open so the action can be retried.
     }
-  }, [planAction, load, loading, toast]);
+  }, [planAction, load, toast]);
 
   const handleReactivatePlan = useCallback(
     async (plan: PlanDto) => {
       try {
-        await loading.run(updatePlan(plan.id, { isActive: true }), "Reactivating plan…");
-        toast.success("Plan reactivated", `${plan.name} is available again.`);
+        await toast.promise(updatePlan(plan.id, { isActive: true }), {
+          loading: {
+            title: "Reactivating plan…",
+            description: `${plan.name} will be available for new assignments.`,
+          },
+          success: {
+            title: "Plan reactivated",
+            description: `${plan.name} is available again.`,
+          },
+          error: (caught) => ({
+            title: "Couldn't reactivate plan",
+            description:
+              caught instanceof ApiError ? caught.message : "Please try again.",
+          }),
+        });
         await load("refresh");
-      } catch (caught) {
-        toast.error(
-          "Couldn't reactivate plan",
-          caught instanceof ApiError ? caught.message : "Please try again.",
-        );
+      } catch {
+        // Toast covers the error; the list stays unchanged.
       }
     },
-    [load, loading, toast],
+    [load, toast],
   );
 
   const showEmpty = status === "ready" && memberships.length === 0;

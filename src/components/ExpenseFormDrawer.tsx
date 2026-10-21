@@ -12,7 +12,7 @@ import {
   createExpense,
   updateExpense,
   type ExpenseInput,
-} from "@/lib/expenses-api";
+} from "@/lib/api";
 import { useToast } from "./providers/ToastProvider";
 import { Button } from "./ui/Button";
 import { Input } from "./ui/Input";
@@ -108,21 +108,43 @@ export function ExpenseFormDrawer({
       setSubmitting(true);
       try {
         if (editing) {
-          await updateExpense(editing.id, input);
-          toast.success("Expense updated", `"${input.title}" was saved.`);
+          await toast.promise(updateExpense(editing.id, input), {
+            loading: {
+              title: "Saving expense…",
+              description: "Updating the recorded expense.",
+            },
+            success: {
+              title: "Expense updated",
+              description: `"${input.title}" was saved.`,
+            },
+            error: (caught) => ({
+              title: "Couldn't update expense",
+              description:
+                caught instanceof ApiError ? caught.message : "Please try again.",
+            }),
+          });
         } else {
-          await createExpense(input);
-          toast.success("Expense added", `"${input.title}" was recorded.`);
+          await toast.promise(createExpense(input), {
+            loading: {
+              title: "Recording expense…",
+              description: "Adding the expense to your books.",
+            },
+            success: {
+              title: "Expense added",
+              description: `"${input.title}" was recorded.`,
+            },
+            error: (caught) => ({
+              title: "Couldn't add expense",
+              description:
+                caught instanceof ApiError ? caught.message : "Please try again.",
+            }),
+          });
         }
         onSaved();
         onOpenChange(false);
       } catch (caught) {
-        const message =
-          caught instanceof ApiError ? caught.message : "Please try again.";
-        setServerError(message);
-        toast.error(
-          isEditing ? "Couldn't update expense" : "Couldn't add expense",
-          message,
+        setServerError(
+          caught instanceof ApiError ? caught.message : "Please try again.",
         );
       } finally {
         setSubmitting(false);
@@ -134,7 +156,6 @@ export function ExpenseFormDrawer({
       category,
       editing,
       expenseDate,
-      isEditing,
       notes,
       onOpenChange,
       onSaved,

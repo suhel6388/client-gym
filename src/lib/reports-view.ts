@@ -24,7 +24,7 @@ import type {
   MembershipWithRelationsDto,
   PaymentDto,
 } from "./members-api";
-import type { ExpenseDto } from "./expenses-api";
+import type { ExpenseDto } from "./api";
 
 /* -- Range selection ------------------------------------------------------ */
 

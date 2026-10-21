@@ -20,7 +20,6 @@ import {
   type PlanDto,
 } from "@/lib/members-api";
 import type { SubscriptionRow } from "@/lib/membership-view";
-import { useGlobalLoading } from "./providers/LoadingProvider";
 import { useToast } from "./providers/ToastProvider";
 import { Avatar } from "./ui/Avatar";
 import { Button } from "./ui/Button";
@@ -61,7 +60,6 @@ export function AssignMembershipDrawer({
   onOpenChange,
   onSaved,
 }: AssignMembershipDrawerProps) {
-  const loading = useGlobalLoading();
   const toast = useToast();
 
   const [memberId, setMemberId] = useState("");
@@ -191,7 +189,7 @@ export function AssignMembershipDrawer({
       setServerError(null);
       setSubmitting(true);
       try {
-        await loading.run(
+        await toast.promise(
           (async () => {
             await createMembership({
               memberId,
@@ -210,23 +208,36 @@ export function AssignMembershipDrawer({
               });
             }
           })(),
-          renewal ? "Renewing membership…" : "Assigning membership…",
-        );
-        toast.success(
-          renewal ? "Membership renewed" : "Membership assigned",
-          selectedMember
-            ? `${selectedMember.name}'s subscription is active.`
-            : "The subscription is active.",
+          {
+            loading: {
+              title: renewal ? "Renewing membership…" : "Assigning membership…",
+              description: collectPayment
+                ? "Saving the subscription and payment."
+                : "Saving the subscription.",
+            },
+            success: {
+              title: renewal ? "Membership renewed" : "Membership assigned",
+              description: selectedMember
+                ? `${selectedMember.name}'s subscription is active.`
+                : "The subscription is active.",
+            },
+            error: (caught) => ({
+              title: "Couldn't save membership",
+              description:
+                caught instanceof ApiError
+                  ? caught.message
+                  : "Something went wrong while saving. Please try again.",
+            }),
+          },
         );
         onSaved?.();
         onOpenChange(false);
       } catch (caught) {
-        const message =
+        setServerError(
           caught instanceof ApiError
             ? caught.message
-            : "Something went wrong while saving. Please try again.";
-        setServerError(message);
-        toast.error("Couldn't save membership", message);
+            : "Something went wrong while saving. Please try again.",
+        );
       } finally {
         setSubmitting(false);
       }
@@ -235,7 +246,6 @@ export function AssignMembershipDrawer({
       amount,
       collectPayment,
       discount,
-      loading,
       memberId,
       onOpenChange,
       onSaved,

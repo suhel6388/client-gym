@@ -18,7 +18,7 @@ export function AuthCard({ heading, subtitle, children, className, showLogo = tr
   return (
     <div
       className={cn(
-        "animate-auth-fade-up w-full max-w-[26.5rem] rounded-xl border border-auth-line bg-auth-card shadow-auth-card",
+        "animate-auth-fade-up w-full max-w-106 rounded-xl border border-auth-line bg-auth-card shadow-auth-card",
         "before:pointer-events-none before:absolute before:inset-x-6 before:top-0 before:h-px before:rounded-full before:bg-gradient-to-r before:from-transparent before:via-auth-gold/50 before:to-transparent",
         "relative",
         className,

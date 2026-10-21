@@ -15,7 +15,6 @@ import {
   type PaymentModeDto,
 } from "@/lib/members-api";
 import { statusTone } from "@/lib/member-ui";
-import { useGlobalLoading } from "./providers/LoadingProvider";
 import { useToast } from "./providers/ToastProvider";
 import { Avatar } from "./ui/Avatar";
 import { Badge } from "./ui/Badge";
@@ -41,7 +40,6 @@ export function PaymentFormDrawer({
   onOpenChange,
   onSaved,
 }: PaymentFormDrawerProps) {
-  const loading = useGlobalLoading();
   const toast = useToast();
 
   const [memberId, setMemberId] = useState("");
@@ -122,7 +120,7 @@ export function PaymentFormDrawer({
       setServerError(null);
       setSubmitting(true);
       try {
-        await loading.run(
+        await toast.promise(
           createPayment({
             memberId,
             amount: amountToPaise(value),
@@ -131,19 +129,30 @@ export function PaymentFormDrawer({
             paymentDate,
             status: "SUCCESS",
           }),
-          "Recording payment…",
-        );
-        toast.success(
-          "Payment recorded",
-          `${formatCurrency(value)} received from ${selectedMember?.name ?? "member"}.`,
+          {
+            loading: {
+              title: "Recording payment…",
+              description: "Saving the receipt on the server.",
+            },
+            success: {
+              title: "Payment recorded",
+              description: `${formatCurrency(value)} received from ${
+                selectedMember?.name ?? "member"
+              }.`,
+            },
+            error: (caught) => ({
+              title: "Couldn't record payment",
+              description:
+                caught instanceof ApiError ? caught.message : "Please try again.",
+            }),
+          },
         );
         onSaved();
         onOpenChange(false);
       } catch (caught) {
-        const message =
-          caught instanceof ApiError ? caught.message : "Please try again.";
-        setServerError(message);
-        toast.error("Couldn't record payment", message);
+        setServerError(
+          caught instanceof ApiError ? caught.message : "Please try again.",
+        );
       } finally {
         setSubmitting(false);
       }
@@ -151,7 +160,6 @@ export function PaymentFormDrawer({
     [
       amount,
       isFuture,
-      loading,
       memberId,
       onOpenChange,
       onSaved,

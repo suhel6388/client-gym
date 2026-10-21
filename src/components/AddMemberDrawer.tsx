@@ -24,7 +24,6 @@ import {
   type MemberDto,
   type PlanDto,
 } from "@/lib/members-api";
-import { useGlobalLoading } from "./providers/LoadingProvider";
 import { useToast } from "./providers/ToastProvider";
 import { MemberForm } from "./MemberForm";
 import { Button } from "./ui/Button";
@@ -50,7 +49,6 @@ export function AddMemberDrawer({
   onSaved,
 }: AddMemberDrawerProps) {
   const mode = member ? "edit" : "create";
-  const loading = useGlobalLoading();
   const toast = useToast();
 
   const [plans, setPlans] = useState<PlanDto[]>([]);
@@ -118,7 +116,7 @@ export function AddMemberDrawer({
       setServerError(null);
       setSubmitting(true);
       try {
-        const saved = await loading.run(
+        const saved = await toast.promise(
           (async () => {
             const payload = buildPayload(values);
             const result =
@@ -151,33 +149,57 @@ export function AddMemberDrawer({
 
             return result;
           })(),
-          mode === "edit" ? "Saving changes…" : "Adding member…",
+          {
+            loading:
+              mode === "edit"
+                ? {
+                    title: "Saving member…",
+                    description: "Updating the member profile and membership.",
+                  }
+                : {
+                    title: "Adding member…",
+                    description: values.planId
+                      ? "Creating the member, membership and payment."
+                      : "Creating the member profile.",
+                  },
+            success: (result) =>
+              mode === "edit"
+                ? {
+                    title: "Member updated",
+                    description: `${result.name}'s details were saved.`,
+                  }
+                : {
+                    title: "Member added",
+                    description: `${result.name} (${result.memberCode}) was added successfully.`,
+                  },
+            error: (error) => ({
+              title: "Couldn't save member",
+              description:
+                error instanceof ApiError
+                  ? error.message
+                  : "Something went wrong while saving. Please try again.",
+            }),
+          },
         );
 
         if (mode === "edit") {
-          toast.success("Member updated", `${saved.name}'s details were saved.`);
           emitMemberUpdated(saved);
         } else {
-          toast.success(
-            "Member added",
-            `${saved.name} (${saved.memberCode}) was added successfully.`,
-          );
           emitMemberCreated(saved);
         }
         onSaved?.(saved);
         onOpenChange(false);
       } catch (error) {
-        const message =
+        setServerError(
           error instanceof ApiError
             ? error.message
-            : "Something went wrong while saving. Please try again.";
-        setServerError(message);
-        toast.error("Couldn't save member", message);
+            : "Something went wrong while saving. Please try again.",
+        );
       } finally {
         setSubmitting(false);
       }
     },
-    [loading, mode, member, onOpenChange, onSaved, toast],
+    [mode, member, onOpenChange, onSaved, toast],
   );
 
   return (

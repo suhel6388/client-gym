@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState, type FormEvent } from "react";
+import React, { useCallback, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { AuthErrorMessage } from "./AuthErrorMessage";
 import { AuthDivider } from "./AuthDivider";
@@ -8,16 +8,18 @@ import { GoogleSignInButton } from "./GoogleSignInButton";
 import { PasswordInput } from "./PasswordInput";
 import { PasswordStrengthIndicator } from "./PasswordStrengthIndicator";
 import { PhoneInput } from "./PhoneInput";
-import { ApiError } from "@/lib/api";
-import { savePendingSignup, signup } from "@/lib/auth-api";
+import { ApiError, savePendingSignup, signup } from "@/lib/api";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 type FieldErrors = Partial<Record<"gymName" | "name" | "email" | "phone" | "password" | "confirm" | "terms", string>>;
-
 type SignupFormProps = {
-  /** Called after the backend accepts the signup and sends the OTP. */
-  onSignupSuccess: (email: string) => void;
+  /**
+   * Called after the backend accepts the signup and sends the OTP.
+   * `alreadyRegistered` is true when the email existed but was not verified —
+   * the account was not duplicated and the user continues on the OTP screen.
+   */
+  onSignupSuccess: (email: string, alreadyRegistered: boolean) => void;
 };
 
 export function SignupForm({ onSignupSuccess }: SignupFormProps) {
@@ -79,40 +81,58 @@ export function SignupForm({ onSignupSuccess }: SignupFormProps) {
       if (Object.keys(nextErrors).length > 0) return;
 
       const trimmedEmail = email.trim().toLowerCase();
+
       setSubmitting(true);
       try {
-        await signup({
+        const result = await signup({
           name: name.trim(),
           email: trimmedEmail,
-          phone,
+          phone: phone.trim(),
           password,
         });
-        // Keep the gym details for the post-verification setup step: the
-        // backend creates the gym (and grants the 14-day trial) via
-        // POST /api/v1/auth/setup-gym once the email is verified.
+
+        // Keep the gym details until the OTP is confirmed. The verify-email
+        // screen reads this stash to create the gym immediately afterwards.
         savePendingSignup({
           email: trimmedEmail,
           gymName: gymName.trim(),
+          gymPhone: phone.trim() || undefined,
           gymAddress: address.trim() || undefined,
         });
-        onSignupSuccess(trimmedEmail);
+
+        // `requiresEmailVerification` means the email existed but was never
+        // verified; the backend re-sent a code and no duplicate was created.
+        onSignupSuccess(trimmedEmail, result.requiresEmailVerification === true);
       } catch (error) {
-        if (error instanceof ApiError) {
-          if (error.status === 409) {
-            setEmailTaken(true);
-          } else if (error.status === 0) {
-            setFormError("Can't reach the server. Check your connection and try again.");
-          } else {
-            setFormError(error.message);
-          }
-        } else {
-          setFormError("Something went wrong. Please try again.");
-        }
         setSubmitting(false);
+        if (error instanceof ApiError) {
+          const emailConflict =
+            error.status === 409 &&
+            (error.code === "EMAIL_ALREADY_REGISTERED" ||
+              /email/i.test(error.message));
+          if (emailConflict) {
+            setEmailTaken(true);
+            return;
+          }
+          setFormError(error.message);
+          return;
+        }
+        setFormError("Something went wrong. Please try again.");
       }
     },
-    [address, email, gymName, name, onSignupSuccess, password, phone, submitting, validate],
+    [
+      address,
+      email,
+      gymName,
+      name,
+      onSignupSuccess,
+      password,
+      phone,
+      submitting,
+      validate,
+    ],
   );
+  
 
   const fieldClass = (invalid?: string) =>
     `h-10 w-full rounded-lg border bg-[#0b0b0b] px-3 text-[13.5px] text-auth-ink outline-none transition-colors placeholder:text-auth-faint focus:ring-2 ${
@@ -122,7 +142,9 @@ export function SignupForm({ onSignupSuccess }: SignupFormProps) {
     }`;
 
   return (
+
     <div className="space-y-5">
+   
       <GoogleSignInButton callbackPath="/auth/callback" />
 
       <AuthDivider>Or sign up with email</AuthDivider>
@@ -138,7 +160,7 @@ export function SignupForm({ onSignupSuccess }: SignupFormProps) {
                 <Link href="/login" className="font-semibold text-auth-gold hover:text-auth-gold-highlight">
                   Sign in instead
                 </Link>
-                .
+  
               </span>
             }
           />

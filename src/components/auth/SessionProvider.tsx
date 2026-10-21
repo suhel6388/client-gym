@@ -10,8 +10,12 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { ApiError } from "@/lib/api";
-import { fetchCurrentUser, loginUrlWithNext, logout, type AuthUser } from "@/lib/auth-api";
+import {
+  fetchCurrentUser,
+  loginUrlWithNext,
+  logout,
+  type AuthUser,
+} from "@/lib/api";
 
 export type SessionStatus = "loading" | "authenticated" | "unauthenticated";
 
@@ -50,17 +54,12 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       setUser(current.user);
       setStatus("authenticated");
       return current.user;
-    } catch (error) {
+    } catch {
       if (!mountedRef.current) return null;
-      // 401 = signed out. Anything else (network, 5xx) also leaves the user
-      // unauthenticated, but the guard shows a retry path for those.
-      if (!(error instanceof ApiError) || error.status === 401 || error.status === 0) {
-        setUser(null);
-        setStatus("unauthenticated");
-      } else {
-        setUser(null);
-        setStatus("unauthenticated");
-      }
+      // 401 means signed out; network/server errors leave the guard on the
+      // login screen too, where the connection problem is reported.
+      setUser(null);
+      setStatus("unauthenticated");
       return null;
     }
   }, []);
@@ -98,7 +97,11 @@ export function SessionProvider({ children }: { children: ReactNode }) {
 /**
  * Client-side route guard for the gym-management area:
  *  - signed out / expired session  -> /login (with a safe return URL)
+ *  - signed in but unverified      -> /verify-email (OTP screen)
  *  - signed in but no gym yet      -> /setup-gym (Google signups, onboarding)
+ *
+ * The backend enforces the same rules: every gym-data endpoint rejects
+ * unverified sessions, so this is UX, not the security boundary.
  */
 export function AuthGuard({ children }: { children: ReactNode }) {
   const { status, user } = useSession();
@@ -110,11 +113,22 @@ export function AuthGuard({ children }: { children: ReactNode }) {
     }
   }, [status]);
 
+  // Unverified accounts may hold a session (e.g. right after signup) but must
+  // confirm the email before the dashboard is usable. The OTP screen signs
+  // them back in automatically after verification.
+  useEffect(() => {
+    if (status === "authenticated" && user && user.emailVerified === false) {
+      window.location.assign(
+        `/verify-email?email=${encodeURIComponent(user.email)}&reason=dashboard`,
+      );
+    }
+  }, [status, user]);
+
   // Signed in, but the account has no gym yet (fresh Google signup, or the
   // pending signup details were lost). Finish onboarding first — the trial is
   // granted by the backend when the gym is created.
   useEffect(() => {
-    if (status === "authenticated" && user && !user.gymId) {
+    if (status === "authenticated" && user && user.emailVerified !== false && !user.gymId) {
       window.location.assign("/setup-gym");
     }
   }, [status, user]);
@@ -125,6 +139,10 @@ export function AuthGuard({ children }: { children: ReactNode }) {
 
   if (status === "unauthenticated") {
     return <AuthLoadingScreen label="Redirecting to sign in…" />;
+  }
+
+  if (user && user.emailVerified === false) {
+    return <AuthLoadingScreen label="Verify your email to continue…" />;
   }
 
   if (user && !user.gymId) {

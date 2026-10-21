@@ -32,7 +32,6 @@ import {
   monthlyEquivalentPaise,
   summarizePlans,
 } from "@/lib/plans-view";
-import { useGlobalLoading } from "./providers/LoadingProvider";
 import { useToast } from "./providers/ToastProvider";
 import { Button } from "./ui/Button";
 import { AssignMembershipDrawer } from "./AssignMembershipDrawer";
@@ -46,7 +45,6 @@ import { PlanStatsCards } from "./PlanStatsCards";
 
 export function PlansPage() {
   const toast = useToast();
-  const loading = useGlobalLoading();
   const router = useRouter();
 
   const [plans, setPlans] = useState<PlanDto[]>([]);
@@ -181,8 +179,21 @@ export function PlansPage() {
     if (!planAction) return;
     setConfirmBusy(true);
     try {
-      await loading.run(deactivatePlan(planAction.id), "Deactivating plan…");
-      toast.success("Plan deactivated", `${planAction.name} is no longer available.`);
+      await toast.promise(deactivatePlan(planAction.id), {
+        loading: {
+          title: "Deactivating plan…",
+          description: `${planAction.name} will no longer be assignable.`,
+        },
+        success: {
+          title: "Plan deactivated",
+          description: `${planAction.name} is no longer available.`,
+        },
+        error: (caught) => ({
+          title: "Couldn't deactivate plan",
+          description:
+            caught instanceof ApiError ? caught.message : "Please try again.",
+        }),
+      });
       setRetired((current) =>
         current.some((plan) => plan.id === planAction.id)
           ? current
@@ -191,31 +202,38 @@ export function PlansPage() {
       setPlanAction(null);
       setDetailsPlan(null);
       await load("refresh");
-    } catch (caught) {
-      toast.error(
-        "Couldn't deactivate plan",
-        caught instanceof ApiError ? caught.message : "Please try again.",
-      );
+    } catch {
+      // Keep the confirmation dialog open so the action can be retried.
     } finally {
       setConfirmBusy(false);
     }
-  }, [planAction, load, loading, toast]);
+  }, [planAction, load, toast]);
 
   const handleReactivatePlan = useCallback(
     async (plan: PlanDto) => {
       try {
-        await loading.run(updatePlan(plan.id, { isActive: true }), "Reactivating plan…");
-        toast.success("Plan reactivated", `${plan.name} is available again.`);
+        await toast.promise(updatePlan(plan.id, { isActive: true }), {
+          loading: {
+            title: "Reactivating plan…",
+            description: `${plan.name} will be available for new assignments.`,
+          },
+          success: {
+            title: "Plan reactivated",
+            description: `${plan.name} is available again.`,
+          },
+          error: (caught) => ({
+            title: "Couldn't reactivate plan",
+            description:
+              caught instanceof ApiError ? caught.message : "Please try again.",
+          }),
+        });
         setRetired((current) => current.filter((entry) => entry.id !== plan.id));
         await load("refresh");
-      } catch (caught) {
-        toast.error(
-          "Couldn't reactivate plan",
-          caught instanceof ApiError ? caught.message : "Please try again.",
-        );
+      } catch {
+        // Toast covers the error; the list stays unchanged.
       }
     },
-    [load, loading, toast],
+    [load, toast],
   );
 
   const openDetails = (plan: PlanDto) => setDetailsPlan(plan);

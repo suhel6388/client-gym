@@ -5,12 +5,18 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { AuthCard } from "@/components/auth/AuthCard";
 import { AuthErrorMessage } from "@/components/auth/AuthErrorMessage";
 import { LoginForm } from "@/components/auth/LoginForm";
-import { ApiError } from "@/lib/api";
-import { fetchCurrentUser, safeNext } from "@/lib/auth-api";
+import { useToast } from "@/components/providers/ToastProvider";
+import {
+  ApiError,
+  fetchCurrentUser,
+  postAuthDestination,
+  safeNext,
+} from "@/lib/api";
 
 function LoginScreen() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const toast = useToast();
   const next = safeNext(searchParams.get("next"));
   const [checkingSession, setCheckingSession] = useState(true);
   const [offline, setOffline] = useState(false);
@@ -22,7 +28,7 @@ function LoginScreen() {
       try {
         const current = await fetchCurrentUser();
         if (!active) return;
-        router.replace(current.user.gymId ? next : "/setup-gym");
+        router.replace(postAuthDestination(current.user, next));
       } catch (error) {
         // 401 is the expected "signed out" case; a network failure is worth
         // surfacing so the user knows why nothing is happening.
@@ -38,16 +44,40 @@ function LoginScreen() {
 
   const handleSuccess = useCallback(
     (target: string) => {
-      router.replace(target);
+      toast.success("Signed in", "Welcome back to DarkGoldGym.");
+      // Confirm the session cookie with /auth/me before leaving the form, then
+      // follow the same redirect rules as OTP verification and Google sign-in.
+      void (async () => {
+        try {
+          const current = await fetchCurrentUser();
+          router.replace(postAuthDestination(current.user, target));
+        } catch (error) {
+          if (error instanceof ApiError && error.status === 401) {
+            toast.error(
+              "Sign-in could not be confirmed",
+              "Your session cookie was not saved. Check the API URL and cookie settings, then try again.",
+              { dedupeKey: "login-session-missing" },
+            );
+            return;
+          }
+          // Network hiccup after a successful login: let the route guard load
+          // the session again instead of trapping the user on the form.
+          router.replace(target);
+        }
+      })();
     },
-    [router],
+    [router, toast],
   );
 
   const handleUnverified = useCallback(
     (email: string) => {
+      toast.warning(
+        "Email not verified",
+        "Enter the 6-digit code we sent to your inbox to continue.",
+      );
       router.replace(`/verify-email?email=${encodeURIComponent(email)}&reason=login`);
     },
-    [router],
+    [router, toast],
   );
 
   return (

@@ -23,7 +23,6 @@ import {
 import { formatTime, todayKey } from "@/lib/attendance-view";
 import { toSubscriptionStatus } from "@/lib/membership-view";
 import { getInitials, type MemberDto, type MembershipWithRelationsDto } from "@/lib/members-api";
-import { useGlobalLoading } from "./providers/LoadingProvider";
 import { useToast } from "./providers/ToastProvider";
 import { Avatar } from "./ui/Avatar";
 import { Badge } from "./ui/Badge";
@@ -64,7 +63,6 @@ export function ManualAttendanceDrawer({
   onOpenChange,
   onSaved,
 }: ManualAttendanceDrawerProps) {
-  const loading = useGlobalLoading();
   const toast = useToast();
 
   const [memberId, setMemberId] = useState("");
@@ -201,46 +199,60 @@ export function ManualAttendanceDrawer({
       setServerError(null);
       setSubmitting(true);
       try {
-        if (action === "in") {
-          await loading.run(
-            recordCheckIn({
-              memberId,
-              date,
-              time,
-              notes: notes.trim() || null,
-              method: "MANUAL",
+        await toast.promise(
+          (async () => {
+            if (action === "in") {
+              await recordCheckIn({
+                memberId,
+                date,
+                time,
+                notes: notes.trim() || null,
+                method: "MANUAL",
+              });
+            } else {
+              if (!openRecord) throw new Error("No open check-in to close.");
+              await recordCheckOut({
+                recordId: openRecord.id,
+                memberId,
+                time,
+                notes: notes.trim() || null,
+              });
+            }
+          })(),
+          {
+            loading: {
+              title: action === "in" ? "Recording check-in…" : "Recording check-out…",
+              description: "Saving the attendance entry.",
+            },
+            success: {
+              title: action === "in" ? "Check-in recorded" : "Check-out recorded",
+              description: selectedMember
+                ? `${selectedMember.name} at ${time}${
+                    ATTENDANCE_DATA_SOURCE === "demo" ? " (demo data)" : ""
+                  }.`
+                : undefined,
+            },
+            error: (caught) => ({
+              title: "Couldn't save attendance",
+              description:
+                caught instanceof ApiError
+                  ? caught.message
+                  : caught instanceof Error
+                    ? caught.message
+                    : "Something went wrong. Please try again.",
             }),
-            "Recording check-in…",
-          );
-        } else {
-          if (!openRecord) throw new Error("No open check-in to close.");
-          await loading.run(
-            recordCheckOut({
-              recordId: openRecord.id,
-              time,
-              notes: notes.trim() || null,
-            }),
-            "Recording check-out…",
-          );
-        }
-
-        toast.success(
-          action === "in" ? "Check-in recorded" : "Check-out recorded",
-          selectedMember
-            ? `${selectedMember.name} at ${time}${ATTENDANCE_DATA_SOURCE === "demo" ? " (demo data)" : ""}.`
-            : undefined,
+          },
         );
         onSaved();
         onOpenChange(false);
       } catch (caught) {
-        const message =
+        setServerError(
           caught instanceof ApiError
             ? caught.message
             : caught instanceof Error
               ? caught.message
-              : "Something went wrong. Please try again.";
-        setServerError(message);
-        toast.error("Couldn't save attendance", message);
+              : "Something went wrong. Please try again.",
+        );
       } finally {
         setSubmitting(false);
       }
@@ -248,7 +260,6 @@ export function ManualAttendanceDrawer({
     [
       action,
       date,
-      loading,
       memberId,
       notes,
       onOpenChange,

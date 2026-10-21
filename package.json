@@ -10,14 +10,16 @@
   },
   "dependencies": {
     "@radix-ui/react-dialog": "^1.1.4",
-    "axios": "^1.12.2",
-    "kbar": "^0.1.0-beta.48",
+    "axios": "^1.20.0",
     "cmdk": "^1.1.1",
+    "kbar": "^0.1.0-beta.48",
     "lucide-react": "^1.55.0",
     "next": "15.5.27",
+    "next-form-handler": "^1.0.1",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "recharts": "^3.10.1"
+    "recharts": "^3.10.1",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

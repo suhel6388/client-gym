@@ -7,14 +7,16 @@ import { AuthCard } from "@/components/auth/AuthCard";
 import { AuthErrorMessage } from "@/components/auth/AuthErrorMessage";
 import { OtpVerificationForm } from "@/components/auth/OtpVerificationForm";
 import { useToast } from "@/components/providers/ToastProvider";
-import { ApiError } from "@/lib/api";
 import {
+  ApiError,
+  DASHBOARD_PATH,
   clearPendingSignup,
   fetchCurrentUser,
   maskEmail,
+  postAuthDestination,
   readPendingSignup,
   setupGym,
-} from "@/lib/auth-api";
+} from "@/lib/api";
 
 function VerifyEmailScreen() {
   const router = useRouter();
@@ -52,7 +54,7 @@ function VerifyEmailScreen() {
         const current = await fetchCurrentUser();
         if (!active || !current.user.gymId) return;
         redirectingRef.current = true;
-        router.replace("/");
+        router.replace(postAuthDestination(current.user));
       } catch {
         // Not signed in — expected on this screen.
       }
@@ -71,6 +73,8 @@ function VerifyEmailScreen() {
     if (redirectingRef.current) return;
     redirectingRef.current = true;
 
+    toast.success("Email verified", "Finishing your account setup…");
+
     const pending = readPendingSignup(email);
     if (pending) {
       try {
@@ -81,20 +85,37 @@ function VerifyEmailScreen() {
           address: pending.gymAddress,
         });
         clearPendingSignup();
-        router.replace("/");
+        router.replace(DASHBOARD_PATH);
         return;
       } catch (err) {
         clearPendingSignup();
-        // 409 = the gym already exists for this account; nothing left to do.
+        // 409 = the gym already exists for this account; follow the session.
         if (err instanceof ApiError && err.status === 409) {
-          router.replace("/");
+          try {
+            const current = await fetchCurrentUser();
+            router.replace(postAuthDestination(current.user));
+          } catch {
+            router.replace(DASHBOARD_PATH);
+          }
           return;
         }
-        toast({
-          title: "Could not finish setting up your gym",
-          description: "Your account is verified — you can create your gym on the next screen.",
-          variant: "error",
-        });
+        // The session cookie did not survive verification (wrong API origin,
+        // cross-site cookie blocked, ...). Send the user back to sign in.
+        if (err instanceof ApiError && err.status === 401) {
+          redirectingRef.current = false;
+          toast.error(
+            "Session expired",
+            "Your email is verified, but the session could not be confirmed. Please sign in.",
+            { dedupeKey: "verify-session-missing" },
+          );
+          router.replace("/login");
+          return;
+        }
+        toast.error(
+          "Could not finish setting up your gym",
+          "Your account is verified — you can create your gym on the next screen.",
+          { dedupeKey: "setup-gym-failed" },
+        );
         router.replace("/setup-gym");
         return;
       }
@@ -104,7 +125,7 @@ function VerifyEmailScreen() {
     // follow whatever the account still needs.
     try {
       const current = await fetchCurrentUser();
-      router.replace(current.user.gymId ? "/" : "/setup-gym");
+      router.replace(postAuthDestination(current.user));
     } catch {
       redirectingRef.current = false;
       router.replace("/login");
@@ -136,15 +157,17 @@ function VerifyEmailScreen() {
     );
   }
 
+  const subtitle =
+    reason === "login"
+      ? "Your email isn't verified yet. Enter the code we just sent to continue."
+      : reason === "signup-existing"
+        ? "This email is already registered but not verified. Enter the new code we sent to continue."
+        : reason === "dashboard"
+          ? "Verify your email before using your dashboard. Enter the code we sent to continue."
+          : "We've sent a verification code to your email address.";
+
   return (
-    <AuthCard
-      heading="Verify Your Email"
-      subtitle={
-        reason === "login"
-          ? "Your email isn't verified yet. Enter the code we just sent to continue."
-          : "We've sent a verification code to your email address."
-      }
-    >
+    <AuthCard heading="Verify Your Email" subtitle={subtitle}>
       <p className="-mt-3 mb-6 text-center text-[13px] text-auth-muted">
         Code sent to{" "}
         <span className="font-semibold text-auth-ink">{email ? maskEmail(email) : "your email"}</span>

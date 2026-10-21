@@ -15,7 +15,7 @@ import { cn } from "@/lib/cn";
 import { formatCurrencyInr, formatLongDate, formatNumber } from "@/lib/format";
 import { todayKey } from "@/lib/date-window";
 import { paiseToAmount } from "@/lib/members-api";
-import { deleteExpense, listExpenses, type ExpenseDto } from "@/lib/expenses-api";
+import { deleteExpense, listExpenses, type ExpenseDto } from "@/lib/api";
 import {
   EXPENSE_CATEGORIES,
   EXPENSE_PERIODS,
@@ -275,15 +275,26 @@ export function ExpensesPage() {
     if (!deleteTarget) return;
     setDeleting(true);
     try {
-      await deleteExpense(deleteTarget.id);
-      toast.success("Expense deleted", `"${deleteTarget.title}" was removed.`);
+      await toast.promise(deleteExpense(deleteTarget.id), {
+        loading: {
+          title: "Deleting expense…",
+          description: `Removing "${deleteTarget.title}" from your books.`,
+        },
+        success: {
+          title: "Expense deleted",
+          description: `"${deleteTarget.title}" was removed.`,
+        },
+        error: (caught) => ({
+          title: "Couldn't delete expense",
+          description:
+            caught instanceof ApiError ? caught.message : "Please try again.",
+        }),
+      });
       setDeleteTarget(null);
       setDetails(null);
       await load("refresh");
-    } catch (caught) {
-      const message =
-        caught instanceof ApiError ? caught.message : "Please try again.";
-      toast.error("Couldn't delete expense", message);
+    } catch {
+      // The toast explains the failure; close the dialog so it can be retried.
       setDeleteTarget(null);
     } finally {
       setDeleting(false);
