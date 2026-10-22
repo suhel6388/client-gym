@@ -5,19 +5,12 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { ApiError } from "@/lib/api";
 import { emitMemberCreated } from "@/lib/events";
+import { createMemberFromForm } from "@/lib/member-create";
 import {
   emptyMemberForm,
-  toMemberInput,
   type MemberFormValues,
 } from "@/lib/member-form";
-import {
-  amountToPaise,
-  createMember,
-  createMembership,
-  createPayment,
-  listPlans,
-  type PlanDto,
-} from "@/lib/members-api";
+import { listPlans, type PlanDto } from "@/lib/members-api";
 import { MemberForm } from "./MemberForm";
 import { useToast } from "./providers/ToastProvider";
 import { Button } from "./ui/Button";
@@ -30,6 +23,7 @@ export function AddMemberPageClient() {
 
   const [plans, setPlans] = useState<PlanDto[]>([]);
   const [plansLoading, setPlansLoading] = useState(true);
+  const [plansError, setPlansError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
 
@@ -37,7 +31,12 @@ export function AddMemberPageClient() {
     let active = true;
     listPlans()
       .then((data) => active && setPlans(data))
-      .catch(() => undefined)
+      .catch((error: unknown) => {
+        if (!active) return;
+        setPlansError(
+          error instanceof ApiError ? error.message : "Couldn't load plans.",
+        );
+      })
       .finally(() => active && setPlansLoading(false));
     return () => {
       active = false;
@@ -49,40 +48,20 @@ export function AddMemberPageClient() {
       setServerError(null);
       setSubmitting(true);
       try {
-        const saved = await toast.promise(
-          (async () => {
-            const member = await createMember(toMemberInput(values));
-            if (values.planId) {
-              await createMembership({
-                memberId: member.id,
-                planId: values.planId,
-                startDate: values.startDate || undefined,
-                discountPaise: Math.max(
-                  0,
-                  Math.round((Number(values.discount) || 0) * 100),
-                ),
-              });
-            }
-            if (values.collectPayment) {
-              await createPayment({
-                memberId: member.id,
-                amount: amountToPaise(Number(values.amount) || 0),
-                paymentMode: values.paymentMode,
-                reference: values.reference.trim() || null,
-                paymentDate: values.paymentDate,
-                status: "SUCCESS",
-              });
-            }
-            return member;
-          })(),
+        const result = await toast.promise(
+          createMemberFromForm(values),
           {
             loading: {
               title: "Adding member…",
               description: values.planId
-                ? "Creating the member, membership and payment."
-                : "Creating the member profile.",
+                ? values.collectPayment
+                  ? "Creating the member, membership and payment. Please wait…"
+                  : "Creating the member and membership. Please wait…"
+                : values.collectPayment
+                  ? "Creating the member profile and payment. Please wait…"
+                  : "Creating the member profile. Please wait…",
             },
-            success: (member) => ({
+            success: ({ member }) => ({
               title: "Member added",
               description: `${member.name} (${member.memberCode}) was added successfully.`,
             }),
@@ -96,7 +75,15 @@ export function AddMemberPageClient() {
           },
         );
 
-        emitMemberCreated(saved);
+        if (result.warnings.length) {
+          toast.warning(
+            "Member added with warnings",
+            result.warnings.join(" "),
+            { persistent: true },
+          );
+        }
+
+        emitMemberCreated(result.member);
         router.push("/members");
       } catch (caught) {
         setServerError(
@@ -118,6 +105,7 @@ export function AddMemberPageClient() {
           variant="ghost"
           size="icon"
           aria-label="Back to members"
+          disabled={submitting}
           onClick={() => router.push("/members")}
         >
           <ArrowLeft className="size-4" strokeWidth={1.75} aria-hidden />
@@ -133,6 +121,12 @@ export function AddMemberPageClient() {
       </div>
 
       <div className="mt-6 rounded-card border border-line bg-card p-6 shadow-card animate-fade-up">
+        {plansError && (
+          <div className="mb-5 rounded-lg border border-warning/40 bg-warning/10 px-3.5 py-2.5 text-xs font-medium text-warning">
+            {plansError} You can still save the member without a plan.
+          </div>
+        )}
+
         <MemberForm
           formId={FORM_ID}
           mode="create"

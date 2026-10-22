@@ -7,18 +7,21 @@ import { MembershipDonutChart } from "@/components/charts/MembershipDonutChart";
 import { MembershipGrowthChart } from "@/components/charts/MembershipGrowthChart";
 import { RevenueChart } from "@/components/charts/RevenueChart";
 import { UpcomingExpirations } from "@/components/UpcomingExpirations";
-import { revenueSeries } from "@/lib/data";
+import type { DashboardView } from "@/lib/dashboard-view";
+import { cn } from "@/lib/cn";
 import { formatCurrency, formatPercent } from "@/lib/format";
 
-const avgRevenue =
-  revenueSeries.reduce((sum, point) => sum + point.revenue, 0) / revenueSeries.length;
-
-const bestMonth = revenueSeries.reduce((best, point) =>
-  point.revenue > best.revenue ? point : best,
-);
-
 /** Revenue analytics + distribution, membership growth + expirations. */
-export function DashboardAnalytics() {
+export function DashboardAnalytics({
+  view,
+  loading,
+}: {
+  view: DashboardView | null;
+  loading: boolean;
+}) {
+  const stats = view?.revenueStats;
+  const yoyGrowth = stats?.yoyGrowth ?? null;
+
   return (
     <>
       {/* Revenue analytics + membership distribution */}
@@ -41,9 +44,13 @@ export function DashboardAnalytics() {
             { label: "Change comparison", icon: RefreshCcw },
           ]}
         >
-          <div className="mt-5">
-            <RevenueChart />
-          </div>
+          {loading ? (
+            <div className="mt-5 h-[280px] animate-pulse rounded-xl bg-card-hover/50" />
+          ) : (
+            <div className="mt-5">
+              <RevenueChart data={view?.revenueSeries ?? []} />
+            </div>
+          )}
 
           <dl className="mt-4 grid grid-cols-3 gap-4 border-t border-line/60 pt-4">
             <div>
@@ -51,7 +58,7 @@ export function DashboardAnalytics() {
                 Avg monthly
               </dt>
               <dd className="mt-1 text-sm font-semibold tabular-nums text-ink">
-                {formatCurrency(Math.round(avgRevenue))}
+                {loading ? "—" : formatCurrency(Math.round(stats?.avgRevenue ?? 0))}
               </dd>
             </div>
             <div>
@@ -59,16 +66,35 @@ export function DashboardAnalytics() {
                 Best month
               </dt>
               <dd className="mt-1 text-sm font-semibold tabular-nums text-ink">
-                {formatCurrency(bestMonth.revenue)}
-                <span className="ml-1.5 font-normal text-faint">{bestMonth.month}</span>
+                {loading ? (
+                  "—"
+                ) : (
+                  <>
+                    {formatCurrency(stats?.bestMonth.revenue ?? 0)}
+                    <span className="ml-1.5 font-normal text-faint">
+                      {stats?.bestMonth.month ?? "—"}
+                    </span>
+                  </>
+                )}
               </dd>
             </div>
             <div>
               <dt className="text-[11px] font-medium uppercase tracking-[0.08em] text-faint">
                 YoY growth
               </dt>
-              <dd className="mt-1 text-sm font-semibold tabular-nums text-success">
-                +{formatPercent(15.7)}
+              <dd
+                className={cn(
+                  "mt-1 text-sm font-semibold tabular-nums",
+                  yoyGrowth === null
+                    ? "text-faint"
+                    : yoyGrowth >= 0
+                      ? "text-success"
+                      : "text-danger",
+                )}
+              >
+                {loading || yoyGrowth === null
+                  ? "—"
+                  : `${yoyGrowth >= 0 ? "+" : "−"}${formatPercent(yoyGrowth)}`}
               </dd>
             </div>
           </dl>
@@ -83,9 +109,13 @@ export function DashboardAnalytics() {
             { label: "Export summary", icon: Download },
           ]}
         >
-          <div className="mt-2">
-            <MembershipDonutChart />
-          </div>
+          {loading ? (
+            <div className="mt-2 h-[340px] animate-pulse rounded-xl bg-card-hover/50" />
+          ) : (
+            <div className="mt-2">
+              <MembershipDonutChart data={view?.membershipMix ?? []} />
+            </div>
+          )}
         </DashboardCard>
       </div>
 
@@ -109,12 +139,19 @@ export function DashboardAnalytics() {
             { label: "Download data", icon: Download },
           ]}
         >
-          <div className="mt-5">
-            <MembershipGrowthChart />
-          </div>
+          {loading ? (
+            <div className="mt-5 h-[260px] animate-pulse rounded-xl bg-card-hover/50" />
+          ) : (
+            <div className="mt-5">
+              <MembershipGrowthChart data={view?.growthSeries ?? []} />
+            </div>
+          )}
         </DashboardCard>
 
-        <UpcomingExpirations />
+        <UpcomingExpirations
+          entries={view?.expirations ?? []}
+          loading={loading}
+        />
       </div>
     </>
   );

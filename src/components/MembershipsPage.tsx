@@ -4,8 +4,8 @@ import {
   BadgeCheck,
   CalendarClock,
   CalendarPlus,
-  CircleDollarSign,
   Download,
+  IndianRupee,
   LayoutGrid,
   Layers,
   List,
@@ -482,7 +482,7 @@ export function MembershipsPage() {
           label="Monthly Revenue"
           value={formatCurrency(paiseToAmount(stats.mrrPaise))}
           helper={`${formatCurrency(paiseToAmount(stats.outstandingPaise))} outstanding`}
-          icon={CircleDollarSign}
+          icon={IndianRupee}
           delay={180}
         />
       </div>

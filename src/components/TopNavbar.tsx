@@ -6,8 +6,8 @@ import {
   ChevronDown,
   ChevronRight,
   CircleAlert,
-  CircleDollarSign,
   CreditCard,
+  IndianRupee,
   LogOut,
   Menu,
   PanelLeftClose,
@@ -248,7 +248,7 @@ export function TopNavbar({
               </div>
               {[
                 { icon: User, label: "My profile" },
-                { icon: CircleDollarSign, label: "Billing & plans" },
+                { icon: IndianRupee, label: "Billing & plans" },
                 { icon: CreditCard, label: "Payment methods" },
                 { icon: Settings, label: "Settings", danger: false },
               ].map(({ icon: Icon, label }) => (

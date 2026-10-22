@@ -21,11 +21,15 @@ import axios, {
 } from "axios";
 
 /** Base URL configured for the browser (inlined at build time). */
-const configuredBase = (
-  process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000"
-)
-  .trim()
-  .replace(/\/+$/, "");
+const configuredBase =
+  process.env.NODE_ENV === "development"
+    ? // In development the app calls its own origin; next.config.ts proxies
+      // /api/v1 to NEXT_PUBLIC_API_URL. This keeps the session cookie
+      // first-party instead of sending it cross-site to the deployed API.
+      ""
+    : (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000")
+        .trim()
+        .replace(/\/+$/, "");
 
 /** Always ends with `/api/v1`, exactly like the backend routes. */
 export const API_BASE = /\/api\/v1$/i.test(configuredBase)

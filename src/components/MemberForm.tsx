@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { CalendarClock, CreditCard, User } from "lucide-react";
+import { CalendarClock, CreditCard, Loader2, User } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { formatCurrency, formatLongDate } from "@/lib/format";
 import {
@@ -68,6 +68,7 @@ export function MemberForm({
   initialValues,
   plans,
   plansLoading = false,
+  submitting = false,
   serverError,
   onSubmit,
 }: MemberFormProps) {
@@ -105,22 +106,50 @@ export function MemberForm({
 
   const handleSubmit = (event: React.FormEvent) => {
     event.preventDefault();
-    const nextErrors = validateMemberForm(values, {
-      requirePlan: mode === "create",
-    });
+    // A second submit can arrive via Enter while the request is in flight.
+    if (submitting) return;
+    const nextErrors = validateMemberForm(values);
     setErrors(nextErrors);
     if (hasErrors(nextErrors)) return;
     onSubmit(values);
   };
 
   return (
-    <form id={formId} onSubmit={handleSubmit} className="space-y-7" noValidate>
+    <form
+      id={formId}
+      onSubmit={handleSubmit}
+      className="space-y-7"
+      aria-busy={submitting}
+      noValidate
+    >
       {serverError && (
         <div className="rounded-lg border border-danger/40 bg-danger/10 px-3.5 py-2.5 text-xs font-medium text-danger">
           {serverError}
         </div>
       )}
 
+      {submitting && (
+        <div
+          role="status"
+          aria-live="polite"
+          className="flex items-center gap-2.5 rounded-lg border border-gold/30 bg-gold/10 px-3.5 py-2.5 text-xs font-medium text-gold"
+        >
+          <Loader2
+            className="size-4 shrink-0 animate-spin"
+            strokeWidth={2}
+            aria-hidden
+          />
+          <span>
+            {mode === "edit" ? "Saving changes…" : "Adding member…"} Please
+            wait while we save the details.
+          </span>
+        </div>
+      )}
+
+      <fieldset
+        disabled={submitting}
+        className="m-0 min-w-0 space-y-7 border-0 p-0"
+      >
       {/* Personal information */}
       <section className="space-y-4">
         <SectionTitle icon={User} title="Personal information" />
@@ -442,6 +471,7 @@ export function MemberForm({
           onChange={(event) => update("notes", event.target.value)}
         />
       </section>
+      </fieldset>
     </form>
   );
 }

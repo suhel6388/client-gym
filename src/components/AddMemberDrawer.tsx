@@ -14,11 +14,8 @@ import {
   toMemberInput,
   type MemberFormValues,
 } from "@/lib/member-form";
+import { createMemberFromForm } from "@/lib/member-create";
 import {
-  amountToPaise,
-  createMember,
-  createMembership,
-  createPayment,
   listPlans,
   updateMember,
   type MemberDto,
@@ -116,61 +113,40 @@ export function AddMemberDrawer({
       setServerError(null);
       setSubmitting(true);
       try {
-        const saved = await toast.promise(
+        const result = await toast.promise(
           (async () => {
-            const payload = buildPayload(values);
-            const result =
-              mode === "edit" && member
-                ? await updateMember(member.id, payload)
-                : await createMember(payload);
-
-            if (mode === "create" && values.planId) {
-              await createMembership({
-                memberId: result.id,
-                planId: values.planId,
-                startDate: values.startDate || undefined,
-                discountPaise: Math.max(
-                  0,
-                  Math.round((Number(values.discount) || 0) * 100),
-                ),
-              });
+            if (mode === "edit" && member) {
+              const updated = await updateMember(member.id, buildPayload(values));
+              return { member: updated, warnings: [] as string[] };
             }
-
-            if (mode === "create" && values.collectPayment) {
-              await createPayment({
-                memberId: result.id,
-                amount: amountToPaise(Number(values.amount) || 0),
-                paymentMode: values.paymentMode,
-                reference: values.reference.trim() || null,
-                paymentDate: values.paymentDate,
-                status: "SUCCESS",
-              });
-            }
-
-            return result;
+            return createMemberFromForm(values);
           })(),
           {
             loading:
               mode === "edit"
                 ? {
                     title: "Saving member…",
-                    description: "Updating the member profile and membership.",
+                    description: "Updating the member profile. Please wait…",
                   }
                 : {
                     title: "Adding member…",
                     description: values.planId
-                      ? "Creating the member, membership and payment."
-                      : "Creating the member profile.",
+                      ? values.collectPayment
+                        ? "Creating the member, membership and payment. Please wait…"
+                        : "Creating the member and membership. Please wait…"
+                      : values.collectPayment
+                        ? "Creating the member profile and payment. Please wait…"
+                        : "Creating the member profile. Please wait…",
                   },
-            success: (result) =>
+            success: ({ member: saved }) =>
               mode === "edit"
                 ? {
                     title: "Member updated",
-                    description: `${result.name}'s details were saved.`,
+                    description: `${saved.name}'s details were saved.`,
                   }
                 : {
                     title: "Member added",
-                    description: `${result.name} (${result.memberCode}) was added successfully.`,
+                    description: `${saved.name} (${saved.memberCode}) was added successfully.`,
                   },
             error: (error) => ({
               title: "Couldn't save member",
@@ -182,12 +158,20 @@ export function AddMemberDrawer({
           },
         );
 
-        if (mode === "edit") {
-          emitMemberUpdated(saved);
-        } else {
-          emitMemberCreated(saved);
+        if (result.warnings.length) {
+          toast.warning(
+            "Member added with warnings",
+            result.warnings.join(" "),
+            { persistent: true },
+          );
         }
-        onSaved?.(saved);
+
+        if (mode === "edit") {
+          emitMemberUpdated(result.member);
+        } else {
+          emitMemberCreated(result.member);
+        }
+        onSaved?.(result.member);
         onOpenChange(false);
       } catch (error) {
         setServerError(

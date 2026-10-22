@@ -1,22 +1,19 @@
 "use client";
 
 import { Download, FileDown, RefreshCcw } from "lucide-react";
-import type { PaymentStatus } from "@/lib/data";
-import { recentPayments } from "@/lib/data";
-import { formatCurrency } from "@/lib/format";
-import { formatLongDate } from "@/lib/format";
+import type { RecentPayment } from "@/lib/dashboard-view";
+import { formatCurrency, formatLongDate } from "@/lib/format";
 import { Avatar } from "./ui/Avatar";
 import { Badge } from "./ui/Badge";
 import { DashboardCard } from "./DashboardCard";
 
-const statusTone: Record<PaymentStatus, "success" | "warning" | "danger" | "muted"> = {
-  Paid: "success",
-  Pending: "warning",
-  Failed: "danger",
-  Refunded: "muted",
-};
-
-export function RecentPaymentsTable() {
+export function RecentPaymentsTable({
+  rows,
+  loading = false,
+}: {
+  rows: RecentPayment[];
+  loading?: boolean;
+}) {
   return (
     <DashboardCard
       title="Recent Payments"
@@ -66,43 +63,63 @@ export function RecentPaymentsTable() {
             </tr>
           </thead>
           <tbody>
-            {recentPayments.map((payment, index) => (
-              <tr
-                key={payment.id}
-                className="group border-b border-line/60 transition-colors last:border-0 hover:bg-card-hover/50"
-              >
-                <td className="py-3 pr-4">
-                  <span className="text-[13px] font-medium tabular-nums text-subtle group-hover:text-ink">
-                    {payment.id}
-                  </span>
-                </td>
-                <td className="py-3 pr-4">
-                  <div className="flex items-center gap-3">
-                    <Avatar initials={payment.initials} index={index} className="size-8 text-[10px]" />
-                    <span className="whitespace-nowrap text-[13px] font-medium text-ink">
-                      {payment.member}
-                    </span>
-                  </div>
-                </td>
-                <td className="whitespace-nowrap py-3 pr-4 text-[13px] text-subtle">
-                  {payment.plan}
-                </td>
-                <td className="hidden whitespace-nowrap py-3 pr-4 text-[13px] text-subtle md:table-cell">
-                  {payment.method}
-                </td>
-                <td className="py-3 pr-4 text-right text-[13px] font-semibold tabular-nums text-ink">
-                  {formatCurrency(payment.amount)}
-                </td>
-                <td className="hidden whitespace-nowrap py-3 pr-4 text-[13px] tabular-nums text-faint lg:table-cell">
-                  {formatLongDate(payment.date)}
-                </td>
-                <td className="py-3 text-right">
-                  <Badge tone={statusTone[payment.status]} dot>
-                    {payment.status}
-                  </Badge>
+            {loading ? (
+              Array.from({ length: 5 }).map((_, index) => (
+                <tr key={`skeleton-${index}`} className="border-b border-line/60 last:border-0">
+                  <td colSpan={7} className="py-3">
+                    <div className="h-9 animate-pulse rounded-lg bg-card-hover/50" />
+                  </td>
+                </tr>
+              ))
+            ) : rows.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="py-10 text-center text-sm text-faint">
+                  No payments recorded yet.
                 </td>
               </tr>
-            ))}
+            ) : (
+              rows.map((payment, index) => (
+                <tr
+                  key={payment.id}
+                  className="group border-b border-line/60 transition-colors last:border-0 hover:bg-card-hover/50"
+                >
+                  <td className="py-3 pr-4">
+                    <span className="text-[13px] font-medium tabular-nums text-subtle group-hover:text-ink">
+                      {payment.id}
+                    </span>
+                  </td>
+                  <td className="py-3 pr-4">
+                    <div className="flex items-center gap-3">
+                      <Avatar
+                        initials={payment.initials}
+                        index={index}
+                        className="size-8 text-[10px]"
+                      />
+                      <span className="whitespace-nowrap text-[13px] font-medium text-ink">
+                        {payment.member}
+                      </span>
+                    </div>
+                  </td>
+                  <td className="whitespace-nowrap py-3 pr-4 text-[13px] text-subtle">
+                    {payment.plan}
+                  </td>
+                  <td className="hidden whitespace-nowrap py-3 pr-4 text-[13px] text-subtle md:table-cell">
+                    {payment.method}
+                  </td>
+                  <td className="py-3 pr-4 text-right text-[13px] font-semibold tabular-nums text-ink">
+                    {formatCurrency(payment.amount)}
+                  </td>
+                  <td className="hidden whitespace-nowrap py-3 pr-4 text-[13px] tabular-nums text-faint lg:table-cell">
+                    {formatLongDate(payment.date)}
+                  </td>
+                  <td className="py-3 text-right">
+                    <Badge tone={payment.tone} dot>
+                      {payment.status}
+                    </Badge>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

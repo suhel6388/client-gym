@@ -9,16 +9,16 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { growthSeries } from "@/lib/data";
+import type { GrowthPoint } from "@/lib/dashboard-view";
 import { formatNumber } from "@/lib/format";
 import { ChartTooltip } from "./ChartTooltip";
 
-export function MembershipGrowthChart() {
+export function MembershipGrowthChart({ data }: { data: GrowthPoint[] }) {
   return (
     <div className="h-[260px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
-          data={growthSeries}
+          data={data}
           margin={{ top: 8, right: 6, bottom: 0, left: 4 }}
           barGap={4}
           barCategoryGap="30%"

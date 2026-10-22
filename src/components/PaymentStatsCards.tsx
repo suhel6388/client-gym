@@ -1,6 +1,6 @@
 "use client";
 
-import { CalendarCheck, CircleDollarSign, ReceiptText, TrendingUp } from "lucide-react";
+import { CalendarCheck, IndianRupee, ReceiptText, TrendingUp } from "lucide-react";
 import { cn } from "@/lib/cn";
 import { formatCurrency, formatNumber } from "@/lib/format";
 import { paiseToAmount } from "@/lib/members-api";
@@ -12,7 +12,7 @@ type StatDef = {
   label: string;
   value: string;
   helper: string;
-  icon: typeof CircleDollarSign;
+  icon: typeof IndianRupee;
   tone: StatTone;
 };
 
@@ -42,7 +42,7 @@ export function PaymentStatsCards({
       helper: `${formatNumber(summary.count)} transaction${
         summary.count === 1 ? "" : "s"
       } · ${periodLabel}`,
-      icon: CircleDollarSign,
+      icon: IndianRupee,
       tone: "gold",
     },
     {

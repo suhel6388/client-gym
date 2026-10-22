@@ -10,16 +10,16 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { revenueSeries } from "@/lib/data";
+import type { RevenuePoint } from "@/lib/dashboard-view";
 import { formatCompactCurrency, formatCurrency } from "@/lib/format";
 import { ChartTooltip } from "./ChartTooltip";
 
-export function RevenueChart() {
+export function RevenueChart({ data }: { data: RevenuePoint[] }) {
   return (
     <div className="h-[280px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart
-          data={revenueSeries}
+          data={data}
           margin={{ top: 8, right: 6, bottom: 0, left: 4 }}
         >
           <defs>

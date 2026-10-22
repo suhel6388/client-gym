@@ -1,9 +1,8 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AuthCard } from "@/components/auth/AuthCard";
-import { AuthErrorMessage } from "@/components/auth/AuthErrorMessage";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { useToast } from "@/components/providers/ToastProvider";
 import {
@@ -18,29 +17,10 @@ function LoginScreen() {
   const searchParams = useSearchParams();
   const toast = useToast();
   const next = safeNext(searchParams.get("next"));
-  const [checkingSession, setCheckingSession] = useState(true);
-  const [offline, setOffline] = useState(false);
 
-  // Already signed in? Leave the login screen before showing the form.
-  useEffect(() => {
-    let active = true;
-    (async () => {
-      try {
-        const current = await fetchCurrentUser();
-        if (!active) return;
-        router.replace(postAuthDestination(current.user, next));
-      } catch (error) {
-        // 401 is the expected "signed out" case; a network failure is worth
-        // surfacing so the user knows why nothing is happening.
-        if (active && error instanceof ApiError && error.status === 0) setOffline(true);
-      } finally {
-        if (active) setCheckingSession(false);
-      }
-    })();
-    return () => {
-      active = false;
-    };
-  }, [next, router]);
+  // No session probe on mount: signed-out visitors would trigger an expected
+  // 401 on every visit to /login. The session is confirmed after credentials
+  // are submitted, and the dashboard guard checks it on protected routes.
 
   const handleSuccess = useCallback(
     (target: string) => {
@@ -82,15 +62,7 @@ function LoginScreen() {
 
   return (
     <AuthCard heading="Welcome Back" subtitle="Sign in to manage your gym.">
-      {offline && (
-        <div className="mb-4">
-          <AuthErrorMessage message="Can't reach the server. Check your connection and try again." />
-        </div>
-      )}
       <LoginForm next={next} onSuccess={handleSuccess} onUnverified={handleUnverified} />
-      <p className="sr-only" role="status">
-        {checkingSession ? "Checking your session" : ""}
-      </p>
     </AuthCard>
   );
 }

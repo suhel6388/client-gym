@@ -1,12 +1,17 @@
-const currencyFormatter = new Intl.NumberFormat("en-US", {
+/**
+ * App-wide money formatter. Billing is in Indian rupees, so amounts use the
+ * rupee symbol and Indian digit grouping (e.g. ₹1,84,920).
+ */
+const currencyFormatter = new Intl.NumberFormat("en-IN", {
   style: "currency",
-  currency: "USD",
-  maximumFractionDigits: 0,
+  currency: "INR",
+  minimumFractionDigits: 0,
+  maximumFractionDigits: 2,
 });
 
-const compactCurrencyFormatter = new Intl.NumberFormat("en-US", {
+const compactCurrencyFormatter = new Intl.NumberFormat("en-IN", {
   style: "currency",
-  currency: "USD",
+  currency: "INR",
   notation: "compact",
   maximumFractionDigits: 1,
 });
@@ -31,8 +36,8 @@ export function formatCompactCurrency(value: number): string {
 }
 
 /**
- * Indian rupee formatters. The expenses module displays money in rupees while
- * the API stores it in paise, so callers convert with `paiseToAmount` first.
+ * Expense accounting formatter that always shows paise. The API stores money in
+ * paise, so callers convert with `paiseToAmount` first.
  */
 const inrCurrencyFormatter = new Intl.NumberFormat("en-IN", {
   style: "currency",

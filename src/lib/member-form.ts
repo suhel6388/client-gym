@@ -27,7 +27,7 @@ export type MemberFormValues = {
   timing: TimingDto;
   planId: string;
   startDate: string;
-  /** Discount in major units (e.g. dollars), as typed by the user. */
+  /** Discount in major units (e.g. rupees), as typed by the user. */
   discount: string;
   collectPayment: boolean;
   /** Payment amount in major units, prefilled from the computed fee. */
@@ -157,10 +157,7 @@ export function toMemberInput(values: MemberFormValues): MemberInput {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export function validateMemberForm(
-  values: MemberFormValues,
-  { requirePlan = true }: { requirePlan?: boolean } = {},
-): MemberFormErrors {
+export function validateMemberForm(values: MemberFormValues): MemberFormErrors {
   const errors: MemberFormErrors = {};
 
   if (!values.firstName.trim()) errors.firstName = "First name is required.";
@@ -178,8 +175,6 @@ export function validateMemberForm(
     if (Number.isNaN(dob.getTime())) errors.dateOfBirth = "Enter a valid date.";
     else if (dob.getTime() > Date.now()) errors.dateOfBirth = "Date of birth can't be in the future.";
   }
-
-  if (requirePlan && !values.planId) errors.planId = "Select a membership plan.";
 
   if (values.planId && !values.startDate) {
     errors.startDate = "Start date is required.";

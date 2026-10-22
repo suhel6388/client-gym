@@ -2,7 +2,7 @@
 
 import {
   BadgeCheck,
-  CircleDollarSign,
+  IndianRupee,
   Layers,
   TrendingUp,
   type LucideIcon,
@@ -53,7 +53,7 @@ export function PlanStatsCards({ performance, loading = false }: PlanStatsCardsP
       label: "Monthly Revenue",
       value: formatCurrency(paiseToAmount(performance.mrrPaise)),
       helper: "Normalized from active terms",
-      icon: CircleDollarSign,
+      icon: IndianRupee,
       tone: "neutral",
     },
     {

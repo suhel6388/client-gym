@@ -1,7 +1,7 @@
 "use client";
 
 import { CalendarClock, Repeat, RefreshCcw } from "lucide-react";
-import { upcomingExpirations } from "@/lib/data";
+import type { Expiration } from "@/lib/dashboard-view";
 import { cn } from "@/lib/cn";
 import { formatShortDate } from "@/lib/format";
 import { Avatar } from "./ui/Avatar";
@@ -20,7 +20,13 @@ function barColorFor(daysLeft: number): string {
   return "bg-gold";
 }
 
-export function UpcomingExpirations() {
+export function UpcomingExpirations({
+  entries,
+  loading = false,
+}: {
+  entries: Expiration[];
+  loading?: boolean;
+}) {
   return (
     <DashboardCard
       title="Upcoming Expirations"
@@ -33,49 +39,64 @@ export function UpcomingExpirations() {
       ]}
       bodyClassName="pt-4"
     >
-      <ul className="divide-y divide-line/60">
-        {upcomingExpirations.map((entry, index) => (
-          <li key={entry.id} className="group py-3 first:pt-0 last:pb-0">
-            <div className="flex items-center gap-3">
-              <Avatar initials={entry.initials} index={index} className="size-9 text-[10px]" />
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-[13px] font-medium text-ink">
-                  {entry.member}
-                </p>
-                <p className="mt-0.5 truncate text-xs text-faint">
-                  {entry.plan} · ends {formatShortDate(entry.expiresOn)}
-                </p>
+      {loading ? (
+        <div className="space-y-3">
+          {Array.from({ length: 5 }).map((_, index) => (
+            <div
+              key={index}
+              className="h-16 animate-pulse rounded-lg bg-card-hover/50"
+            />
+          ))}
+        </div>
+      ) : entries.length === 0 ? (
+        <p className="flex min-h-[220px] items-center justify-center text-center text-sm text-faint">
+          No memberships expiring in the next 30 days.
+        </p>
+      ) : (
+        <ul className="divide-y divide-line/60">
+          {entries.map((entry, index) => (
+            <li key={entry.id} className="group py-3 first:pt-0 last:pb-0">
+              <div className="flex items-center gap-3">
+                <Avatar initials={entry.initials} index={index} className="size-9 text-[10px]" />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-[13px] font-medium text-ink">
+                    {entry.member}
+                  </p>
+                  <p className="mt-0.5 truncate text-xs text-faint">
+                    {entry.plan} · ends {formatShortDate(entry.expiresOn)}
+                  </p>
+                </div>
+                <Badge tone={toneFor(entry.daysLeft)} className="shrink-0">
+                  {entry.daysLeft} {entry.daysLeft === 1 ? "day" : "days"}
+                </Badge>
+                <button
+                  type="button"
+                  title={`Renew ${entry.member}'s membership`}
+                  aria-label={`Renew ${entry.member}'s membership`}
+                  className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg text-faint transition-colors hover:bg-card-hover hover:text-gold"
+                >
+                  <Repeat className="size-4" strokeWidth={1.75} aria-hidden />
+                </button>
               </div>
-              <Badge tone={toneFor(entry.daysLeft)} className="shrink-0">
-                {entry.daysLeft} {entry.daysLeft === 1 ? "day" : "days"}
-              </Badge>
-              <button
-                type="button"
-                title={`Renew ${entry.member}'s membership`}
-                aria-label={`Renew ${entry.member}'s membership`}
-                className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg text-faint transition-colors hover:bg-card-hover hover:text-gold"
-              >
-                <Repeat className="size-4" strokeWidth={1.75} aria-hidden />
-              </button>
-            </div>
 
-            <div className="mt-2.5 flex items-center gap-2.5 pl-12">
-              <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-line-soft">
-                <div
-                  className={cn(
-                    "h-full rounded-full transition-[width] duration-500",
-                    barColorFor(entry.daysLeft),
-                  )}
-                  style={{ width: `${entry.elapsed}%` }}
-                />
+              <div className="mt-2.5 flex items-center gap-2.5 pl-12">
+                <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-line-soft">
+                  <div
+                    className={cn(
+                      "h-full rounded-full transition-[width] duration-500",
+                      barColorFor(entry.daysLeft),
+                    )}
+                    style={{ width: `${entry.elapsed}%` }}
+                  />
+                </div>
+                <span className="w-14 shrink-0 text-right text-[11px] tabular-nums text-faint">
+                  {entry.elapsed}% used
+                </span>
               </div>
-              <span className="w-14 shrink-0 text-right text-[11px] tabular-nums text-faint">
-                {entry.elapsed}% used
-              </span>
-            </div>
-          </li>
-        ))}
-      </ul>
+            </li>
+          ))}
+        </ul>
+      )}
     </DashboardCard>
   );
 }

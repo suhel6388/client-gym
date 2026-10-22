@@ -1,20 +1,28 @@
 "use client";
 
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
-import { membershipMix } from "@/lib/data";
+import type { MixSlice } from "@/lib/dashboard-view";
 import { formatNumber, formatPercent } from "@/lib/format";
 import { ChartTooltip } from "./ChartTooltip";
 
-const total = membershipMix.reduce((sum, slice) => sum + slice.value, 0);
+export function MembershipDonutChart({ data }: { data: MixSlice[] }) {
+  const total = data.reduce((sum, slice) => sum + slice.value, 0);
 
-export function MembershipDonutChart() {
+  if (total === 0) {
+    return (
+      <div className="flex h-[340px] items-center justify-center text-center text-sm text-faint">
+        No active memberships yet.
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="relative mx-auto mt-2 h-[240px] w-full max-w-[300px]">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
             <Pie
-              data={membershipMix}
+              data={data}
               dataKey="value"
               nameKey="name"
               cx="50%"
@@ -28,7 +36,7 @@ export function MembershipDonutChart() {
               stroke="none"
               animationDuration={800}
             >
-              {membershipMix.map((slice) => (
+              {data.map((slice) => (
                 <Cell key={slice.name} fill={slice.color} />
               ))}
             </Pie>
@@ -52,7 +60,7 @@ export function MembershipDonutChart() {
       </div>
 
       <ul className="mt-5 space-y-2.5">
-        {membershipMix.map((slice) => {
+        {data.map((slice) => {
           const share = (slice.value / total) * 100;
           return (
             <li key={slice.name} className="flex items-center gap-2.5">
