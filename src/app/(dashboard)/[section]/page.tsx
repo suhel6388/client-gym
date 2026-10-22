@@ -13,6 +13,7 @@ export function generateStaticParams() {
     .filter(
       (section) =>
         section !== "/" &&
+        section !== "dashboard" &&
         section !== "memberships" &&
         section !== "attendance" &&
         section !== "payments" &&
@@ -62,7 +63,7 @@ export default async function SectionPage({ params }: SectionPageProps) {
           fully wired up — every module will appear here next.
         </p>
         <Link
-          href="/"
+          href="/dashboard"
           className="mt-6 inline-flex h-9.5 items-center gap-2 rounded-lg border border-line bg-card px-4 text-sm font-medium text-ink transition-colors hover:border-line-strong hover:bg-card-hover"
         >
           <ArrowLeft className="size-4" strokeWidth={1.75} aria-hidden />

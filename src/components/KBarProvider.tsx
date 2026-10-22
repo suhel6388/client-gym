@@ -84,7 +84,7 @@ export function KBarProviderWrapper({ children }: { children: React.ReactNode })
         shortcut: ["d"],
         keywords: "dashboard home overview",
         icon: <LayoutDashboard className="size-4" />,
-        perform: () => router.push("/"),
+        perform: () => router.push("/dashboard"),
       },
       {
         id: "members",

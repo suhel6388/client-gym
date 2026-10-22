@@ -1,6 +1,9 @@
+import { DashboardOverview } from "@/components/DashboardOverview";
+
 /**
- * Alias for the documented `/dashboard` URL (see API.md and the Google OAuth
- * examples). The dashboard itself lives at the route-group root (`/`); this
- * page renders the exact same component so both URLs work.
+ * Authenticated gym dashboard. The public marketing page owns the default "/"
+ * route; this is the canonical destination after sign-in.
  */
-export { default } from "../page";
+export default function DashboardPage() {
+  return <DashboardOverview />;
+}

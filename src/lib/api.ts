@@ -37,7 +37,7 @@ export const API_BASE = /\/api\/v1$/i.test(configuredBase)
   : `${configuredBase}/api/v1`;
 
 /** Route that renders the authenticated dashboard. */
-export const DASHBOARD_PATH = "/";
+export const DASHBOARD_PATH = "/dashboard";
 
 export type ApiErrorBody = {
   error?: string;

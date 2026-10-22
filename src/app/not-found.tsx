@@ -15,14 +15,14 @@ export default function NotFound() {
       </h1>
       <p className="mt-2 max-w-sm text-sm leading-relaxed text-subtle">
         The route you&apos;re looking for doesn&apos;t exist or has been moved. Let&apos;s
-        get you back to the dashboard.
+        get you back home.
       </p>
       <Link
         href="/"
         className="mt-6 inline-flex h-9.5 items-center gap-2 rounded-lg border border-line bg-card px-4 text-sm font-medium text-ink transition-colors hover:border-line-strong hover:bg-card-hover"
       >
         <ArrowLeft className="size-4" strokeWidth={1.75} aria-hidden />
-        Back to dashboard
+        Back to home
       </Link>
     </div>
   );

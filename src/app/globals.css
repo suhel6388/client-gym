@@ -206,6 +206,509 @@
 }
 
 /* ---------------------------------------------------------------------------
+   DarkGoldGym — public landing page theme
+   Scoped tokens so the marketing surface can use its own near-black palette
+   without changing the authenticated app's existing design tokens.
+   --------------------------------------------------------------------------- */
+@theme {
+  --color-lp-canvas: #050606;
+  --color-lp-nav: #080909;
+  --color-lp-card: #101112;
+  --color-lp-surface: #171819;
+  --color-lp-gold: #f5b323;
+  --color-lp-gold-highlight: #ffd15c;
+  --color-lp-ink: #f7f7f7;
+  --color-lp-muted: #b6b6b6;
+  --color-lp-line: rgba(245, 179, 35, 0.18);
+}
+
+.dg-landing {
+  background-color: var(--color-lp-canvas);
+}
+
+.dg-gold-text {
+  background-image: linear-gradient(100deg, #ffd15c 0%, #f5b323 46%, #e6a00f 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
+
+/* ---------------------------------------------------------------------------
+   Landing navbar — animated gold underline + restrained radial glow
+   --------------------------------------------------------------------------- */
+.dg-nav-link {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  height: 100%;
+  align-items: center;
+  padding-inline: 0.875rem;
+  border: 0;
+  background: transparent;
+  color: var(--color-lp-muted);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.005em;
+  white-space: nowrap;
+  transition: color 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (min-width: 1280px) {
+  .dg-nav-link {
+    padding-inline: 1rem;
+    font-size: 13.5px;
+  }
+}
+
+.dg-nav-link:hover,
+.dg-nav-link:focus-visible,
+.dg-nav-link[data-open="true"],
+.dg-nav-link[aria-current="page"] {
+  color: var(--color-lp-gold-highlight);
+}
+
+.dg-nav-glow {
+  position: absolute;
+  left: 50%;
+  bottom: -2px;
+  z-index: 0;
+  width: 9.5rem;
+  height: 5.4rem;
+  border-radius: 999px;
+  background: radial-gradient(
+    ellipse at 50% 100%,
+    rgba(245, 179, 35, 0.3) 0%,
+    rgba(245, 179, 35, 0.11) 36%,
+    transparent 72%
+  );
+  filter: blur(5px);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(8px) scale(0.86);
+  transform-origin: center bottom;
+  transition:
+    opacity 320ms ease,
+    transform 340ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.dg-nav-underline {
+  position: absolute;
+  left: 14%;
+  right: 14%;
+  bottom: -1px;
+  z-index: 3;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    #f5b323 18%,
+    #ffd15c 50%,
+    #f5b323 82%,
+    transparent 100%
+  );
+  box-shadow:
+    0 0 10px rgba(245, 179, 35, 0.72),
+    0 0 22px rgba(245, 179, 35, 0.26);
+  opacity: 0;
+  pointer-events: none;
+  transform: scaleX(0);
+  transform-origin: center;
+  transition:
+    transform 320ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 300ms ease,
+    box-shadow 300ms ease;
+}
+
+.dg-nav-edge {
+  position: absolute;
+  left: -6px;
+  right: -6px;
+  bottom: -1px;
+  z-index: 2;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(245, 179, 35, 0.35) 22%,
+    rgba(255, 209, 92, 0.52) 50%,
+    rgba(245, 179, 35, 0.35) 78%,
+    transparent 100%
+  );
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 300ms ease;
+}
+
+.dg-nav-link:hover .dg-nav-glow,
+.dg-nav-link:focus-visible .dg-nav-glow,
+.dg-nav-link[data-open="true"] .dg-nav-glow,
+.dg-nav-link[aria-current="page"] .dg-nav-glow {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0) scale(1);
+}
+
+.dg-nav-link:hover .dg-nav-underline,
+.dg-nav-link:focus-visible .dg-nav-underline,
+.dg-nav-link[data-open="true"] .dg-nav-underline,
+.dg-nav-link[aria-current="page"] .dg-nav-underline {
+  opacity: 1;
+  transform: scaleX(1);
+}
+
+.dg-nav-link:hover .dg-nav-edge,
+.dg-nav-link:focus-visible .dg-nav-edge,
+.dg-nav-link[data-open="true"] .dg-nav-edge,
+.dg-nav-link[aria-current="page"] .dg-nav-edge {
+  opacity: 1;
+}
+
+/* The current page stays softly lit; hovering it makes the glow bloom. */
+.dg-nav-link[aria-current="page"]:not(:hover):not([data-open="true"]) .dg-nav-glow {
+  opacity: 0.46;
+  transform: translateX(-50%) translateY(2px) scale(0.93);
+}
+
+.dg-nav-link[aria-current="page"]:not(:hover):not([data-open="true"]) .dg-nav-underline {
+  opacity: 0.9;
+  box-shadow:
+    0 0 7px rgba(245, 179, 35, 0.5),
+    0 0 16px rgba(245, 179, 35, 0.18);
+}
+
+.dg-nav-link[aria-current="page"]:not(:hover):not([data-open="true"]) .dg-nav-edge {
+  opacity: 0.55;
+}
+
+/* ---------------------------------------------------------------------------
+   Landing hero atmosphere
+   --------------------------------------------------------------------------- */
+.dg-hero-surface {
+  background-color: var(--color-lp-canvas);
+  background-image:
+    radial-gradient(ellipse 52% 46% at 79% 40%, rgba(245, 179, 35, 0.09), transparent 64%),
+    radial-gradient(ellipse 42% 38% at 8% 2%, rgba(245, 179, 35, 0.055), transparent 68%),
+    linear-gradient(180deg, #070808 0%, #050606 54%, #060707 100%);
+}
+
+.dg-hero-grid {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+  background-size: 72px 72px;
+  opacity: 0.2;
+  -webkit-mask-image: radial-gradient(
+    ellipse 76% 72% at 66% 38%,
+    #000 8%,
+    transparent 82%
+  );
+  mask-image: radial-gradient(
+    ellipse 76% 72% at 66% 38%,
+    #000 8%,
+    transparent 82%
+  );
+}
+
+/* ---------------------------------------------------------------------------
+   Hero visual — athlete, cinematic lighting, floating CRM dashboard
+   --------------------------------------------------------------------------- */
+.dg-hero-stage {
+  position: relative;
+  isolation: isolate;
+  width: 100%;
+  max-width: 720px;
+  margin-inline: auto;
+  padding-top: 104px;
+}
+
+.dg-hero-stage-glow {
+  position: absolute;
+  z-index: 0;
+  top: -7%;
+  right: -12%;
+  width: 96%;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: radial-gradient(
+    circle,
+    rgba(245, 179, 35, 0.18) 0%,
+    rgba(245, 179, 35, 0.05) 40%,
+    transparent 68%
+  );
+  filter: blur(46px);
+  pointer-events: none;
+}
+
+.dg-hero-stage-beam {
+  position: absolute;
+  z-index: 0;
+  top: -2%;
+  right: 8%;
+  width: 42%;
+  height: 58%;
+  background: linear-gradient(
+    164deg,
+    rgba(255, 209, 92, 0.16) 0%,
+    rgba(245, 179, 35, 0.04) 44%,
+    transparent 72%
+  );
+  filter: blur(22px);
+  transform: skewX(-11deg);
+  pointer-events: none;
+}
+
+.dg-hero-athlete {
+  position: absolute;
+  z-index: 1;
+  top: -12px;
+  right: -4%;
+  width: 104%;
+  height: 94%;
+  overflow: hidden;
+  pointer-events: none;
+  -webkit-mask-image:
+    linear-gradient(
+      to bottom,
+      transparent 0%,
+      #000 15%,
+      #000 58%,
+      rgba(0, 0, 0, 0.55) 76%,
+      transparent 100%
+    ),
+    linear-gradient(
+      to right,
+      transparent 0%,
+      #000 15%,
+      #000 88%,
+      transparent 100%
+    );
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(
+      to bottom,
+      transparent 0%,
+      #000 15%,
+      #000 58%,
+      rgba(0, 0, 0, 0.55) 76%,
+      transparent 100%
+    ),
+    linear-gradient(
+      to right,
+      transparent 0%,
+      #000 15%,
+      #000 88%,
+      transparent 100%
+    );
+  mask-composite: intersect;
+}
+
+.dg-hero-athlete-image {
+  object-fit: cover;
+  object-position: 50% 24%;
+  filter: grayscale(0.45) sepia(0.34) saturate(0.86) contrast(1.14)
+    brightness(0.55);
+  transform: scale(1.03);
+}
+
+.dg-hero-athlete-light {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(
+      ellipse 56% 38% at 72% 8%,
+      rgba(255, 196, 77, 0.22),
+      transparent 66%
+    ),
+    radial-gradient(
+      ellipse 46% 38% at 50% 32%,
+      rgba(255, 196, 77, 0.18),
+      transparent 72%
+    ),
+    linear-gradient(
+      90deg,
+      rgba(5, 6, 6, 0.86) 0%,
+      rgba(5, 6, 6, 0.32) 26%,
+      transparent 58%,
+      rgba(5, 6, 6, 0.5) 100%
+    ),
+    linear-gradient(
+      180deg,
+      rgba(5, 6, 6, 0.38) 0%,
+      transparent 16%,
+      transparent 62%,
+      rgba(5, 6, 6, 0.9) 100%
+    );
+  pointer-events: none;
+}
+
+/* Small gold chest mark so the black gym vest carries the brand without
+   altering the supplied logo. Hidden when it falls behind the dashboard. */
+.dg-hero-athlete-vest {
+  position: absolute;
+  top: 43.5%;
+  left: 53.5%;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: rgba(255, 209, 92, 0.82);
+  font-size: 0.45rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  line-height: 1;
+  white-space: nowrap;
+  opacity: 0.72;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.85);
+  transform: rotate(-5deg) skewY(-2deg);
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.dg-hero-dashboard {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+}
+
+@media (min-width: 640px) {
+  .dg-hero-stage {
+    padding-top: 154px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .dg-hero-dashboard .dg-preview-tilt {
+    transform: perspective(2100px) rotateY(-5.5deg) rotateX(1.2deg)
+      rotate(-0.9deg);
+    transform-origin: 56% 52%;
+  }
+
+  .dg-hero-stage:hover .dg-preview-tilt {
+    transform: perspective(2100px) rotateY(-3.4deg) rotateX(0.6deg)
+      rotate(-0.5deg);
+  }
+}
+
+@media (min-width: 1280px) {
+  .dg-hero-stage {
+    width: calc(100% + 1.5rem);
+    max-width: 700px;
+    margin-right: -1.5rem;
+    margin-left: 0;
+    padding-top: 270px;
+  }
+
+  .dg-hero-dashboard {
+    width: 86%;
+  }
+}
+
+@media (min-width: 1440px) {
+  .dg-hero-stage {
+    padding-top: 350px;
+  }
+}
+
+@media (max-width: 639px) {
+  .dg-hero-stage {
+    padding-top: 150px;
+  }
+
+  .dg-hero-athlete {
+    top: -8px;
+    right: -3%;
+    width: 106%;
+    height: 48%;
+  }
+
+  .dg-hero-athlete-image {
+    object-position: 50% 20%;
+  }
+}
+
+
+@keyframes dg-preview-in {
+  from {
+    opacity: 0;
+    transform: translate3d(0, 24px, 0) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.dg-preview-shell {
+  animation: dg-preview-in 0.9s cubic-bezier(0.22, 1, 0.36, 1) 0.12s both;
+}
+
+.dg-preview-tilt {
+  transform-style: preserve-3d;
+}
+
+@media (min-width: 1024px) {
+  .dg-preview-tilt {
+    transform: perspective(1900px) rotateY(-4deg) rotateX(1.1deg);
+    transform-origin: 58% 50%;
+    transition: transform 600ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .dg-preview-shell:hover .dg-preview-tilt {
+    transform: perspective(1900px) rotateY(-2.4deg) rotateX(0.4deg);
+  }
+}
+
+/* The dashboard is a miniature app. Lay it out from the width it actually
+   receives, not the viewport, so the two-column hero never crams it. */
+.dg-dashboard {
+  container-name: dashboard;
+  container-type: inline-size;
+}
+
+.dg-preview-sidebar {
+  display: none;
+  width: 106px;
+}
+
+.dg-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.dg-insight-grid,
+.dg-activity-grid {
+  display: grid;
+  gap: 0.625rem;
+}
+
+@container dashboard (min-width: 460px) {
+  .dg-metrics-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+
+  .dg-insight-grid {
+    grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+  }
+
+  .dg-activity-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@container dashboard (min-width: 470px) {
+  .dg-preview-sidebar {
+    display: flex;
+  }
+}
+
+@container dashboard (max-width: 620px) {
+  .dg-metric-icon {
+    display: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
    DarkGoldGym — authentication theme (brand palette)
    --------------------------------------------------------------------------- */
 @theme {
