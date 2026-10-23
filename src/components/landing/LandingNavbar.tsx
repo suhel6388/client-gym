@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import DarkGoldLogoHorizontal from "../../../public/logo_hr";
 import { cn } from "@/lib/cn";
-import { LANDING_NAV } from "./content";
+import { LANDING_NAV } from "./navigation";
 
 const MENU_ID_PREFIX = "landing-nav-menu";
 

@@ -6,7 +6,10 @@
  * functions from this file instead of creating their own clients.
  *
  * Conventions taken from `backend/API.md`:
- * - Base URL: `NEXT_PUBLIC_API_URL` (with or without the `/api/v1` suffix).
+ * - Base URL: `NEXT_PUBLIC_API_URL`, defaulting to the deployed Render API.
+ *   Every request — in development and production — goes directly to that
+ *   absolute URL. Localhost values are ignored so the app never calls a local
+ *   API.
  * - Auth is a Better Auth HttpOnly session cookie, so every request uses
  *   `withCredentials: true`. No token is ever stored in JavaScript.
  * - Successful responses wrap their payload in `{ data: ... }`; `apiRequest`
@@ -20,16 +23,23 @@ import axios, {
   isAxiosError,
 } from "axios";
 
-/** Base URL configured for the browser (inlined at build time). */
-const configuredBase =
-  process.env.NODE_ENV === "development"
-    ? // In development the app calls its own origin; next.config.ts proxies
-      // /api/v1 to NEXT_PUBLIC_API_URL. This keeps the session cookie
-      // first-party instead of sending it cross-site to the deployed API.
-      ""
-    : (process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:5000")
-        .trim()
-        .replace(/\/+$/, "");
+const DEFAULT_API_BASE_URL = "https://gym-managment-system-7yiu.onrender.com";
+
+/**
+ * The base URL used by every API request.
+ *
+ * `NEXT_PUBLIC_API_URL` (defaulting to the deployed Render API) is used in
+ * every environment, so development and production hit the same backend.
+ * An explicit localhost value is rejected so the app never calls a local API.
+ */
+const envBase = (process.env.NEXT_PUBLIC_API_URL ?? "").trim();
+const isLocalBase =
+  /(?:^https?:\/\/)?(?:localhost|127\.0\.0\.1|0\.0\.0\.0)(?::\d+)?(?:\/|$)/i.test(
+    envBase,
+  );
+const configuredBase = (
+  envBase && !isLocalBase ? envBase : DEFAULT_API_BASE_URL
+).replace(/\/+$/, "");
 
 /** Always ends with `/api/v1`, exactly like the backend routes. */
 export const API_BASE = /\/api\/v1$/i.test(configuredBase)
