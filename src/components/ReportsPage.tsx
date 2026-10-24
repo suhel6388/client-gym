@@ -27,7 +27,7 @@ import type {
   PaymentDto,
 } from "@/lib/members-api";
 import type { ExpenseDto } from "@/lib/api";
-import { REPORTS_USE_MOCK, fetchReportsData } from "@/lib/reports-service";
+import { fetchReportsData } from "@/lib/reports-service";
 import { summarizePayments, type PaymentRow } from "@/lib/payments-view";
 import {
   buildTrendSeries,
@@ -109,7 +109,7 @@ export function ReportsPage() {
   >([]);
 
   const load = useCallback(
-    async (mode: "initial" | "refresh") => {
+    async (mode: "initial" | "refresh", signal?: AbortSignal) => {
       if (mode === "initial") {
         setStatus("loading");
         setError(null);
@@ -117,20 +117,15 @@ export function ReportsPage() {
         setRefreshing(true);
       }
       try {
-        // Dummy data while REPORTS_USE_MOCK is true.
-        // Flip it (or set NEXT_PUBLIC_USE_MOCK_REPORTS=false) to hit
-        // the axios API layer with no other code changes.
-        const bundle = await fetchReportsData();
-        if (REPORTS_USE_MOCK) {
-          // Simulate network latency so skeletons still show briefly.
-          await new Promise((resolve) => setTimeout(resolve, 150));
-        }
+        const bundle = await fetchReportsData({ signal });
+        if (signal?.aborted) return;
         setPayments(bundle.payments);
         setExpenses(bundle.expenses);
         setMemberships(bundle.memberships);
         setMembers(bundle.members);
         setStatus("ready");
       } catch (caught) {
+        if (signal?.aborted) return;
         const message =
           caught instanceof ApiError
             ? caught.message
@@ -142,14 +137,16 @@ export function ReportsPage() {
           toast.error("Refresh failed", message);
         }
       } finally {
-        setRefreshing(false);
+        if (!signal?.aborted) setRefreshing(false);
       }
     },
     [toast],
   );
 
   useEffect(() => {
-    load("initial");
+    const controller = new AbortController();
+    load("initial", controller.signal);
+    return () => controller.abort();
   }, [load]);
 
   const anchor = useMemo(() => reportAnchor(), []);
