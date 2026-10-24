@@ -6,6 +6,7 @@ import {
   ChevronRight,
   ChevronsUpDown,
   Eye,
+  MessageCircle,
   RefreshCw,
   Repeat,
   Snowflake,
@@ -14,6 +15,8 @@ import {
 import { cn } from "@/lib/cn";
 import { formatCurrency, formatShortDate } from "@/lib/format";
 import { paiseToAmount } from "@/lib/members-api";
+import { toast } from "@/lib/toast";
+import { buildWhatsAppRenewalUrl } from "@/lib/whatsapp";
 import {
   paymentStatusFor,
   paymentTone,
@@ -126,6 +129,31 @@ function actionItems(
     { label: "Record payment", icon: Wallet, onSelect: () => handlers.onRecordPayment(row) },
     { label: "Renew membership", icon: Repeat, onSelect: () => handlers.onRenew(row) },
   ];
+  if (row.status === "Expired") {
+    items.push({
+      label: "Send WhatsApp reminder",
+      icon: MessageCircle,
+      onSelect: () => {
+        const url = buildWhatsAppRenewalUrl({
+          name: row.memberName,
+          phone: row.memberPhone,
+          expiryDate: row.endDate,
+          planName: row.planName,
+          memberCode: row.memberCode,
+        });
+
+        if (!url) {
+          toast.error(
+            "No valid phone number",
+            `Add a WhatsApp number for ${row.memberName} before sending a reminder.`,
+          );
+          return;
+        }
+
+        window.open(url, "_blank", "noopener,noreferrer");
+      },
+    });
+  }
   if (row.status === "Active" || row.status === "Expiring") {
     items.push({ label: "Freeze membership", icon: Snowflake, onSelect: () => handlers.onFreeze(row) });
   }

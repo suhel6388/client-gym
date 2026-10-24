@@ -45,7 +45,12 @@ export {
   updatePlan,
 } from "./api";
 
-export type MemberStatus = "Active" | "Expiring" | "Inactive" | "Frozen";
+export type MemberStatus =
+  | "Active"
+  | "Expiring"
+  | "Expired"
+  | "Inactive"
+  | "Frozen";
 
 export type MemberRow = {
   id: string;
@@ -76,12 +81,15 @@ export function getInitials(name: string): string {
 export function deriveStatus(membership: MembershipDto | null): MemberStatus {
   if (!membership) return "Inactive";
   if (membership.status === "FROZEN") return "Frozen";
-  if (membership.status === "EXPIRED") return "Inactive";
   if (membership.status === "CANCELLED" || membership.status === "INACTIVE") {
     return "Inactive";
   }
+  // The backend exposes EXPIRED as `effectiveStatus` only on the memberships
+  // endpoint, so the members list has to infer it from the end date. Keep this
+  // separate from "Inactive" (no plan/cancelled) so owners can remind lapsed
+  // members directly from the Expired filter.
   const remaining = new Date(membership.endDate).getTime() - Date.now();
-  if (remaining < 0) return "Inactive";
+  if (membership.status === "EXPIRED" || remaining < 0) return "Expired";
   if (remaining <= 14 * DAY_MS) return "Expiring";
   return "Active";
 }

@@ -8,6 +8,7 @@ import {
   Download,
   Eye,
   Mail,
+  MessageCircle,
   MoreHorizontal,
   Pencil,
   Phone,
@@ -19,6 +20,7 @@ import {
   Users,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useWhatsAppRenewalTemplate } from "@/hooks/use-whatsapp-template";
 import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import {
@@ -41,6 +43,7 @@ import {
   type PlanDto,
 } from "@/lib/members-api";
 import { statusTone } from "@/lib/member-ui";
+import { buildWhatsAppRenewalUrl } from "@/lib/whatsapp";
 import { useToast } from "./providers/ToastProvider";
 import { Avatar } from "./ui/Avatar";
 import { Badge } from "./ui/Badge";
@@ -48,11 +51,13 @@ import { Button } from "./ui/Button";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { DashboardCard } from "./DashboardCard";
 import { MemberDetailsDrawer } from "./MemberDetailsDrawer";
+import { WhatsAppRemindersDrawer } from "./WhatsAppRemindersDrawer";
 
 const STATUSES: ("All" | MemberStatus)[] = [
   "All",
   "Active",
   "Expiring",
+  "Expired",
   "Inactive",
   "Frozen",
 ];
@@ -61,7 +66,8 @@ const STATUS_ORDER: Record<MemberStatus, number> = {
   Active: 0,
   Expiring: 1,
   Frozen: 2,
-  Inactive: 3,
+  Expired: 3,
+  Inactive: 4,
 };
 
 type SortKey = "name" | "plan" | "status" | "joined" | "nextDue";
@@ -87,6 +93,8 @@ export function MembersPage() {
   const [viewMember, setViewMember] = useState<MemberDto | null>(null);
   const [archiveTarget, setArchiveTarget] = useState<MemberDto | null>(null);
   const [archiving, setArchiving] = useState(false);
+  const [remindersOpen, setRemindersOpen] = useState(false);
+  const whatsappTemplate = useWhatsAppRenewalTemplate();
 
   const load = useCallback(
     async (mode: "initial" | "refresh") => {
@@ -155,6 +163,12 @@ export function MembersPage() {
       return matchesQuery && matchesStatus && matchesPlan;
     });
   }, [rows, query, statusFilter, planFilter]);
+
+  /** Expired members inside the current filters — the reminder drawer's list. */
+  const expiredRows = useMemo(
+    () => filtered.filter((row) => row.status === "Expired"),
+    [filtered],
+  );
 
   const sorted = useMemo(() => {
     const direction = sortDir === "asc" ? 1 : -1;
@@ -281,6 +295,20 @@ export function MembersPage() {
           </p>
         </div>
         <div className="animate-fade-up flex flex-wrap gap-2.5" style={{ animationDelay: "80ms" }}>
+          {expiredRows.length > 0 && (
+            <Button
+              variant="secondary"
+              size="md"
+              onClick={() => setRemindersOpen(true)}
+            >
+              <MessageCircle
+                className="size-4 text-[#25D366]"
+                strokeWidth={1.75}
+                aria-hidden
+              />
+              Send reminders ({expiredRows.length})
+            </Button>
+          )}
           <Button variant="secondary" size="md" onClick={exportCsv} disabled={filtered.length === 0}>
             <Download className="size-4" strokeWidth={1.75} aria-hidden />
             Export
@@ -455,6 +483,10 @@ export function MembersPage() {
                       </td>
                       <td className="px-4 py-3">
                         <div className="flex items-center justify-end gap-1">
+                          <WhatsAppReminderAction
+                            row={row}
+                            template={whatsappTemplate}
+                          />
                           <Button
                             variant="ghost"
                             size="sm"
@@ -589,7 +621,54 @@ export function MembersPage() {
         onConfirm={() => handleArchive(archiveTarget)}
         onCancel={() => !archiving && setArchiveTarget(null)}
       />
+
+      <WhatsAppRemindersDrawer
+        open={remindersOpen}
+        onOpenChange={setRemindersOpen}
+        members={expiredRows}
+        template={whatsappTemplate}
+      />
     </div>
+  );
+}
+
+/**
+ * Direct WhatsApp action for an expired member. Active rows render nothing —
+ * reminders only make sense once the membership has lapsed.
+ */
+function WhatsAppReminderAction({
+  row,
+  template,
+}: {
+  row: MemberRow;
+  template: string;
+}) {
+  if (row.status !== "Expired" || !row.nextDue) return null;
+
+  const url = buildWhatsAppRenewalUrl(
+    {
+      name: row.name,
+      phone: row.phone,
+      expiryDate: row.nextDue,
+      planName: row.plan,
+      memberCode: row.code,
+    },
+    template,
+  );
+
+  if (!url) return null;
+
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      title={`Send WhatsApp renewal reminder to ${row.name}`}
+      aria-label={`Send WhatsApp renewal reminder to ${row.name}`}
+      className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg border border-[#25D366]/30 bg-[#25D366]/10 text-[#25D366] transition-colors hover:border-[#25D366]/50 hover:bg-[#25D366]/15"
+    >
+      <MessageCircle className="size-3.5" strokeWidth={1.75} aria-hidden />
+    </a>
   );
 }
 

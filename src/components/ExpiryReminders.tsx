@@ -1,9 +1,11 @@
 "use client";
 
-import { CalendarClock, CheckCircle2, Repeat } from "lucide-react";
+import { CalendarClock, CheckCircle2, MessageCircle, Repeat } from "lucide-react";
+import { useWhatsAppRenewalTemplate } from "@/hooks/use-whatsapp-template";
 import { cn } from "@/lib/cn";
 import { formatShortDate } from "@/lib/format";
 import type { SubscriptionRow } from "@/lib/membership-view";
+import { buildWhatsAppRenewalUrl } from "@/lib/whatsapp";
 import { Avatar } from "./ui/Avatar";
 import { Badge, type BadgeTone } from "./ui/Badge";
 import { Button } from "./ui/Button";
@@ -28,6 +30,7 @@ type ExpiryRemindersProps = {
 };
 
 export function ExpiryReminders({ rows, loading = false, onRenew, delay = 0 }: ExpiryRemindersProps) {
+  const whatsappTemplate = useWhatsAppRenewalTemplate();
   const today = rows
     .filter((row) => row.status === "Expiring" && row.daysLeft <= 0)
     .sort((a, b) => a.endDate.localeCompare(b.endDate));
@@ -128,6 +131,12 @@ export function ExpiryReminders({ rows, loading = false, onRenew, delay = 0 }: E
                     >
                       {group.daysLabel(row)}
                     </span>
+                    {group.key === "expired" && (
+                      <WhatsAppReminderLink
+                        row={row}
+                        template={whatsappTemplate}
+                      />
+                    )}
                     <Button
                       variant="secondary"
                       size="sm"
@@ -145,5 +154,39 @@ export function ExpiryReminders({ rows, loading = false, onRenew, delay = 0 }: E
         </div>
       )}
     </DashboardCard>
+  );
+}
+
+function WhatsAppReminderLink({
+  row,
+  template,
+}: {
+  row: SubscriptionRow;
+  template: string;
+}) {
+  const url = buildWhatsAppRenewalUrl(
+    {
+      name: row.memberName,
+      phone: row.memberPhone,
+      expiryDate: row.endDate,
+      planName: row.planName,
+      memberCode: row.memberCode,
+    },
+    template,
+  );
+
+  if (!url) return null;
+
+  return (
+    <a
+      href={url}
+      target="_blank"
+      rel="noopener noreferrer"
+      title={`Send WhatsApp renewal reminder to ${row.memberName}`}
+      aria-label={`Send WhatsApp renewal reminder to ${row.memberName}`}
+      className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg border border-[#25D366]/30 bg-[#25D366]/10 text-[#25D366] transition-colors hover:border-[#25D366]/50 hover:bg-[#25D366]/15"
+    >
+      <MessageCircle className="size-3.5" strokeWidth={1.75} aria-hidden />
+    </a>
   );
 }

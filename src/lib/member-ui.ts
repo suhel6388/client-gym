@@ -11,6 +11,7 @@ export type BadgeTone =
 const STATUS_TONES: Record<MemberStatus, BadgeTone> = {
   Active: "success",
   Expiring: "warning",
+  Expired: "danger",
   Inactive: "muted",
   Frozen: "neutral",
 };

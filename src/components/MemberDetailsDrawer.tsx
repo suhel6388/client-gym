@@ -6,16 +6,19 @@ import {
   CreditCard,
   Mail,
   MapPin,
+  MessageCircle,
   Pencil,
   Phone,
   ShieldAlert,
   X,
 } from "lucide-react";
 import type { ReactNode } from "react";
+import { useWhatsAppRenewalTemplate } from "@/hooks/use-whatsapp-template";
 import { cn } from "@/lib/cn";
 import { formatCurrency, formatLongDate } from "@/lib/format";
 import { getInitials, paiseToAmount, toMemberRow, type MemberDto } from "@/lib/members-api";
 import { statusTone } from "@/lib/member-ui";
+import { buildWhatsAppRenewalUrl } from "@/lib/whatsapp";
 import { Avatar } from "./ui/Avatar";
 import { Badge } from "./ui/Badge";
 import { Button } from "./ui/Button";
@@ -68,6 +71,20 @@ export function MemberDetailsDrawer({
   const feePaise = membership
     ? Math.max(0, membership.pricePaise - membership.discountPaise)
     : 0;
+  const whatsappTemplate = useWhatsAppRenewalTemplate();
+  const reminderUrl =
+    row?.status === "Expired" && row.nextDue
+      ? buildWhatsAppRenewalUrl(
+          {
+            name: row.name,
+            phone: row.phone,
+            expiryDate: row.nextDue,
+            planName: row.plan,
+            memberCode: row.code,
+          },
+          whatsappTemplate,
+        )
+      : null;
 
   return (
     <>
@@ -209,7 +226,7 @@ export function MemberDetailsDrawer({
           </div>
         )}
 
-        <div className="flex shrink-0 gap-2 border-t border-line/60 px-6 py-4 sm:justify-end">
+        <div className="flex shrink-0 flex-wrap gap-2 border-t border-line/60 px-6 py-4 sm:justify-end">
           <Button
             type="button"
             variant="secondary"
@@ -221,6 +238,18 @@ export function MemberDetailsDrawer({
             <Archive className="size-4" strokeWidth={1.75} aria-hidden />
             Archive
           </Button>
+          {reminderUrl && (
+            <a
+              href={reminderUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              title="Send a WhatsApp renewal reminder"
+              className="inline-flex h-9.5 flex-1 shrink-0 select-none items-center justify-center gap-2 whitespace-nowrap rounded-lg border border-[#25D366]/35 bg-[#25D366]/10 px-4 text-sm font-medium text-[#25D366] transition-colors hover:bg-[#25D366]/15 sm:flex-none"
+            >
+              <MessageCircle className="size-4" strokeWidth={1.75} aria-hidden />
+              WhatsApp
+            </a>
+          )}
           <Button
             type="button"
             variant="primary"
