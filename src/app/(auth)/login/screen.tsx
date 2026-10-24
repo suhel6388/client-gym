@@ -50,12 +50,17 @@ function LoginScreen() {
   );
 
   const handleUnverified = useCallback(
-    (email: string) => {
+    (email: string, emailSent: boolean) => {
       toast.warning(
         "Email not verified",
-        "Enter the 6-digit code we sent to your inbox to continue.",
+        emailSent
+          ? "Enter the 6-digit code we sent to your inbox to continue."
+          : "We couldn't send a new code. Tap Resend OTP on the next screen.",
       );
-      router.replace(`/verify-email?email=${encodeURIComponent(email)}&reason=login`);
+      const delivery = emailSent ? "" : "&emailSent=0";
+      router.replace(
+        `/verify-email?email=${encodeURIComponent(email)}&reason=login${delivery}`,
+      );
     },
     [router, toast],
   );

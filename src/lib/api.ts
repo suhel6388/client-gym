@@ -101,6 +101,12 @@ export type RequestOptions = {
    * Defaults to 1 for GET and 0 for everything else.
    */
   retry?: number;
+  /**
+   * Per-request timeout in milliseconds. Defaults to the client-wide 30s.
+   * Long-running auth calls (for example a cold-starting Render instance)
+   * can raise this without affecting every other request.
+   */
+  timeout?: number;
 };
 
 export const apiClient = axios.create({
@@ -114,12 +120,19 @@ export const apiClient = axios.create({
 
 const buildRequestConfig = (
   method: NonNullable<RequestOptions["method"]>,
-  { body, signal, query, headers }: Omit<RequestOptions, "method"> = {},
+  {
+    body,
+    signal,
+    query,
+    headers,
+    timeout,
+  }: Omit<RequestOptions, "method"> = {},
 ): AxiosRequestConfig => ({
   method,
   data: body,
   signal,
   params: query,
+  timeout,
   paramsSerializer: {
     // Skip undefined/empty values cleanly.
     indexes: null,
@@ -158,6 +171,7 @@ const normalizeError = (error: unknown): ApiError => {
       return new ApiError(
         "The server took too long to respond. It may be waking up — please try again.",
         0,
+        { code: "TIMEOUT" },
       );
     }
     if (axiosErr.name === "CanceledError" || axiosErr.code === "ERR_CANCELED") {
@@ -259,6 +273,33 @@ export async function apiRequest<T>(
 // Keep the old name for backward compatibility with existing imports.
 export const apiFetch = apiRequest;
 
+/**
+ * Wakes a sleeping API instance (Render free services spin down after a
+ * period of inactivity). The promise is shared so a page can start the warm-up
+ * on mount and the signup POST can await the same request instead of starting
+ * a second one.
+ *
+ * Failures are swallowed: the actual request will surface a useful error.
+ */
+let warmUpPromise: Promise<void> | null = null;
+
+export function warmUpApi(): Promise<void> {
+  if (!warmUpPromise) {
+    warmUpPromise = apiRequest<{ status?: string }>("/health", {
+      // A cold Render instance can take well over the default 30s to boot.
+      // No retry: signup must not wait two full timeouts before it even starts.
+      timeout: 45000,
+      retry: 0,
+    })
+      .then(() => undefined)
+      .catch(() => {
+        // Let the next caller try again if the instance was still down.
+        warmUpPromise = null;
+      });
+  }
+  return warmUpPromise;
+}
+
 // ---------------------------------------------------------------------------
 // Auth — `/api/v1/auth/*` (see API.md → Authentication)
 // ---------------------------------------------------------------------------
@@ -309,6 +350,8 @@ export type SignupResult = {
    * the OTP and the client must continue on the verify-email screen.
    */
   requiresEmailVerification?: boolean;
+  /** False when the account was created but the OTP email could not be sent. */
+  emailSent?: boolean;
 };
 
 export type VerifyEmailResult = {
@@ -330,10 +373,17 @@ export type GoogleSignInResult = {
 };
 
 /** POST /auth/signup — create the account and send the 6-digit OTP. */
-export function signup(input: SignupInput) {
+export async function signup(input: SignupInput) {
+  // Wake a sleeping Render instance before the mutation. Otherwise the first
+  // request can exceed the client timeout even though the server goes on to
+  // create the account, leaving the user with a confusing timeout error.
+  await warmUpApi();
   return apiRequest<SignupResult>("/auth/signup", {
     method: "POST",
     body: input,
+    // Creating an account includes password hashing, a DB write and the OTP
+    // email. 60s leaves room for a cold instance without hanging forever.
+    timeout: 60000,
   });
 }
 

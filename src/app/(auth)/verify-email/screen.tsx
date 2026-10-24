@@ -25,6 +25,8 @@ function VerifyEmailScreen() {
 
   const paramEmail = searchParams.get("email")?.trim().toLowerCase() ?? "";
   const reason = searchParams.get("reason");
+  const emailSentParam = searchParams.get("emailSent");
+  const [deliveryFailed, setDeliveryFailed] = useState(emailSentParam === "0");
   const [email, setEmail] = useState(paramEmail);
   const [missingEmail, setMissingEmail] = useState(false);
   const redirectingRef = useRef(false);
@@ -45,6 +47,12 @@ function VerifyEmailScreen() {
       setMissingEmail(true);
     }
   }, [paramEmail]);
+
+  // Keep the warning in sync if the screen is reopened with a new result,
+  // while still allowing a successful resend to clear it locally.
+  useEffect(() => {
+    setDeliveryFailed(emailSentParam === "0");
+  }, [emailSentParam]);
 
   // A user who is already fully signed in has nothing to verify here.
   useEffect(() => {
@@ -157,8 +165,9 @@ function VerifyEmailScreen() {
     );
   }
 
-  const subtitle =
-    reason === "login"
+  const subtitle = deliveryFailed
+    ? "We couldn't send the verification code. Tap Resend OTP below to try again."
+    : reason === "login"
       ? "Your email isn't verified yet. Enter the code we just sent to continue."
       : reason === "signup-existing"
         ? "This email is already registered but not verified. Enter the new code we sent to continue."
@@ -169,11 +178,24 @@ function VerifyEmailScreen() {
   return (
     <AuthCard heading="Verify Your Email" subtitle={subtitle}>
       <p className="-mt-3 mb-6 text-center text-[13px] text-auth-muted">
-        Code sent to{" "}
+        {deliveryFailed ? "Code not sent to " : "Code sent to "}
         <span className="font-semibold text-auth-ink">{email ? maskEmail(email) : "your email"}</span>
       </p>
 
-      <OtpVerificationForm email={email} onSuccess={() => void handleVerified()} />
+      {deliveryFailed && (
+        <div className="mb-5">
+          <AuthErrorMessage
+            message="The verification email could not be delivered."
+            hint="Tap Resend OTP below. If it keeps failing, the API's email service may be unavailable."
+          />
+        </div>
+      )}
+
+      <OtpVerificationForm
+        email={email}
+        onSuccess={() => void handleVerified()}
+        onResendSuccess={() => setDeliveryFailed(false)}
+      />
 
       <div className="mt-6 border-t border-auth-line pt-5">
         <p className="text-center text-[13px] text-auth-muted">

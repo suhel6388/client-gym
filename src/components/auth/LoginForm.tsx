@@ -20,7 +20,7 @@ type LoginFormProps = {
   /** Called after the backend confirms credentials and sets the session. */
   onSuccess: (next: string) => void;
   /** Called when the password is right but the email is unverified (403). */
-  onUnverified: (email: string) => void;
+  onUnverified: (email: string, emailSent: boolean) => void;
 };
 
 export function LoginForm({ next, onSuccess, onUnverified }: LoginFormProps) {
@@ -38,8 +38,14 @@ export function LoginForm({ next, onSuccess, onUnverified }: LoginFormProps) {
     loginAction,
     () => onSuccess(next),
     (state) => {
-      if (state.error === AUTH_ERRORS.unverified) {
-        onUnverified(email.trim().toLowerCase());
+      if (
+        state.error === AUTH_ERRORS.unverified ||
+        state.error === AUTH_ERRORS.unverifiedNoEmail
+      ) {
+        onUnverified(
+          email.trim().toLowerCase(),
+          state.error !== AUTH_ERRORS.unverifiedNoEmail,
+        );
         return;
       }
       setFormError(state.error);

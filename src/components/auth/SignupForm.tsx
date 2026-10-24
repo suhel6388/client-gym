@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useState, type FormEvent } from "react";
+import React, { useCallback, useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { AuthErrorMessage } from "./AuthErrorMessage";
 import { AuthDivider } from "./AuthDivider";
@@ -8,7 +8,7 @@ import { GoogleSignInButton } from "./GoogleSignInButton";
 import { PasswordInput } from "./PasswordInput";
 import { PasswordStrengthIndicator } from "./PasswordStrengthIndicator";
 import { PhoneInput } from "./PhoneInput";
-import { ApiError, savePendingSignup, signup } from "@/lib/api";
+import { ApiError, savePendingSignup, signup, warmUpApi } from "@/lib/api";
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -18,8 +18,13 @@ type SignupFormProps = {
    * Called after the backend accepts the signup and sends the OTP.
    * `alreadyRegistered` is true when the email existed but was not verified —
    * the account was not duplicated and the user continues on the OTP screen.
+   * `emailSent` is false when the account exists but the OTP email failed.
    */
-  onSignupSuccess: (email: string, alreadyRegistered: boolean) => void;
+  onSignupSuccess: (
+    email: string,
+    alreadyRegistered: boolean,
+    emailSent: boolean,
+  ) => void;
 };
 
 export function SignupForm({ onSignupSuccess }: SignupFormProps) {
@@ -35,6 +40,13 @@ export function SignupForm({ onSignupSuccess }: SignupFormProps) {
   const [formError, setFormError] = useState<string | null>(null);
   const [emailTaken, setEmailTaken] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+
+  // Start waking the API while the user fills the form. Render free instances
+  // spin down when idle, and the signup POST would otherwise be the first
+  // request to hit a cold server.
+  useEffect(() => {
+    void warmUpApi();
+  }, []);
 
   const validate = useCallback((): FieldErrors => {
     const next: FieldErrors = {};
@@ -102,7 +114,11 @@ export function SignupForm({ onSignupSuccess }: SignupFormProps) {
 
         // `requiresEmailVerification` means the email existed but was never
         // verified; the backend re-sent a code and no duplicate was created.
-        onSignupSuccess(trimmedEmail, result.requiresEmailVerification === true);
+        onSignupSuccess(
+          trimmedEmail,
+          result.requiresEmailVerification === true,
+          result.emailSent !== false,
+        );
       } catch (error) {
         setSubmitting(false);
         if (error instanceof ApiError) {
@@ -112,6 +128,12 @@ export function SignupForm({ onSignupSuccess }: SignupFormProps) {
               /email/i.test(error.message));
           if (emailConflict) {
             setEmailTaken(true);
+            return;
+          }
+          if (error.code === "TIMEOUT") {
+            setFormError(
+              "The server took too long to respond. Your account may already be created — submit again to resend the verification code, or try again in a moment.",
+            );
             return;
           }
           setFormError(error.message);

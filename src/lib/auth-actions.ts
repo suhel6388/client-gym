@@ -30,6 +30,9 @@ export const AUTH_ERRORS = {
     "Invalid email or password. Check your credentials and try again.",
   /** Login with an email that still needs OTP verification (backend 403). */
   unverified: "Your email isn't verified yet.",
+  /** Unverified login where the backend also failed to send the OTP. */
+  unverifiedNoEmail:
+    "Your email isn't verified, and we couldn't send a new code. Use Resend OTP on the next screen.",
   /** Signup with an email that already has an account (backend 409). */
   emailTaken: "An account with this email already exists.",
   /** setup-gym when the account already has a gym (backend 409). */
@@ -76,7 +79,14 @@ export const loginAction: FormAction = async (_state, formData) => {
   } catch (error) {
     if (error instanceof ApiError) {
       if (error.status === 403 && error.code === "EMAIL_NOT_VERIFIED") {
-        return { success: false, error: AUTH_ERRORS.unverified };
+        const payload = error.payload as { emailSent?: boolean } | null | undefined;
+        return {
+          success: false,
+          error:
+            payload?.emailSent === false
+              ? AUTH_ERRORS.unverifiedNoEmail
+              : AUTH_ERRORS.unverified,
+        };
       }
       if (error.status === 401) {
         return { success: false, error: AUTH_ERRORS.invalidCredentials };

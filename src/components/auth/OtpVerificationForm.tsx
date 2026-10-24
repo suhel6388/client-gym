@@ -20,6 +20,8 @@ type OtpVerificationFormProps = {
   email: string;
   /** Called only after the backend confirms verification and sets the session. */
   onSuccess: () => void;
+  /** Called after a resend succeeds, so the parent can clear a stale warning. */
+  onResendSuccess?: () => void;
   className?: string;
 };
 
@@ -28,7 +30,12 @@ type OtpVerificationFormProps = {
  * navigation and auto-submit when the code is complete. Success is only ever
  * declared by the backend — the UI never assumes the account is verified.
  */
-export function OtpVerificationForm({ email, onSuccess, className }: OtpVerificationFormProps) {
+export function OtpVerificationForm({
+  email,
+  onSuccess,
+  onResendSuccess,
+  className,
+}: OtpVerificationFormProps) {
   const [digits, setDigits] = useState<string[]>(Array(OTP_LENGTH).fill(""));
   const [error, setError] = useState<string | null>(null);
   const [codeExpired, setCodeExpired] = useState(false);
@@ -251,6 +258,7 @@ export function OtpVerificationForm({ email, onSuccess, className }: OtpVerifica
           submittedRef.current = false;
           setDigits(Array(OTP_LENGTH).fill(""));
           focusInput(0);
+          onResendSuccess?.();
         }}
         onError={(message) => {
           setError(message);

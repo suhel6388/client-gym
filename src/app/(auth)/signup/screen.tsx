@@ -9,10 +9,11 @@ function SignupScreen() {
   return (
     <AuthCard heading="Create Your Gym Account" subtitle="Start managing your gym with DarkGoldGym.">
       <SignupForm
-        onSignupSuccess={(email, alreadyRegistered) => {
+        onSignupSuccess={(email, alreadyRegistered, emailSent) => {
           const reason = alreadyRegistered ? "signup-existing" : "signup";
+          const delivery = emailSent ? "" : "&emailSent=0";
           router.replace(
-            `/verify-email?email=${encodeURIComponent(email)}&reason=${reason}`,
+            `/verify-email?email=${encodeURIComponent(email)}&reason=${reason}${delivery}`,
           );
         }}
       />
