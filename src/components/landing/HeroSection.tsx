@@ -6,7 +6,7 @@ import { FEATURE_HIGHLIGHTS, HERO_COPY, TRUST_INDICATORS } from "./content";
 export function HeroSection() {
   return (
     <section
-      id="main-content"
+      id="home"
       className="relative isolate flex flex-col overflow-hidden bg-lp-canvas xl:min-h-[calc(100svh-84px)] xl:justify-center"
     >
       {/* Atmosphere */}

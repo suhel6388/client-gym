@@ -89,7 +89,7 @@ export const LANDING_NAV: LandingNavItem[] = [
   },
   {
     label: "Pricing",
-    href: "/signup",
+    href: "#pricing",
   },
   {
     label: "Resources",

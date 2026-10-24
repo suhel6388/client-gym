@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
 import { HeroSection } from "@/components/landing/HeroSection";
 import { LandingNavbar } from "@/components/landing/LandingNavbar";
+import GymFeatures from "@/components/landing/Features";
+import GymPricing from "@/components/landing/Pricing";
+import GymAbout from "@/components/landing/About";
+import GymContact from "@/components/landing/Contact";
+import GymReview from "@/components/landing/Review";
+import GymReward from "@/components/landing/Reward";
+import GymFooter from "@/components/landing/Footer";
 
 export const metadata: Metadata = {
   title: "Gym Management CRM",
@@ -23,7 +30,14 @@ export default function LandingPage() {
       </a>
       <LandingNavbar />
       <main>
-        <HeroSection />
+        <HeroSection  />
+        <GymFeatures/>
+        <GymPricing/>
+        <GymAbout/>
+        <GymContact/>
+        <GymReview/>
+        <GymReward/>
+        <GymFooter/>
       </main>
     </div>
   );
