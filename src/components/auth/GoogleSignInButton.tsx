@@ -32,6 +32,8 @@ function GoogleGIcon({ className }: { className?: string }) {
 type GoogleSignInButtonProps = {
   /** Path to return to after OAuth (must be same-origin; sanitized server-side too). */
   callbackPath?: string;
+  /** Path that displays OAuth errors (must be same-origin). */
+  errorCallbackPath?: string;
   label?: string;
   className?: string;
   /** Called when the flow fails before the browser leaves (network/API error). */
@@ -45,6 +47,7 @@ type GoogleSignInButtonProps = {
  */
 export function GoogleSignInButton({
   callbackPath = "/auth/callback",
+  errorCallbackPath = "/auth/callback",
   label = "Continue with Google",
   className,
   onError,
@@ -57,8 +60,10 @@ export function GoogleSignInButton({
     setPending(true);
     setError(null);
     try {
-      const callbackURL = `${window.location.origin}${callbackPath}`;
-      const { url } = await getGoogleSignInUrl(callbackURL);
+      const origin = window.location.origin;
+      const callbackURL = `${origin}${callbackPath}`;
+      const errorCallbackURL = `${origin}${errorCallbackPath}`;
+      const { url } = await getGoogleSignInUrl(callbackURL, errorCallbackURL);
       if (!url) throw new Error("No authorization URL returned");
       window.location.assign(url);
       // Keep the button in the loading state while the browser navigates away.

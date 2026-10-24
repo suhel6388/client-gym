@@ -20,9 +20,26 @@ function describeOauthError(code: string | null): string {
     case "access_denied":
     case "user_cancelled":
       return "Google sign-in was cancelled. You can try again or use your email instead.";
+    case "state_mismatch":
+    case "please_restart_the_process":
+      return "Your sign-in session expired or the browser blocked the sign-in cookie. Please try again.";
     case "invalid_callback":
     case "invalid_redirect_uri":
+    case "invalid_callback_url":
+    case "invalid_error_callback_url":
       return "Google sign-in is misconfigured. Contact support if this continues.";
+    case "email_not_found":
+      return "Google didn't share an email address for this account. Use your email and password instead.";
+    case "email_not_verified":
+      return "Google hasn't verified this email address. Verify it with Google or use your email instead.";
+    case "account_already_linked_to_different_user":
+      return "This Google account is already linked to another user. Sign in with that account instead.";
+    case "unable_to_link_account":
+      return "We couldn't link this Google account. Try signing in with your email and password instead.";
+    case "no_code":
+    case "invalid_code":
+    case "unable_to_get_user_info":
+      return "Google sign-in didn't complete. Please try again.";
     default:
       return "Google sign-in failed. Please try again or use your email instead.";
   }
@@ -79,7 +96,14 @@ function CallbackScreen() {
       ) : (
         <div className="space-y-5">
           <AuthErrorMessage message={message} />
-          <GoogleSignInButton label="Try Google again" />
+          <GoogleSignInButton
+            label="Try Google again"
+            callbackPath={
+              next
+                ? `/auth/callback?next=${encodeURIComponent(next)}`
+                : "/auth/callback"
+            }
+          />
           <Link
             href="/login"
             className="flex h-10 w-full items-center justify-center rounded-lg border border-auth-line-strong text-[13.5px] font-semibold text-auth-ink transition-colors hover:border-auth-gold/40"

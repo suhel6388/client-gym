@@ -15,6 +15,9 @@
  * - Successful responses wrap their payload in `{ data: ... }`; `apiRequest`
  *   unwraps that envelope automatically.
  * - Errors are normalized into `ApiError` (status, code, details, payload).
+ * - Transient timeouts (for example a sleeping Render instance) are retried
+ *   once for GET requests and idempotent auth calls. Mutations are never
+ *   retried automatically, so a retry cannot duplicate a member/payment.
  */
 
 import axios, {
@@ -93,6 +96,11 @@ export type RequestOptions = {
   /** Query string parameters; `undefined` and `null` values are skipped. */
   query?: QueryParams;
   headers?: Record<string, string>;
+  /**
+   * Extra attempts for transient timeouts/network errors.
+   * Defaults to 1 for GET and 0 for everything else.
+   */
+  retry?: number;
 };
 
 export const apiClient = axios.create({
@@ -147,7 +155,10 @@ const normalizeError = (error: unknown): ApiError => {
     const axiosErr = error as AxiosError<unknown>;
 
     if (axiosErr.code === "ECONNABORTED") {
-      return new ApiError("Request timed out. Please try again.", 0);
+      return new ApiError(
+        "The server took too long to respond. It may be waking up — please try again.",
+        0,
+      );
     }
     if (axiosErr.name === "CanceledError" || axiosErr.code === "ERR_CANCELED") {
       return new ApiError("Request was cancelled.", 0);
@@ -173,37 +184,76 @@ const normalizeError = (error: unknown): ApiError => {
   return new ApiError("An unexpected error occurred.", 0);
 };
 
+/** Time to wait between transient-error attempts. */
+const RETRY_DELAY_MS = 1500;
+
+const sleep = (ms: number) =>
+  new Promise<void>((resolve) => {
+    setTimeout(resolve, ms);
+  });
+
+/**
+ * Network failures, timeouts, and gateway errors are safe to retry when the
+ * request is idempotent. A sleeping Render instance typically accepts the
+ * retried request after the first attempt has woken it up.
+ */
+const isTransientError = (error: unknown): boolean => {
+  if (!isAxiosError(error)) return false;
+  if (error.code === "ECONNABORTED" || error.code === "ERR_NETWORK") {
+    return true;
+  }
+  const status = error.response?.status;
+  return status === 408 || status === 502 || status === 503 || status === 504;
+};
+
 /**
  * Performs a JSON request, unwraps the standard `{ data }` envelope and throws
  * a typed `ApiError` for non-2xx responses.
+ *
+ * GET requests retry once by default; pass `retry: 0` to disable it or
+ * `retry: 1` on an idempotent POST. Mutations keep the default of no retry.
  */
 export async function apiRequest<T>(
   path: string,
   options: RequestOptions = {},
 ): Promise<T> {
-  const { method = "GET", ...rest } = options;
+  const {
+    method = "GET",
+    retry = method === "GET" ? 1 : 0,
+    ...rest
+  } = options;
+  const attempts = Math.max(0, retry) + 1;
 
-  try {
-    const response = await apiClient.request<unknown>({
-      url: path,
-      ...buildRequestConfig(method, rest),
-    });
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    try {
+      const response = await apiClient.request<unknown>({
+        url: path,
+        ...buildRequestConfig(method, rest),
+      });
 
-    if (response.status === 204) return undefined as T;
+      if (response.status === 204) return undefined as T;
 
-    const payload = response.data;
-    if (
-      payload &&
-      typeof payload === "object" &&
-      Object.prototype.hasOwnProperty.call(payload, "data")
-    ) {
-      return (payload as { data: T }).data;
+      const payload = response.data;
+      if (
+        payload &&
+        typeof payload === "object" &&
+        Object.prototype.hasOwnProperty.call(payload, "data")
+      ) {
+        return (payload as { data: T }).data;
+      }
+
+      return payload as T;
+    } catch (error) {
+      if (attempt < attempts && isTransientError(error)) {
+        await sleep(RETRY_DELAY_MS * attempt);
+        continue;
+      }
+      throw normalizeError(error);
     }
-
-    return payload as T;
-  } catch (error) {
-    throw normalizeError(error);
   }
+
+  // The loop always returns or throws; this keeps TypeScript satisfied.
+  throw new ApiError("Request failed. Please try again.", 0);
 }
 
 // Keep the old name for backward compatibility with existing imports.
@@ -308,12 +358,19 @@ export function login(input: LoginInput) {
   return apiRequest<LoginResult>("/auth/login", {
     method: "POST",
     body: input,
+    // Signing in again is safe: the first attempt may have succeeded even if
+    // the response was lost to a Render cold-start timeout.
+    retry: 1,
   });
 }
 
 /** POST /auth/logout — clear the session cookie. */
 export function logout() {
-  return apiRequest<unknown>("/auth/logout", { method: "POST" });
+  return apiRequest<unknown>("/auth/logout", {
+    method: "POST",
+    // Idempotent: retry so a timed-out logout still clears the cookie.
+    retry: 1,
+  });
 }
 
 /** GET /auth/me — current user + gym context. Throws `ApiError(401)` when signed out. */
@@ -324,11 +381,19 @@ export function fetchCurrentUser() {
 /**
  * POST /auth/google — the backend returns the Google consent URL and the
  * browser redirects there. Google verifies the email, so OTP is skipped.
+ *
+ * `errorCallbackURL` keeps OAuth failures on the frontend callback page
+ * instead of Better Auth's error page on the API host.
  */
-export function getGoogleSignInUrl(callbackURL: string) {
+export function getGoogleSignInUrl(
+  callbackURL: string,
+  errorCallbackURL?: string,
+) {
   return apiRequest<GoogleSignInResult>("/auth/google", {
     method: "POST",
-    body: { callbackURL },
+    body: { callbackURL, errorCallbackURL },
+    // A retry creates a fresh OAuth state, so it is safe after a timeout.
+    retry: 1,
   });
 }
 
