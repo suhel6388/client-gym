@@ -373,7 +373,7 @@ export function LandingNavbar() {
           />
           <div
             id="landing-mobile-menu"
-            className="absolute inset-x-0 top-full z-50 max-h-[calc(100dvh-4.5rem)] overflow-y-auto border-b border-lp-gold/15 bg-lp-nav shadow-[0_28px_70px_rgba(0,0,0,0.82)] lg:hidden"
+            className="absolute inset-x-0 top-full z-50 max-h-[calc(100dvh-4.5rem)] overflow-y-auto border-b border-lp-gold/15 bg-lp-nav shadow-[0_28px_70px_rgba(0,0,0,0.82)] xl:hidden"
           >
             <nav
               aria-label="Mobile navigation"
