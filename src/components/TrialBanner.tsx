@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { CalendarClock, Sparkles } from "lucide-react";
+import { Ban, CalendarClock, Sparkles } from "lucide-react";
 import { fetchSubscription, type SubscriptionStatus } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { toast } from "@/lib/toast";
@@ -100,6 +100,11 @@ export function TrialBanner({ className }: { className?: string }) {
     title = "Cancelled";
     const ends = formatDate(subscription.currentPeriodEnd);
     detail = ends ? `Access ends ${ends}` : "";
+  } else if (subscription?.status === "SUSPENDED") {
+    icon = Ban;
+    tone = "border-danger/25 bg-danger/[0.05]";
+    title = "Access suspended";
+    detail = "Contact support to restore access.";
   } else {
     icon = CalendarClock;
     tone = "border-line-strong bg-card";

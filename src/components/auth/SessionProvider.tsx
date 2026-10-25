@@ -14,6 +14,7 @@ import {
   fetchCurrentUser,
   loginUrlWithNext,
   logout,
+  SUPER_ADMIN_PATH,
   type AuthUser,
 } from "@/lib/api";
 
@@ -124,11 +125,25 @@ export function AuthGuard({ children }: { children: ReactNode }) {
     }
   }, [status, user]);
 
+  // Platform owners never use the gym dashboard. Send them to the dedicated
+  // console instead of treating "no gymId" as incomplete onboarding.
+  useEffect(() => {
+    if (status === "authenticated" && user?.role === "SUPER_ADMIN") {
+      window.location.assign(SUPER_ADMIN_PATH);
+    }
+  }, [status, user]);
+
   // Signed in, but the account has no gym yet (fresh Google signup, or the
   // pending signup details were lost). Finish onboarding first — the trial is
   // granted by the backend when the gym is created.
   useEffect(() => {
-    if (status === "authenticated" && user && user.emailVerified !== false && !user.gymId) {
+    if (
+      status === "authenticated" &&
+      user &&
+      user.role !== "SUPER_ADMIN" &&
+      user.emailVerified !== false &&
+      !user.gymId
+    ) {
       window.location.assign("/setup-gym");
     }
   }, [status, user]);
@@ -143,6 +158,10 @@ export function AuthGuard({ children }: { children: ReactNode }) {
 
   if (user && user.emailVerified === false) {
     return <AuthLoadingScreen label="Verify your email to continue…" />;
+  }
+
+  if (user?.role === "SUPER_ADMIN") {
+    return <AuthLoadingScreen label="Opening platform console…" />;
   }
 
   if (user && !user.gymId) {

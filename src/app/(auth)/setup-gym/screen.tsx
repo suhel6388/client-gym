@@ -10,6 +10,7 @@ import { useToast } from "@/components/providers/ToastProvider";
 import {
   ApiError,
   DASHBOARD_PATH,
+  SUPER_ADMIN_PATH,
   clearPendingSignup,
   fetchCurrentUser,
   readPendingSignup,
@@ -48,6 +49,11 @@ export default function SetupGymScreen() {
         }
         if (current.user.gymId) {
           router.replace(DASHBOARD_PATH);
+          return;
+        }
+        // Platform admins have no gym by design; they belong in the console.
+        if (current.user.role === "SUPER_ADMIN") {
+          router.replace(SUPER_ADMIN_PATH);
           return;
         }
         setUser(current.user);

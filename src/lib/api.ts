@@ -49,8 +49,11 @@ export const API_BASE = /\/api\/v1$/i.test(configuredBase)
   ? configuredBase
   : `${configuredBase}/api/v1`;
 
-/** Route that renders the authenticated dashboard. */
+/** Route that renders the authenticated gym dashboard. */
 export const DASHBOARD_PATH = "/dashboard";
+
+/** Route that renders the platform-owner (SaaS super-admin) console. */
+export const SUPER_ADMIN_PATH = "/super-admin";
 
 export type ApiErrorBody = {
   error?: string;
@@ -542,6 +545,13 @@ export function postAuthDestination(
   if (!user) return loginUrlWithNext(requested ?? DASHBOARD_PATH);
   if (user.emailVerified === false) {
     return `/verify-email?email=${encodeURIComponent(user.email)}&reason=dashboard`;
+  }
+  // Platform owners are not gym users. They always land in the super-admin
+  // console and can never be routed into gym onboarding or a gym dashboard.
+  if (user.role === "SUPER_ADMIN") {
+    return requested && requested.startsWith(SUPER_ADMIN_PATH)
+      ? safeNext(requested, SUPER_ADMIN_PATH)
+      : SUPER_ADMIN_PATH;
   }
   if (!user.gymId) return "/setup-gym";
   return safeNext(requested);
@@ -1103,7 +1113,13 @@ export function fetchDueMemberships(
 export type SubscriptionStatus = {
   subscription: {
     id: string;
-    status: "TRIALING" | "ACTIVE" | "EXPIRED" | "CANCELLED" | "PAST_DUE";
+    status:
+      | "TRIALING"
+      | "ACTIVE"
+      | "EXPIRED"
+      | "CANCELLED"
+      | "PAST_DUE"
+      | "SUSPENDED";
     planNameSnapshot?: string | null;
     pricePaise?: number;
     currency?: string;
@@ -1219,4 +1235,318 @@ export function cancelSubscription() {
     cancelledAt: string | null;
     alreadyCancelled: boolean;
   }>("/subscription/cancel", { method: "POST", body: {} });
+}
+
+// ---------------------------------------------------------------------------
+// Platform administration — `/api/v1/super-admin/*`
+// ---------------------------------------------------------------------------
+//
+// These endpoints are only reachable by a database-backed SUPER_ADMIN session.
+// The client treats them as read/write platform operations; the backend is the
+// authorization boundary and re-checks the role for every call.
+
+export type PlatformSubscriptionStatus =
+  | "TRIALING"
+  | "ACTIVE"
+  | "EXPIRED"
+  | "CANCELLED"
+  | "PAST_DUE"
+  | "SUSPENDED"
+  | "NO_SUBSCRIPTION";
+
+export type PlatformOwner = {
+  id: string;
+  name: string;
+  email: string;
+  phone?: string | null;
+  emailVerified?: boolean;
+  createdAt?: string;
+};
+
+export type PlatformSubscription = {
+  id: string;
+  status: Exclude<PlatformSubscriptionStatus, "NO_SUBSCRIPTION">;
+  effectiveStatus: PlatformSubscriptionStatus;
+  entitled: boolean;
+  entitlementReason: string;
+  plan: SubscriptionPlan | null;
+  planId: string | null;
+  planNameSnapshot?: string | null;
+  pricePaise: number;
+  currency: string;
+  trialStartsAt: string | null;
+  trialEndsAt: string | null;
+  currentPeriodStart: string | null;
+  currentPeriodEnd: string | null;
+  expiresAt: string | null;
+  remainingDays: number;
+  cancelAtPeriodEnd: boolean;
+  cancelledAt: string | null;
+  paymentProvider?: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type PlatformGym = {
+  id: string;
+  name: string;
+  email?: string | null;
+  phone?: string | null;
+  address?: string | null;
+  registeredAt: string;
+  createdAt: string;
+  owner: PlatformOwner | null;
+  owners: PlatformOwner[];
+  effectiveStatus: PlatformSubscriptionStatus;
+  subscription: PlatformSubscription | null;
+  expiryDate: string | null;
+  memberCount: number;
+  staffCount: number;
+};
+
+export type PlatformAuditLog = {
+  id: string;
+  action: string;
+  gymId: string | null;
+  planId: string | null;
+  subscriptionId: string | null;
+  actorUserId: string | null;
+  actorEmail: string | null;
+  actorRole: string | null;
+  reason: string | null;
+  details: unknown;
+  createdAt: string;
+};
+
+export type PlatformStats = {
+  totalGyms: number;
+  activeSubscriptions: number;
+  trialGyms: number;
+  expiredSubscriptions: number;
+  suspendedGyms: number;
+  pastDueGyms: number;
+  noSubscriptionGyms: number;
+  subscriptionRevenuePaise: number;
+  monthlyRevenuePaise: number;
+  successfulPayments: number;
+  monthlySuccessfulPayments: number;
+  planDistribution: Array<{
+    planId: string | null;
+    planName: string;
+    count: number;
+  }>;
+  expiringSoon: Array<{
+    gymId: string;
+    gymName: string;
+    status: string;
+    effectiveStatus: PlatformSubscriptionStatus;
+    planName: string;
+    expiresAt: string | null;
+    remainingDays: number;
+  }>;
+  recentGyms: PlatformGym[];
+  recentActivity: PlatformAuditLog[];
+  generatedAt: string;
+};
+
+export type PlatformPayment = {
+  id: string;
+  planId: string | null;
+  subscriptionId: string | null;
+  amountPaise: number;
+  currency: string;
+  status: string;
+  provider: string;
+  orderId: string | null;
+  paymentId: string | null;
+  failureReason?: string | null;
+  verifiedAt?: string | null;
+  createdAt: string;
+};
+
+export type PlatformTrial = {
+  id: string;
+  type: "INITIAL" | "EXTENSION";
+  startsAt: string;
+  endsAt: string;
+  reason?: string | null;
+  grantedById?: string | null;
+  grantedByRole?: string | null;
+  source?: string | null;
+  createdAt: string;
+};
+
+export type PlatformGymDetail = {
+  gym: {
+    id: string;
+    name: string;
+    email?: string | null;
+    phone?: string | null;
+    address?: string | null;
+    registeredAt: string;
+    createdAt: string;
+  };
+  owner: PlatformOwner | null;
+  owners: PlatformOwner[];
+  staff: PlatformOwner[];
+  effectiveStatus: PlatformSubscriptionStatus;
+  subscription: PlatformSubscription | null;
+  expiryDate: string | null;
+  payments: PlatformPayment[];
+  trialHistory: PlatformTrial[];
+  subscriptionHistory: PlatformAuditLog[];
+  auditLogs: PlatformAuditLog[];
+  stats: {
+    members: number;
+    owners: number;
+    staff: number;
+    totalUsers: number;
+    attendanceRecords: number;
+    membershipPlans: number;
+    activeMemberships: number;
+  };
+};
+
+export type PlatformGymList = {
+  gyms: PlatformGym[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+  filters: {
+    q: string | null;
+    status: PlatformSubscriptionStatus | null;
+    planId: string | null;
+    sort: PlatformGymSort;
+  };
+};
+
+export type PlatformGymSort = "newest" | "oldest" | "name";
+
+export type PlatformGymFilters = {
+  q?: string;
+  status?: PlatformSubscriptionStatus | "";
+  planId?: string;
+  page?: number;
+  limit?: number;
+  sort?: PlatformGymSort;
+};
+
+export type PlatformMutationResult = {
+  message?: string;
+  [key: string]: unknown;
+};
+
+/** GET /super-admin/stats — real database totals. */
+export function fetchPlatformStats(signal?: AbortSignal) {
+  return apiRequest<PlatformStats>("/super-admin/stats", { signal });
+}
+
+/** GET /super-admin/gyms — cross-gym directory with search and filters. */
+export function listPlatformGyms(
+  filters: PlatformGymFilters = {},
+  signal?: AbortSignal,
+) {
+  return apiRequest<PlatformGymList>("/super-admin/gyms", {
+    signal,
+    query: {
+      q: filters.q?.trim() || undefined,
+      status: filters.status || undefined,
+      planId: filters.planId || undefined,
+      page: filters.page,
+      limit: filters.limit,
+      sort: filters.sort,
+    },
+  });
+}
+
+/** GET /super-admin/gyms/:gymId — owner, billing history and audit trail. */
+export function fetchPlatformGym(gymId: string, signal?: AbortSignal) {
+  return apiRequest<PlatformGymDetail>(
+    `/super-admin/gyms/${encodeURIComponent(gymId)}`,
+    { signal },
+  );
+}
+
+/** GET /super-admin/plans — every plan, including inactive ones. */
+export function listPlatformPlans(signal?: AbortSignal) {
+  return apiRequest<SubscriptionPlan[]>("/super-admin/plans", { signal });
+}
+
+/** GET /super-admin/activity — recent platform audit entries. */
+export function fetchPlatformActivity(limit = 50, signal?: AbortSignal) {
+  return apiRequest<PlatformAuditLog[]>("/super-admin/activity", {
+    signal,
+    query: { limit },
+  });
+}
+
+/** POST /super-admin/gyms/:gymId/plan — assign or change the paid plan. */
+export function assignPlatformPlan(
+  gymId: string,
+  input: { planId: string; expiresAt?: string; reason: string },
+) {
+  return apiRequest<{ subscription: PlatformSubscription }>(
+    `/super-admin/gyms/${encodeURIComponent(gymId)}/plan`,
+    { method: "POST", body: input },
+  );
+}
+
+/** POST /super-admin/gyms/:gymId/extend-expiry — extend a paid period/trial. */
+export function extendPlatformExpiry(
+  gymId: string,
+  input: { additionalDays?: number; expiresAt?: string; reason: string },
+) {
+  return apiRequest<{
+    subscriptionId: string;
+    status: string;
+    expiresAt: string | null;
+    previousExpiry: string | null;
+    extendedByDays: number | null;
+  }>(`/super-admin/gyms/${encodeURIComponent(gymId)}/extend-expiry`, {
+    method: "POST",
+    body: input,
+  });
+}
+
+/** POST /super-admin/gyms/:gymId/trial — start or extend a trial. */
+export function startPlatformTrial(
+  gymId: string,
+  input: { days?: number; startsAt?: string; reason: string },
+) {
+  return apiRequest<{
+    subscriptionId: string;
+    status: string;
+    trialStartsAt: string;
+    trialEndsAt: string;
+    extended: boolean;
+  }>(`/super-admin/gyms/${encodeURIComponent(gymId)}/trial`, {
+    method: "POST",
+    body: input,
+  });
+}
+
+/** POST /super-admin/gyms/:gymId/trial/end — end a trial immediately. */
+export function endPlatformTrial(gymId: string, reason: string) {
+  return apiRequest<{
+    subscriptionId: string;
+    status: string;
+    trialEndsAt: string;
+  }>(`/super-admin/gyms/${encodeURIComponent(gymId)}/trial/end`, {
+    method: "POST",
+    body: { reason },
+  });
+}
+
+/** PATCH /super-admin/gyms/:gymId/access — suspend or reactivate a gym. */
+export function setPlatformAccess(
+  gymId: string,
+  input: { status: "ACTIVE" | "SUSPENDED"; expiresAt?: string; reason: string },
+) {
+  return apiRequest<{ subscription: PlatformSubscription }>(
+    `/super-admin/gyms/${encodeURIComponent(gymId)}/access`,
+    { method: "PATCH", body: input },
+  );
 }
