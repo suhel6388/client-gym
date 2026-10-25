@@ -59,7 +59,7 @@ export function LandingNavbar() {
       // Just below the sticky navbar, but above the scroll-padding offset so
       // an anchor click immediately lights its own link.
       const marker =
-        window.scrollY + (window.innerWidth >= 1024 ? 112 : 92);
+        window.scrollY + (window.innerWidth >= 1280 ? 112 : 92);
       let current = "home";
 
       // Sort by document position: the nav order and page order differ because
@@ -130,7 +130,7 @@ export function LandingNavbar() {
     }
 
     function handleResize() {
-      if (window.innerWidth >= 1024) setMobileOpen(false);
+      if (window.innerWidth >= 1280) setMobileOpen(false);
     }
 
     document.addEventListener("keydown", handleKeyDown);
@@ -190,7 +190,7 @@ export function LandingNavbar() {
         className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-lp-gold/20 to-transparent"
       />
 
-      <div className="relative z-10 mx-auto grid h-[72px] max-w-[1440px] grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-5 sm:h-[76px] sm:px-8 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:px-10 xl:h-[84px] xl:px-12">
+      <div className="relative z-10 mx-auto grid h-[72px] max-w-[1440px] grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-5 sm:h-[76px] sm:px-8 lg:px-10 xl:h-[84px] xl:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] xl:px-12">
         <Link
           href="/"
           aria-label="DarkGoldGym home"
@@ -199,7 +199,7 @@ export function LandingNavbar() {
           <DarkGoldLogoHorizontal className="h-8 w-auto text-white sm:h-9 lg:h-9 xl:h-10" />
         </Link>
 
-        <div ref={navRef} className="hidden h-full items-stretch justify-self-center lg:flex">
+        <div ref={navRef} className="hidden h-full items-stretch justify-self-center xl:flex">
           <nav aria-label="Primary" className="flex h-full items-stretch">
             {LANDING_NAV.map((item) => {
               const hasMenu = Boolean(item.children?.length);
@@ -351,7 +351,7 @@ export function LandingNavbar() {
             aria-expanded={mobileOpen}
             aria-controls="landing-mobile-menu"
             onClick={() => setMobileOpen((open) => !open)}
-            className="inline-flex size-10 items-center justify-center rounded-lg border border-white/[0.1] bg-white/[0.03] text-lp-ink transition-all duration-300 hover:border-lp-gold/40 hover:bg-lp-gold/[0.06] hover:text-lp-gold-highlight hover:shadow-[0_0_22px_-10px_rgba(245,179,35,0.75)] focus-visible:border-lp-gold active:scale-95 lg:hidden"
+            className="inline-flex size-10 items-center justify-center rounded-lg border border-white/[0.1] bg-white/[0.03] text-lp-ink transition-all duration-300 hover:border-lp-gold/40 hover:bg-lp-gold/[0.06] hover:text-lp-gold-highlight hover:shadow-[0_0_22px_-10px_rgba(245,179,35,0.75)] focus-visible:border-lp-gold active:scale-95 xl:hidden"
           >
             {mobileOpen ? (
               <X aria-hidden className="size-4.5" strokeWidth={1.9} />
@@ -369,7 +369,7 @@ export function LandingNavbar() {
             tabIndex={-1}
             aria-label="Close navigation menu"
             onClick={() => setMobileOpen(false)}
-            className="fixed inset-0 top-[72px] z-40 bg-black/70 backdrop-blur-[2px] sm:top-[76px] lg:hidden"
+            className="fixed inset-0 top-[72px] z-40 bg-black/70 backdrop-blur-[2px] sm:top-[76px] xl:hidden"
           />
           <div
             id="landing-mobile-menu"
