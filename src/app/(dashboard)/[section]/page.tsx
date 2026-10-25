@@ -20,7 +20,8 @@ export function generateStaticParams() {
         section !== "expenses" &&
         section !== "plans" &&
         section !== "reports" &&
-        section !== "settings",
+        section !== "settings" &&
+        section !== "staff",
     )
     .map((section) => ({ section }));
 }

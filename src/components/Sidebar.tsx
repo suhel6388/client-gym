@@ -9,6 +9,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { navGroups } from "@/lib/nav";
 import { cn } from "@/lib/cn";
+import { useSession } from "./auth/SessionProvider";
 import DarkGoldLogo from "../../public/logo";
 import DarkGoldLogoHorizontal from "../../public/logo_hr";
 
@@ -26,6 +27,20 @@ export function Sidebar({
   onCloseMobile,
 }: SidebarProps) {
   const pathname = usePathname();
+  const { user } = useSession();
+
+  // Role-scoped navigation. The backend still enforces every endpoint; this
+  // only keeps owner-only tools out of the staff sidebar.
+  const visibleGroups = navGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter(
+        (item) =>
+          !item.roles ||
+          (user?.role ? item.roles.includes(user.role) : false),
+      ),
+    }))
+    .filter((group) => group.items.length > 0);
 
   return (
     <>
@@ -85,7 +100,7 @@ export function Sidebar({
         {/* Navigation */}
         <nav className="scroll-thin flex-1 overflow-y-auto px-3 py-5">
           <ul className="space-y-6">
-            {navGroups.map((group) => (
+            {visibleGroups.map((group) => (
               <li key={group.title}>
                 {!collapsed && (
                   <p className="mb-2 select-none px-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-faint">

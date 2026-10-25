@@ -5,6 +5,7 @@ import {
   Dumbbell,
   LayoutDashboard,
   Settings,
+  UserCog,
   Users,
   Wallet,
   type LucideIcon,
@@ -17,6 +18,8 @@ export type NavItem = {
   /** Small pill rendered on the right of the row (counts, status). */
   badge?: string;
   badgeTone?: "gold" | "danger";
+  /** When set, the item is only shown to these backend roles. */
+  roles?: string[];
 };
 
 export type NavGroup = {
@@ -54,6 +57,7 @@ export const navGroups: NavGroup[] = [
     items: [
       // { label: "Trainers", href: "/trainers", icon: UserCog },
       // { label: "Classes", href: "/classes", icon: GraduationCap },
+      { label: "Staff", href: "/staff", icon: UserCog, roles: ["ADMIN"] },
       { label: "Settings", href: "/settings", icon: Settings },
     ],
   },
