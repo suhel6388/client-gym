@@ -3,15 +3,29 @@
 import { ArrowUpRight, ChevronDown, ChevronRight, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type MouseEvent } from "react";
 import DarkGoldLogoHorizontal from "../../../public/logo_hr";
 import { cn } from "@/lib/cn";
 import { LANDING_NAV } from "./navigation";
 
 const MENU_ID_PREFIX = "landing-nav-menu";
 
+// Every in-page anchor on the landing route. Only sections that appear in the
+// navbar drive the highlight, so the last nav section stays lit through the
+// contact, testimonial and CTA sections instead of going dark.
+const NAV_SECTION_IDS = LANDING_NAV.flatMap((item) => {
+  const hash = hashFor(item.href);
+  return hash ? [hash] : [];
+});
+
 function menuIdFor(label: string) {
   return `${MENU_ID_PREFIX}-${label.toLowerCase().replace(/\s+/g, "-")}`;
+}
+
+/** Extract the hash from links such as "/#features" or "#pricing". */
+function hashFor(href: string) {
+  const index = href.indexOf("#");
+  return index >= 0 ? href.slice(index + 1) : null;
 }
 
 export function LandingNavbar() {
@@ -19,13 +33,69 @@ export function LandingNavbar() {
   const navRef = useRef<HTMLDivElement>(null);
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [activeSection, setActiveSection] = useState("home");
 
-  // The landing page is the Features destination, so keep that item lit on "/".
-  const activeLabel = pathname === "/" ? "Features" : null;
+  // Highlight the link for the section currently crossing the navbar line.
+  const activeLabel =
+    pathname === "/"
+      ? LANDING_NAV.find((item) => hashFor(item.href) === activeSection)?.label ?? null
+      : LANDING_NAV.find((item) => item.href === pathname)?.label ?? null;
 
   useEffect(() => {
     setOpenMenu(null);
     setMobileOpen(false);
+  }, [pathname]);
+
+  // Scroll spy: pick the last section whose top has passed the navbar offset.
+  // Cheaper and more predictable than IntersectionObserver for long, nested
+  // sections such as the hero's solution preview.
+  useEffect(() => {
+    if (pathname !== "/") return;
+
+    let frame = 0;
+
+    const update = () => {
+      frame = 0;
+      // Just below the sticky navbar, but above the scroll-padding offset so
+      // an anchor click immediately lights its own link.
+      const marker =
+        window.scrollY + (window.innerWidth >= 1024 ? 112 : 92);
+      let current = "home";
+
+      // Sort by document position: the nav order and page order differ because
+      // "Solutions" points inside the hero. The lowest section past the marker
+      // wins.
+      const sections = NAV_SECTION_IDS.map((id) => document.getElementById(id))
+        .filter((element): element is HTMLElement => Boolean(element))
+        .sort(
+          (a, b) =>
+            a.getBoundingClientRect().top - b.getBoundingClientRect().top,
+        );
+
+      for (const element of sections) {
+        const top = element.getBoundingClientRect().top + window.scrollY;
+        if (top <= marker) current = element.id;
+      }
+
+      setActiveSection(current);
+    };
+
+    const schedule = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(update);
+    };
+
+    update();
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    window.addEventListener("hashchange", schedule);
+
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+      window.removeEventListener("hashchange", schedule);
+    };
   }, [pathname]);
 
   useEffect(() => {
@@ -72,15 +142,52 @@ export function LandingNavbar() {
     };
   }, [mobileOpen]);
 
+  /**
+   * Smooth-scroll in-page anchors instead of letting the router jump. Keeps
+   * the URL shareable and immediately reflects the chosen section.
+   */
+  function handleAnchorNavigation(
+    event: MouseEvent<HTMLAnchorElement>,
+    href: string,
+  ) {
+    const hash = hashFor(href);
+    if (!hash || pathname !== "/") return;
+
+    const target = document.getElementById(hash);
+    if (!target) return;
+
+    event.preventDefault();
+    const reduceMotion = window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
+
+    target.scrollIntoView({
+      behavior: reduceMotion ? "auto" : "smooth",
+      block: "start",
+    });
+
+    if (window.location.hash !== `#${hash}`) {
+      window.history.replaceState(null, "", `#${hash}`);
+    }
+
+    setActiveSection(hash);
+    setOpenMenu(null);
+    setMobileOpen(false);
+  }
+
   return (
-    <header className="sticky top-0 z-50 border-b border-white/[0.06] bg-lp-nav/95">
+    <header className="sticky top-0 z-50 border-b border-lp-gold/10 bg-lp-nav/95">
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-lp-nav/70 backdrop-blur-xl"
+        className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(8,9,9,0.96),rgba(8,9,9,0.82))] backdrop-blur-xl"
       />
       <span
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-lp-gold/25 to-transparent"
+      />
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-lp-gold/20 to-transparent"
       />
 
       <div className="relative z-10 mx-auto grid h-[72px] max-w-[1440px] grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-5 sm:h-[76px] sm:px-8 lg:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] lg:px-10 xl:h-[84px] xl:px-12">
@@ -150,6 +257,7 @@ export function LandingNavbar() {
                           )}
                         />
                       </span>
+                      <span aria-hidden className="dg-nav-bg" />
                       <span aria-hidden className="dg-nav-glow" />
                       <span aria-hidden className="dg-nav-edge" />
                       <span aria-hidden className="dg-nav-underline" />
@@ -158,11 +266,13 @@ export function LandingNavbar() {
                     <Link
                       href={item.href}
                       aria-current={isActive ? "page" : undefined}
+                      onClick={(event) => handleAnchorNavigation(event, item.href)}
                       className="dg-nav-link"
                     >
                       <span className="relative z-10 inline-flex items-center gap-1.5">
                         {item.label}
                       </span>
+                      <span aria-hidden className="dg-nav-bg" />
                       <span aria-hidden className="dg-nav-glow" />
                       <span aria-hidden className="dg-nav-edge" />
                       <span aria-hidden className="dg-nav-underline" />
@@ -174,7 +284,7 @@ export function LandingNavbar() {
                       id={menuId}
                       className="absolute left-1/2 top-full z-50 w-[306px] -translate-x-1/2 pt-3"
                     >
-                      <div className="relative overflow-hidden rounded-xl border border-white/[0.09] bg-[#0c0d0e]/98 p-2 shadow-[0_28px_60px_-18px_rgba(0,0,0,0.9)] backdrop-blur-xl">
+                      <div className="relative overflow-hidden rounded-xl border border-lp-gold/20 bg-[#0c0d0e]/98 p-2 shadow-[0_28px_60px_-18px_rgba(0,0,0,0.9),0_0_40px_-24px_rgba(245,179,35,0.55)] backdrop-blur-xl">
                         <span
                           aria-hidden
                           className="pointer-events-none absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-lp-gold/75 to-transparent"
@@ -186,10 +296,13 @@ export function LandingNavbar() {
                               <li key={child.label}>
                                 <Link
                                   href={child.href}
-                                  onClick={() => setOpenMenu(null)}
-                                  className="group/menu flex items-start gap-2.5 rounded-lg px-2.5 py-2.5 transition-colors duration-200 hover:bg-lp-gold/[0.065] focus-visible:bg-lp-gold/[0.065]"
+                                  onClick={(event) => {
+                                    handleAnchorNavigation(event, child.href);
+                                    setOpenMenu(null);
+                                  }}
+                                  className="group/menu flex items-start gap-2.5 rounded-lg px-2.5 py-2.5 transition-colors duration-200 hover:bg-lp-gold/[0.075] focus-visible:bg-lp-gold/[0.075]"
                                 >
-                                  <span className="mt-0.5 inline-flex size-7 shrink-0 items-center justify-center rounded-md border border-lp-gold/15 bg-lp-gold/[0.07] text-lp-gold transition-colors duration-200 group-hover/menu:border-lp-gold/25 group-hover/menu:text-lp-gold-highlight">
+                                  <span className="mt-0.5 inline-flex size-7 shrink-0 items-center justify-center rounded-md border border-lp-gold/15 bg-lp-gold/[0.07] text-lp-gold transition-colors duration-200 group-hover/menu:border-lp-gold/30 group-hover/menu:bg-lp-gold/[0.12] group-hover/menu:text-lp-gold-highlight">
                                     <ChildIcon
                                       aria-hidden
                                       className="size-3.5"
@@ -221,7 +334,7 @@ export function LandingNavbar() {
         <div className="flex items-center gap-2 justify-self-end sm:gap-2.5">
           <Link
             href="/login"
-            className="hidden h-10 items-center justify-center whitespace-nowrap rounded-lg border border-white/[0.14] bg-white/[0.02] px-4 text-[12.5px] font-semibold text-lp-ink transition-colors duration-300 hover:border-lp-gold/45 hover:bg-lp-gold/[0.06] hover:text-lp-gold-highlight md:inline-flex"
+            className="hidden h-10 items-center justify-center whitespace-nowrap rounded-lg border border-white/[0.14] bg-white/[0.02] px-4 text-[12.5px] font-semibold text-lp-ink transition-all duration-300 hover:border-lp-gold/45 hover:bg-lp-gold/[0.06] hover:text-lp-gold-highlight hover:shadow-[0_0_22px_-10px_rgba(245,179,35,0.75)] md:inline-flex"
           >
             Log In
           </Link>
@@ -238,7 +351,7 @@ export function LandingNavbar() {
             aria-expanded={mobileOpen}
             aria-controls="landing-mobile-menu"
             onClick={() => setMobileOpen((open) => !open)}
-            className="inline-flex size-10 items-center justify-center rounded-lg border border-white/[0.1] bg-white/[0.03] text-lp-ink transition-colors duration-300 hover:border-lp-gold/40 hover:text-lp-gold focus-visible:border-lp-gold lg:hidden"
+            className="inline-flex size-10 items-center justify-center rounded-lg border border-white/[0.1] bg-white/[0.03] text-lp-ink transition-all duration-300 hover:border-lp-gold/40 hover:bg-lp-gold/[0.06] hover:text-lp-gold-highlight hover:shadow-[0_0_22px_-10px_rgba(245,179,35,0.75)] focus-visible:border-lp-gold active:scale-95 lg:hidden"
           >
             {mobileOpen ? (
               <X aria-hidden className="size-4.5" strokeWidth={1.9} />
@@ -260,7 +373,7 @@ export function LandingNavbar() {
           />
           <div
             id="landing-mobile-menu"
-            className="absolute inset-x-0 top-full z-50 max-h-[calc(100dvh-4.5rem)] overflow-y-auto border-b border-white/[0.09] bg-lp-nav shadow-[0_28px_70px_rgba(0,0,0,0.82)] lg:hidden"
+            className="absolute inset-x-0 top-full z-50 max-h-[calc(100dvh-4.5rem)] overflow-y-auto border-b border-lp-gold/15 bg-lp-nav shadow-[0_28px_70px_rgba(0,0,0,0.82)] lg:hidden"
           >
             <nav
               aria-label="Mobile navigation"
@@ -276,19 +389,34 @@ export function LandingNavbar() {
                     <li key={item.label}>
                       <Link
                         href={item.href}
-                        onClick={() => setMobileOpen(false)}
+                        onClick={(event) => {
+                          handleAnchorNavigation(event, item.href);
+                          setMobileOpen(false);
+                        }}
                         aria-current={isActive ? "page" : undefined}
                         className={cn(
-                          "flex items-center justify-between rounded-lg px-3 py-3 text-[14px] font-medium transition-colors duration-200",
+                          "flex items-center justify-between rounded-lg border px-3 py-3 text-[14px] font-medium transition-all duration-300",
                           isActive
-                            ? "bg-lp-gold/[0.08] text-lp-gold"
-                            : "text-lp-muted hover:bg-white/[0.04] hover:text-lp-ink",
+                            ? "border-lp-gold/25 bg-lp-gold/[0.08] text-lp-gold-highlight shadow-[inset_0_0_20px_-10px_rgba(245,179,35,0.7)]"
+                            : "border-transparent text-lp-muted hover:border-lp-gold/15 hover:bg-white/[0.04] hover:text-lp-ink active:bg-lp-gold/[0.06]",
                         )}
                       >
-                        {item.label}
+                        <span className="inline-flex items-center gap-2.5">
+                          <span
+                            aria-hidden
+                            className={cn(
+                              "size-1.5 rounded-full bg-lp-gold transition-opacity duration-300",
+                              isActive ? "opacity-100 shadow-[0_0_8px_rgba(245,179,35,0.9)]" : "opacity-0",
+                            )}
+                          />
+                          {item.label}
+                        </span>
                         <ChevronRight
                           aria-hidden
-                          className="size-4 opacity-45"
+                          className={cn(
+                            "size-4 transition-colors",
+                            isActive ? "text-lp-gold" : "opacity-45",
+                          )}
                           strokeWidth={1.8}
                         />
                       </Link>
@@ -297,11 +425,11 @@ export function LandingNavbar() {
                 })}
               </ul>
 
-              <div className="mt-4 grid gap-2.5 border-t border-white/[0.08] pt-4">
+              <div className="mt-4 grid gap-2.5 border-t border-lp-gold/15 pt-4">
                 <Link
                   href="/login"
                   onClick={() => setMobileOpen(false)}
-                  className="inline-flex h-11 items-center justify-center rounded-lg border border-white/[0.14] bg-white/[0.02] text-[13px] font-semibold text-lp-ink transition-colors hover:border-lp-gold/45 hover:text-lp-gold-highlight"
+                  className="inline-flex h-11 items-center justify-center rounded-lg border border-white/[0.14] bg-white/[0.02] text-[13px] font-semibold text-lp-ink transition-all duration-300 hover:border-lp-gold/45 hover:bg-lp-gold/[0.06] hover:text-lp-gold-highlight"
                 >
                   Log In
                 </Link>

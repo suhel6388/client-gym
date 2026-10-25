@@ -11,7 +11,7 @@ import {
 
 /* ---------- Content (edit freely) ---------- */
 
-const BRAND = "YourGymApp"; // <- change to your product name
+const BRAND = "DarkGoldGym";
 
 const STORY = [
   `${BRAND} started with a simple problem: gym owners were spending more time on registers, WhatsApp reminders and payment follow-ups than on their members.`,
@@ -92,10 +92,14 @@ export default function GymAbout() {
   return (
     <section
       id="about"
-      className="relative isolate w-full overflow-hidden bg-[#070707] text-white"
+      className="dg-lp-section relative isolate w-full overflow-hidden text-lp-ink"
     >
-      <div className="pointer-events-none absolute -left-40 top-1/3 -z-10 h-[420px] w-[520px] rounded-full bg-amber-500/[0.06] blur-3xl" />
-      <div className="absolute inset-x-0 top-0 h-px bg-white/10" />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -left-40 top-1/3 -z-10 h-[420px] w-[520px] rounded-full bg-lp-gold/[0.055] blur-3xl"
+      />
+      <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-lp-line/40" />
+      <div aria-hidden className="absolute inset-x-0 bottom-0 h-px bg-lp-line/30" />
 
       <motion.div
         variants={container}
@@ -109,14 +113,14 @@ export default function GymAbout() {
           <div>
             <motion.p
               variants={text}
-              className="text-xs font-semibold uppercase tracking-wider text-amber-400"
+              className="text-xs font-semibold uppercase tracking-wider text-lp-gold"
             >
               About Us
             </motion.p>
 
             <motion.h2
               variants={text}
-              className="mt-4 text-3xl font-semibold leading-tight sm:text-4xl"
+              className="mt-4 text-balance text-3xl font-semibold leading-tight tracking-[-0.02em] sm:text-4xl"
             >
               We help gyms spend less time on admin and more on their members
             </motion.h2>
@@ -125,7 +129,7 @@ export default function GymAbout() {
               <motion.p
                 key={i}
                 variants={text}
-                className="mt-5 max-w-lg text-sm leading-relaxed text-white/70 sm:text-base"
+                className="mt-5 max-w-lg text-sm leading-relaxed text-lp-muted sm:text-base"
               >
                 {p}
               </motion.p>
@@ -134,13 +138,13 @@ export default function GymAbout() {
             <motion.div variants={text} className="mt-8 flex flex-wrap gap-3">
               <a
                 href="#pricing"
-                className="rounded-md bg-gradient-to-b from-amber-300 to-amber-500 px-6 py-3 text-sm font-semibold text-black transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
+                className="rounded-lg bg-[linear-gradient(135deg,#FFD15C_0%,#F5B323_55%,#EFAE14_100%)] px-6 py-3 text-sm font-semibold text-[#171203] shadow-[0_12px_28px_-14px_rgba(245,179,35,0.75)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_34px_-12px_rgba(245,179,35,0.9)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lp-gold-highlight"
               >
                 Start Free Trial
               </a>
               <a
                 href="#contact"
-                className="rounded-md border border-amber-400 px-6 py-3 text-sm font-semibold text-amber-400 transition hover:bg-amber-400/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300"
+                className="rounded-lg border border-lp-gold/45 px-6 py-3 text-sm font-semibold text-lp-gold-highlight transition-all duration-300 hover:-translate-y-0.5 hover:border-lp-gold/80 hover:bg-lp-gold/[0.08] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lp-gold-highlight"
               >
                 Talk to Us
               </a>
@@ -155,13 +159,15 @@ export default function GymAbout() {
                 variants={card}
                 whileHover={prefersReduced ? undefined : { y: -4 }}
                 transition={{ type: "spring", stiffness: 300, damping: 22 }}
-                className="group rounded-xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-sm transition-colors hover:border-amber-400/40 hover:bg-white/[0.06]"
+                className="group rounded-xl border border-white/[0.07] bg-white/[0.025] p-5 backdrop-blur-sm transition-all duration-300 hover:border-lp-gold/35 hover:bg-lp-gold/[0.045] hover:shadow-[0_20px_44px_-30px_rgba(245,179,35,0.55)]"
               >
-                <div className="flex h-11 w-11 items-center justify-center rounded-full border border-amber-400/70 bg-amber-400/5 text-amber-400 transition-colors group-hover:bg-amber-400/15">
-                  <Icon className="h-5 w-5" strokeWidth={1.75} />
+                <div className="flex size-11 items-center justify-center rounded-full border border-lp-gold/45 bg-lp-gold/[0.06] text-lp-gold transition-all duration-300 group-hover:border-lp-gold/70 group-hover:bg-lp-gold/[0.13] group-hover:shadow-[0_0_22px_-8px_rgba(245,179,35,0.8)]">
+                  <Icon className="size-5" strokeWidth={1.75} aria-hidden />
                 </div>
-                <h3 className="mt-5 text-base font-semibold">{title}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-white/60">
+                <h3 className="mt-5 text-base font-semibold text-lp-ink">
+                  {title}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-lp-muted/85">
                   {description}
                 </p>
               </motion.article>
@@ -170,17 +176,17 @@ export default function GymAbout() {
         </div>
 
         {/* ---------- Stats strip ---------- */}
-        <div className="mt-14 grid grid-cols-2 gap-y-8 rounded-xl border border-white/10 bg-white/[0.03] px-4 py-8 lg:grid-cols-4">
+        <div className="mt-14 grid grid-cols-2 gap-y-8 rounded-xl border border-white/[0.07] bg-white/[0.025] px-4 py-8 lg:grid-cols-4">
           {STATS.map(({ value, label }, i) => (
             <motion.div
               key={label}
               variants={stat}
               className={`text-center ${
-                i !== 0 ? "lg:border-l lg:border-white/10" : ""
+                i !== 0 ? "lg:border-l lg:border-lp-line/40" : ""
               }`}
             >
-              <p className="text-3xl font-semibold text-amber-400">{value}</p>
-              <p className="mt-1 text-xs text-white/60 sm:text-sm">{label}</p>
+              <p className="text-3xl font-semibold text-lp-gold">{value}</p>
+              <p className="mt-1 text-xs text-lp-muted/80 sm:text-sm">{label}</p>
             </motion.div>
           ))}
         </div>

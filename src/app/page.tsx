@@ -29,15 +29,15 @@ export default function LandingPage() {
         Skip to content
       </a>
       <LandingNavbar />
-      <main>
-        <HeroSection  />
-        <GymFeatures/>
-        <GymPricing/>
-        <GymAbout/>
-        <GymContact/>
-        <GymReview/>
-        <GymReward/>
-        <GymFooter/>
+      <main id="main-content" tabIndex={-1} className="outline-none">
+        <HeroSection />
+        <GymFeatures />
+        <GymPricing />
+        <GymAbout />
+        <GymContact />
+        <GymReview />
+        <GymReward />
+        <GymFooter />
       </main>
     </div>
   );

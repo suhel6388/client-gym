@@ -28,36 +28,40 @@ export type LandingNavItem = {
 
 export const LANDING_NAV: LandingNavItem[] = [
   {
+    label: "Home",
+    href: "/#home",
+  },
+  {
     label: "Features",
     href: "/#features",
     children: [
       {
         label: "Member Management",
-        href: "/#member-management",
+        href: "/#features",
         description: "Profiles, renewals and member history in one place.",
         icon: Users,
       },
       {
         label: "Attendance Tracking",
-        href: "/#attendance-tracking",
+        href: "/#features",
         description: "Check-ins, check-outs and daily gym activity.",
         icon: CalendarCheck,
       },
       {
         label: "Payments & Billing",
-        href: "/#payments-billing",
+        href: "/#features",
         description: "Collect dues, issue receipts and track cash flow.",
         icon: CreditCard,
       },
       {
         label: "Workout & Programs",
-        href: "/#workout-programs",
+        href: "/#features",
         description: "Build training plans members actually follow.",
         icon: Dumbbell,
       },
       {
         label: "Reports & Analytics",
-        href: "/#reports-analytics",
+        href: "/#features",
         description: "See revenue, retention and growth at a glance.",
         icon: BarChart3,
       },
@@ -118,5 +122,9 @@ export const LANDING_NAV: LandingNavItem[] = [
   {
     label: "About Us",
     href: "/#about",
+  },
+  {
+    label: "Contact Us",
+    href: "/#contact",
   },
 ];

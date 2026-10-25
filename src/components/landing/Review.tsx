@@ -135,9 +135,14 @@ export default function GymReview() {
   return (
     <section
       id="review"
-      className="relative isolate w-full overflow-hidden bg-[#070707] text-white"
+      className="dg-lp-section relative isolate w-full overflow-hidden text-lp-ink"
     >
-      <div className="absolute inset-x-0 top-0 h-px bg-white/10" />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[420px] w-[760px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-lp-gold/[0.045] blur-[120px]"
+      />
+      <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-lp-line/40" />
+      <div aria-hidden className="absolute inset-x-0 bottom-0 h-px bg-lp-line/30" />
 
       <motion.div
         variants={container}
@@ -149,11 +154,14 @@ export default function GymReview() {
         <div className="text-center">
           <motion.p
             variants={v}
-            className="text-xs font-semibold uppercase tracking-wider text-amber-400"
+            className="text-xs font-semibold uppercase tracking-wider text-lp-gold"
           >
             Trusted by Gym Owners
           </motion.p>
-          <motion.h2 variants={v} className="mt-3 text-3xl font-semibold sm:text-4xl">
+          <motion.h2
+            variants={v}
+            className="mt-3 text-balance text-3xl font-semibold tracking-[-0.02em] sm:text-4xl"
+          >
             What our customers say
           </motion.h2>
         </div>
@@ -170,9 +178,9 @@ export default function GymReview() {
             type="button"
             onClick={prev}
             aria-label="Previous review"
-            className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/20 text-white transition hover:border-amber-400 hover:text-amber-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 sm:flex"
+            className="hidden size-10 shrink-0 items-center justify-center rounded-full border border-white/20 text-lp-ink transition-all duration-300 hover:border-lp-gold/70 hover:bg-lp-gold/[0.08] hover:text-lp-gold-highlight hover:shadow-[0_0_22px_-8px_rgba(245,179,35,0.8)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lp-gold-highlight active:scale-95 sm:flex"
           >
-            <ChevronLeft className="h-5 w-5" />
+            <ChevronLeft className="size-5" aria-hidden />
           </button>
 
           {/* Viewport */}
@@ -193,27 +201,30 @@ export default function GymReview() {
                   className="shrink-0 px-2"
                   style={{ flexBasis: `${100 / visible}%` }}
                 >
-                  <article className="h-full rounded-xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-sm transition-colors hover:border-amber-400/40">
+                  <article className="group h-full rounded-xl border border-white/[0.07] bg-white/[0.025] p-5 backdrop-blur-sm transition-all duration-300 hover:border-lp-gold/35 hover:bg-lp-gold/[0.035] hover:shadow-[0_20px_44px_-30px_rgba(245,179,35,0.55)]">
                     <div className="flex gap-1" aria-label="5 out of 5 stars">
                       {Array.from({ length: 5 }).map((_, s) => (
                         <Star
                           key={s}
-                          className="h-4 w-4 fill-amber-400 text-amber-400"
+                          className="size-4 fill-lp-gold text-lp-gold"
+                          aria-hidden
                         />
                       ))}
                     </div>
 
-                    <p className="mt-4 min-h-[96px] text-sm leading-relaxed text-white/85">
+                    <p className="mt-4 min-h-[96px] text-sm leading-relaxed text-lp-ink/85">
                       &ldquo;{r.quote}&rdquo;
                     </p>
 
                     <div className="mt-5 flex items-center gap-3">
-                      <span className="flex h-10 w-10 items-center justify-center rounded-full border border-amber-400/70 bg-amber-400/10 text-sm font-semibold text-amber-400">
+                      <span className="flex size-10 items-center justify-center rounded-full border border-lp-gold/45 bg-lp-gold/[0.08] text-sm font-semibold text-lp-gold transition-colors group-hover:border-lp-gold/70 group-hover:bg-lp-gold/[0.14]">
                         {initials(r.name)}
                       </span>
                       <div>
-                        <p className="text-sm font-semibold">{r.name}</p>
-                        <p className="text-xs text-white/60">{r.gym}</p>
+                        <p className="text-sm font-semibold text-lp-ink">
+                          {r.name}
+                        </p>
+                        <p className="text-xs text-lp-muted/80">{r.gym}</p>
                       </div>
                     </div>
                   </article>
@@ -226,9 +237,9 @@ export default function GymReview() {
             type="button"
             onClick={next}
             aria-label="Next review"
-            className="hidden h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/20 text-white transition hover:border-amber-400 hover:text-amber-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 sm:flex"
+            className="hidden size-10 shrink-0 items-center justify-center rounded-full border border-white/20 text-lp-ink transition-all duration-300 hover:border-lp-gold/70 hover:bg-lp-gold/[0.08] hover:text-lp-gold-highlight hover:shadow-[0_0_22px_-8px_rgba(245,179,35,0.8)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lp-gold-highlight active:scale-95 sm:flex"
           >
-            <ChevronRight className="h-5 w-5" />
+            <ChevronRight className="size-5" aria-hidden />
           </button>
         </motion.div>
 
@@ -239,9 +250,12 @@ export default function GymReview() {
               key={r.name}
               type="button"
               aria-label={`Go to review ${i + 1}`}
+              aria-current={i === activeDot ? "true" : undefined}
               onClick={() => setIndex(i)}
-              className={`h-1.5 rounded-full transition-all ${
-                i === activeDot ? "w-6 bg-amber-400" : "w-1.5 bg-white/25"
+              className={`h-1.5 rounded-full transition-all duration-300 ${
+                i === activeDot
+                  ? "w-6 bg-lp-gold shadow-[0_0_10px_rgba(245,179,35,0.75)]"
+                  : "w-1.5 bg-white/25 hover:bg-lp-gold/50"
               }`}
             />
           ))}

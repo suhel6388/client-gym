@@ -39,7 +39,7 @@ const reduced: Variants = {
 type Status = "idle" | "sending" | "success" | "error";
 
 const inputClass =
-  "w-full rounded-md border border-white/10 bg-white/[0.04] px-4 py-3 text-sm text-white placeholder:text-white/40 transition focus:border-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-400";
+  "w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm text-lp-ink placeholder:text-lp-muted/45 transition-colors duration-200 hover:border-white/[0.14] focus:border-lp-gold focus:outline-none focus:ring-1 focus:ring-lp-gold/50";
 
 /* ---------- Component ---------- */
 
@@ -83,10 +83,14 @@ export default function GymContact() {
   return (
     <section
       id="contact"
-      className="relative isolate w-full overflow-hidden bg-[#070707] text-white"
+      className="dg-lp-section relative isolate w-full overflow-hidden text-lp-ink"
     >
-      <div className="pointer-events-none absolute -right-40 top-1/4 -z-10 h-[420px] w-[520px] rounded-full bg-amber-500/[0.06] blur-3xl" />
-      <div className="absolute inset-x-0 top-0 h-px bg-white/10" />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-40 top-1/4 -z-10 h-[420px] w-[520px] rounded-full bg-lp-gold/[0.055] blur-3xl"
+      />
+      <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-lp-line/40" />
+      <div aria-hidden className="absolute inset-x-0 bottom-0 h-px bg-lp-line/30" />
 
       <motion.div
         variants={container}
@@ -99,14 +103,20 @@ export default function GymContact() {
         <div className="text-center">
           <motion.p
             variants={v}
-            className="text-xs font-semibold uppercase tracking-wider text-amber-400"
+            className="text-xs font-semibold uppercase tracking-wider text-lp-gold"
           >
             Contact Us
           </motion.p>
-          <motion.h2 variants={v} className="mt-3 text-3xl font-semibold sm:text-4xl">
+          <motion.h2
+            variants={v}
+            className="mt-3 text-balance text-3xl font-semibold tracking-[-0.02em] sm:text-4xl"
+          >
             Let&apos;s get your gym running smoothly
           </motion.h2>
-          <motion.p variants={v} className="mx-auto mt-3 max-w-xl text-sm text-white/70">
+          <motion.p
+            variants={v}
+            className="mx-auto mt-3 max-w-xl text-sm text-lp-muted"
+          >
             Message us on WhatsApp for a quick reply, or send us the form and we&apos;ll
             get back to you.
           </motion.p>
@@ -120,14 +130,16 @@ export default function GymContact() {
               href={WHATSAPP_URL}
               target="_blank"
               rel="noopener noreferrer"
-              className="group flex items-center gap-4 rounded-xl border border-amber-400 bg-amber-400/[0.05] p-5 shadow-[0_0_40px_-14px_rgba(251,191,36,0.45)] transition hover:bg-amber-400/10"
+              className="group flex items-center gap-4 rounded-xl border border-lp-gold/55 bg-lp-gold/[0.055] p-5 shadow-[0_0_44px_-18px_rgba(245,179,35,0.55)] transition-all duration-300 hover:-translate-y-0.5 hover:border-lp-gold/80 hover:bg-lp-gold/[0.09]"
             >
-              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-b from-amber-300 to-amber-500 text-black">
-                <MessageCircle className="h-6 w-6" strokeWidth={2} />
+              <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-[linear-gradient(135deg,#FFD15C_0%,#F5B323_55%,#EFAE14_100%)] text-[#171203] shadow-[0_8px_20px_-10px_rgba(245,179,35,0.9)]">
+                <MessageCircle className="size-6" strokeWidth={2} aria-hidden />
               </span>
               <span>
-                <span className="block text-base font-semibold">Chat on WhatsApp</span>
-                <span className="block text-sm text-white/60">
+                <span className="block text-base font-semibold text-lp-ink">
+                  Chat on WhatsApp
+                </span>
+                <span className="block text-sm text-lp-muted">
                   Fastest way to reach us
                 </span>
               </span>
@@ -136,28 +148,32 @@ export default function GymContact() {
             <motion.a
               variants={v}
               href={`tel:${PHONE_TEL}`}
-              className="group flex items-center gap-4 rounded-xl border border-white/10 bg-white/[0.03] p-5 transition hover:border-amber-400/40 hover:bg-white/[0.06]"
+              className="group flex items-center gap-4 rounded-xl border border-white/[0.07] bg-white/[0.025] p-5 transition-all duration-300 hover:border-lp-gold/40 hover:bg-lp-gold/[0.04]"
             >
-              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-amber-400/70 bg-amber-400/5 text-amber-400">
-                <Phone className="h-5 w-5" strokeWidth={1.75} />
+              <span className="flex size-12 shrink-0 items-center justify-center rounded-full border border-lp-gold/45 bg-lp-gold/[0.06] text-lp-gold transition-colors group-hover:border-lp-gold/70 group-hover:bg-lp-gold/[0.12]">
+                <Phone className="size-5" strokeWidth={1.75} aria-hidden />
               </span>
               <span>
-                <span className="block text-sm text-white/60">Call us</span>
-                <span className="block text-base font-semibold">{PHONE_DISPLAY}</span>
+                <span className="block text-sm text-lp-muted">Call us</span>
+                <span className="block text-base font-semibold text-lp-ink">
+                  {PHONE_DISPLAY}
+                </span>
               </span>
             </motion.a>
 
             <motion.a
               variants={v}
               href={`mailto:${EMAIL}`}
-              className="group flex items-center gap-4 rounded-xl border border-white/10 bg-white/[0.03] p-5 transition hover:border-amber-400/40 hover:bg-white/[0.06]"
+              className="group flex items-center gap-4 rounded-xl border border-white/[0.07] bg-white/[0.025] p-5 transition-all duration-300 hover:border-lp-gold/40 hover:bg-lp-gold/[0.04]"
             >
-              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-amber-400/70 bg-amber-400/5 text-amber-400">
-                <Mail className="h-5 w-5" strokeWidth={1.75} />
+              <span className="flex size-12 shrink-0 items-center justify-center rounded-full border border-lp-gold/45 bg-lp-gold/[0.06] text-lp-gold transition-colors group-hover:border-lp-gold/70 group-hover:bg-lp-gold/[0.12]">
+                <Mail className="size-5" strokeWidth={1.75} aria-hidden />
               </span>
               <span className="min-w-0">
-                <span className="block text-sm text-white/60">Email us</span>
-                <span className="block truncate text-base font-semibold">{EMAIL}</span>
+                <span className="block text-sm text-lp-muted">Email us</span>
+                <span className="block truncate text-base font-semibold text-lp-ink">
+                  {EMAIL}
+                </span>
               </span>
             </motion.a>
           </div>
@@ -165,29 +181,37 @@ export default function GymContact() {
           {/* ---------- Right: form ---------- */}
           <motion.div
             variants={v}
-            className="rounded-xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur-sm sm:p-8"
+            className="rounded-xl border border-white/[0.07] bg-white/[0.025] p-6 backdrop-blur-sm sm:p-8"
           >
             {status === "success" ? (
               <div
                 role="status"
                 className="flex h-full min-h-[320px] flex-col items-center justify-center text-center"
               >
-                <CheckCircle2 className="h-12 w-12 text-amber-400" strokeWidth={1.5} />
-                <h3 className="mt-4 text-xl font-semibold">Message sent</h3>
-                <p className="mt-2 max-w-xs text-sm text-white/60">
+                <CheckCircle2
+                  className="size-12 text-lp-gold"
+                  strokeWidth={1.5}
+                  aria-hidden
+                />
+                <h3 className="mt-4 text-xl font-semibold text-lp-ink">
+                  Message sent
+                </h3>
+                <p className="mt-2 max-w-xs text-sm text-lp-muted">
                   Thanks for reaching out. We&apos;ll reply as soon as we can.
                 </p>
                 <button
                   type="button"
                   onClick={() => setStatus("idle")}
-                  className="mt-6 rounded-md border border-amber-400 px-5 py-2.5 text-sm font-semibold text-amber-400 transition hover:bg-amber-400/10"
+                  className="mt-6 rounded-lg border border-lp-gold/45 px-5 py-2.5 text-sm font-semibold text-lp-gold-highlight transition-all duration-300 hover:border-lp-gold/80 hover:bg-lp-gold/[0.08]"
                 >
                   Send another message
                 </button>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
-                <h3 className="text-xl font-semibold">Send us a message</h3>
+                <h3 className="text-xl font-semibold text-lp-ink">
+                  Send us a message
+                </h3>
 
                 {/* Honeypot (hidden from users) */}
                 <input
@@ -201,7 +225,10 @@ export default function GymContact() {
 
                 <div className="grid gap-4 sm:grid-cols-2">
                   <div>
-                    <label htmlFor="name" className="mb-1.5 block text-xs text-white/60">
+                    <label
+                      htmlFor="name"
+                      className="mb-1.5 block text-xs text-lp-muted"
+                    >
                       Your name
                     </label>
                     <input
@@ -214,7 +241,10 @@ export default function GymContact() {
                     />
                   </div>
                   <div>
-                    <label htmlFor="phone" className="mb-1.5 block text-xs text-white/60">
+                    <label
+                      htmlFor="phone"
+                      className="mb-1.5 block text-xs text-lp-muted"
+                    >
                       Phone number
                     </label>
                     <input
@@ -228,7 +258,10 @@ export default function GymContact() {
                 </div>
 
                 <div>
-                  <label htmlFor="email" className="mb-1.5 block text-xs text-white/60">
+                  <label
+                    htmlFor="email"
+                    className="mb-1.5 block text-xs text-lp-muted"
+                  >
                     Email
                   </label>
                   <input
@@ -242,7 +275,10 @@ export default function GymContact() {
                 </div>
 
                 <div>
-                  <label htmlFor="message" className="mb-1.5 block text-xs text-white/60">
+                  <label
+                    htmlFor="message"
+                    className="mb-1.5 block text-xs text-lp-muted"
+                  >
                     Message
                   </label>
                   <textarea
@@ -264,9 +300,9 @@ export default function GymContact() {
                 <button
                   type="submit"
                   disabled={status === "sending"}
-                  className="flex w-full items-center justify-center gap-2 rounded-md bg-gradient-to-b from-amber-300 to-amber-500 px-4 py-3 text-sm font-semibold text-black transition hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-[linear-gradient(135deg,#FFD15C_0%,#F5B323_55%,#EFAE14_100%)] px-4 py-3 text-sm font-semibold text-[#171203] shadow-[0_12px_28px_-14px_rgba(245,179,35,0.75)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_34px_-12px_rgba(245,179,35,0.9)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lp-gold-highlight disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:translate-y-0"
                 >
-                  <Send className="h-4 w-4" />
+                  <Send className="size-4" aria-hidden />
                   {status === "sending" ? "Sending..." : "Send Message"}
                 </button>
               </form>

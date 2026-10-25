@@ -100,7 +100,7 @@ const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 const container: Variants = {
   hidden: {},
-  show: { transition: { staggerChildren: 0.14, delayChildren: 0.05 } },
+  show: { transition: { staggerChildren: 0.12, delayChildren: 0.05 } },
 };
 
 const textItem: Variants = {
@@ -123,6 +123,9 @@ const reduced: Variants = {
   show: { opacity: 1, transition: { duration: 0.3 } },
 };
 
+const PRIMARY_BUTTON =
+  "bg-[linear-gradient(135deg,#FFD15C_0%,#F5B323_55%,#EFAE14_100%)] text-[#171203] shadow-[0_12px_28px_-14px_rgba(245,179,35,0.75)] hover:-translate-y-0.5 hover:shadow-[0_16px_34px_-12px_rgba(245,179,35,0.9)]";
+
 /* ---------- Component ---------- */
 
 export default function GymPricing() {
@@ -135,11 +138,15 @@ export default function GymPricing() {
   return (
     <section
       id="pricing"
-      className="relative isolate w-full overflow-hidden bg-[#070707] text-white"
+      className="dg-lp-section relative isolate w-full overflow-hidden text-lp-ink"
     >
       {/* Soft amber glow behind the popular plan */}
-      <div className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[500px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-amber-500/[0.06] blur-3xl" />
-      <div className="absolute inset-x-0 top-0 h-px bg-white/10" />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute left-1/2 top-1/2 -z-10 h-[500px] w-[700px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-lp-gold/[0.06] blur-3xl"
+      />
+      <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-lp-line/40" />
+      <div aria-hidden className="absolute inset-x-0 bottom-0 h-px bg-lp-line/30" />
 
       <motion.div
         variants={container}
@@ -152,19 +159,19 @@ export default function GymPricing() {
         <div className="text-center">
           <motion.p
             variants={text}
-            className="text-xs font-semibold uppercase tracking-wider text-amber-400"
+            className="text-xs font-semibold uppercase tracking-wider text-lp-gold"
           >
             Simple &amp; Transparent Pricing
           </motion.p>
 
           <motion.h2
             variants={text}
-            className="mt-3 text-3xl font-semibold sm:text-4xl"
+            className="mt-3 text-balance text-3xl font-semibold tracking-[-0.02em] sm:text-4xl"
           >
             Choose the plan that&apos;s right for you
           </motion.h2>
 
-          <motion.p variants={text} className="mt-3 text-sm text-white/70">
+          <motion.p variants={text} className="mt-3 text-sm text-lp-muted">
             14-Day Free Trial on All Plans. No Credit Card Required.
           </motion.p>
         </div>
@@ -177,31 +184,33 @@ export default function GymPricing() {
               variants={card}
               whileHover={prefersReduced ? undefined : { y: -6 }}
               transition={{ type: "spring", stiffness: 300, damping: 22 }}
-              className={`relative flex flex-col rounded-xl border p-6 backdrop-blur-sm ${
+              className={`relative flex flex-col rounded-xl border p-6 backdrop-blur-sm transition-colors duration-300 ${
                 plan.popular
-                  ? "border-amber-400 bg-amber-400/[0.04] shadow-[0_0_40px_-12px_rgba(251,191,36,0.45)]"
-                  : "border-white/10 bg-white/[0.03] hover:border-amber-400/40"
+                  ? "border-lp-gold/65 bg-lp-gold/[0.055] shadow-[0_0_46px_-16px_rgba(245,179,35,0.55)]"
+                  : "border-white/[0.07] bg-white/[0.025] hover:border-lp-gold/35 hover:bg-lp-gold/[0.035]"
               }`}
             >
               {plan.popular && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md border border-amber-400 bg-[#0d0b05] px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-amber-400">
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md border border-lp-gold/70 bg-lp-card px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-lp-gold-highlight shadow-[0_0_20px_-8px_rgba(245,179,35,0.8)]">
                   Most Popular
                 </span>
               )}
 
-              <h3 className="text-center text-sm font-semibold uppercase tracking-wider text-amber-400">
+              <h3 className="text-center text-sm font-semibold uppercase tracking-wider text-lp-gold">
                 {plan.name}
               </h3>
 
               <p className="mt-4 text-center">
-                <span className="text-4xl font-semibold">{plan.price}</span>{" "}
-                <span className="text-sm text-white/80">{plan.period}</span>
+                <span className="text-4xl font-semibold text-lp-ink">
+                  {plan.price}
+                </span>{" "}
+                <span className="text-sm text-lp-muted">{plan.period}</span>
               </p>
 
-              <p className="mt-2 text-center text-xs text-white/60">
+              <p className="mt-2 text-center text-xs text-lp-muted/80">
                 {plan.note}
                 {plan.noteHighlight && (
-                  <span className="font-semibold text-amber-400">
+                  <span className="font-semibold text-lp-gold">
                     {plan.noteHighlight}
                   </span>
                 )}
@@ -209,10 +218,14 @@ export default function GymPricing() {
 
               <ul className="mt-6 flex-1 space-y-3">
                 {plan.features.map((f) => (
-                  <li key={f} className="flex items-center gap-3 text-sm text-white/85">
+                  <li
+                    key={f}
+                    className="flex items-center gap-3 text-sm text-lp-ink/85"
+                  >
                     <Check
-                      className="h-4 w-4 shrink-0 text-amber-400"
+                      className="size-4 shrink-0 text-lp-gold"
                       strokeWidth={2.5}
+                      aria-hidden
                     />
                     {f}
                   </li>
@@ -221,10 +234,10 @@ export default function GymPricing() {
 
               <button
                 type="button"
-                className={`mt-8 w-full rounded-md px-4 py-3 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-300 ${
+                className={`mt-8 w-full rounded-lg px-4 py-3 text-sm font-semibold transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lp-gold-highlight ${
                   plan.popular
-                    ? "bg-gradient-to-b from-amber-300 to-amber-500 text-black hover:brightness-110"
-                    : "border border-amber-400 text-amber-400 hover:bg-amber-400/10"
+                    ? PRIMARY_BUTTON
+                    : "border border-lp-gold/45 text-lp-gold-highlight hover:-translate-y-0.5 hover:border-lp-gold/80 hover:bg-lp-gold/[0.08]"
                 }`}
               >
                 Start Free Trial
@@ -240,13 +253,17 @@ export default function GymPricing() {
               key={title}
               variants={trust}
               className={`flex items-center justify-center gap-3 lg:px-4 ${
-                i !== 0 ? "lg:border-l lg:border-white/10" : ""
+                i !== 0 ? "lg:border-l lg:border-lp-line/40" : ""
               }`}
             >
-              <Icon className="h-7 w-7 shrink-0 text-amber-400" strokeWidth={1.5} />
+              <Icon
+                className="size-7 shrink-0 text-lp-gold"
+                strokeWidth={1.5}
+                aria-hidden
+              />
               <div>
-                <p className="text-sm font-semibold">{title}</p>
-                <p className="text-xs text-white/60">{subtitle}</p>
+                <p className="text-sm font-semibold text-lp-ink">{title}</p>
+                <p className="text-xs text-lp-muted/75">{subtitle}</p>
               </div>
             </motion.div>
           ))}

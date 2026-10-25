@@ -21,10 +21,7 @@ export function HeroSection() {
 
       <div className="relative z-10 mx-auto grid w-full max-w-[1440px] gap-14 px-5 pb-16 pt-12 sm:px-8 sm:pb-20 sm:pt-14 lg:px-10 lg:pb-[5.5rem] lg:pt-16 xl:grid-cols-[minmax(0,1.04fr)_minmax(0,0.96fr)] xl:items-center xl:gap-10 xl:px-12 xl:pb-14 xl:pt-12">
         {/* Marketing copy */}
-        <div
-          id="about"
-          className="min-w-0 scroll-mt-28 lg:mx-auto lg:max-w-[760px] xl:mx-0 xl:max-w-none"
-        >
+        <div className="min-w-0 lg:mx-auto lg:max-w-[760px] xl:mx-0 xl:max-w-none">
           <div className="inline-flex items-center gap-2 rounded-full border border-lp-gold/25 bg-lp-gold/[0.055] px-3.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-lp-gold-highlight shadow-[inset_0_1px_0_rgba(255,255,255,0.045)]">
             <span aria-hidden className="relative flex size-1.5">
               <span className="absolute inset-0 rounded-full bg-lp-gold shadow-[0_0_10px_rgba(245,179,35,0.9)]" />
@@ -43,7 +40,7 @@ export function HeroSection() {
             {HERO_COPY.description}
           </p>
 
-          <div id="features" className="mt-8 scroll-mt-28">
+          <div className="mt-8">
             <h2 className="sr-only">Core gym management features</h2>
             <ul className="flex max-w-[760px] flex-wrap items-start gap-x-7 gap-y-5 min-[1440px]:flex-nowrap min-[1440px]:gap-x-8">
               {FEATURE_HIGHLIGHTS.map((feature) => {

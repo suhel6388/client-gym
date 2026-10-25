@@ -129,6 +129,7 @@ export function HeroVisual() {
             alt=""
             fill
             priority
+            unoptimized
             sizes="(min-width: 1280px) 30vw, 60vw"
             className="object-cover object-[62%_0%]"
           />

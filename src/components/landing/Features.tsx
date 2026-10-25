@@ -12,11 +12,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
-/**
- * Put your image in /public and change this path.
- * e.g. /public/gym-bg.png  ->  "/gym-bg.png"
- */
-const BG_IMAGE = "/images/workout.webp";
+/** Workout photography lives in /public/images. */
+const FEATURE_IMAGE = "/images/workout.webp";
 
 type Feature = {
   title: string;
@@ -59,19 +56,18 @@ const FEATURES: Feature[] = [
 
 /* ---------- Animation variants ---------- */
 
-// Parent: controls the order. Left text first, then cards one by one.
+// Parent: controls the order. Left visual first, then cards one by one.
 const container: Variants = {
   hidden: {},
   show: {
     transition: {
-      staggerChildren: 0.14,
-      delayChildren: 0.1,
+      staggerChildren: 0.12,
+      delayChildren: 0.08,
     },
   },
 };
 
-// Heading block items (label -> title)
-const textItem: Variants = {
+const visualItem: Variants = {
   hidden: { opacity: 0, y: 24 },
   show: {
     opacity: 1,
@@ -80,7 +76,6 @@ const textItem: Variants = {
   },
 };
 
-// Each card appears one after another
 const cardItem: Variants = {
   hidden: { opacity: 0, y: 32, scale: 0.96 },
   show: {
@@ -100,71 +95,109 @@ const reduced: Variants = {
 export default function GymFeatures() {
   const prefersReduced = useReducedMotion();
 
-  const text = prefersReduced ? reduced : textItem;
+  const visual = prefersReduced ? reduced : visualItem;
   const card = prefersReduced ? reduced : cardItem;
 
   return (
-    <section id="#features" className="relative isolate w-full overflow-hidden bg-lp-canvas text-white">
-      {/* Background image */}
-      {/* <Image
-        src={BG_IMAGE}
-        alt=""
-        fill
-        priority
-        sizes="100vw"
-        className="-z-20 object-cover object-left opacity-90"
-      /> */}
-
-      {/* Dark overlays so text stays readable */}
-      <div className="absolute inset-0 -z-10 bg-gradient-to-r from-black/40 via-black/55 to-black/90" />
-      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-black/60 via-transparent to-black/70" />
+    <section
+      id="features"
+      className="dg-lp-section relative isolate w-full overflow-hidden text-lp-ink"
+    >
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -left-40 top-1/4 -z-10 size-[440px] rounded-full bg-lp-gold/[0.05] blur-[120px]"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -right-32 bottom-0 -z-10 size-[420px] rounded-full bg-lp-gold/[0.045] blur-[120px]"
+      />
 
       {/* Top / bottom hairlines */}
-      <div className="absolute inset-x-0 top-0 h-px bg-white/10" />
-      <div className="absolute inset-x-0 bottom-0 h-px bg-white/10" />
+      <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-lp-line/40" />
+      <div aria-hidden className="absolute inset-x-0 bottom-0 h-px bg-lp-line/30" />
 
       <motion.div
         variants={container}
         initial="hidden"
         whileInView="show"
-        viewport={{ once: true, amount: 0.25 }}
-        className="mx-auto grid max-w-[1400px] items-center gap-10 px-6 py-16 sm:px-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.9fr)] lg:gap-6 lg:py-20"
+        viewport={{ once: true, amount: 0.2 }}
+        className="mx-auto grid max-w-[1400px] items-stretch gap-6 px-5 py-16 sm:px-8 sm:py-20 lg:grid-cols-[minmax(0,0.82fr)_minmax(0,1.55fr)] lg:gap-8 lg:px-10 lg:py-24"
       >
-        {/* ---------- Left: heading ---------- */}
-        <div className="max-w-sm">
-          <motion.p
-            variants={text}
-            className="text-xs font-semibold uppercase tracking-wider text-amber-400"
-          >
-            Powerful Features
-          </motion.p>
+        {/* ---------- Left: workout image with the heading blended in ---------- */}
+        <motion.div
+          variants={visual}
+          className="group relative min-h-[420px] overflow-hidden rounded-2xl border border-lp-gold/20 bg-lp-card shadow-[0_30px_70px_-34px_rgba(0,0,0,0.95),0_0_50px_-30px_rgba(245,179,35,0.5)] sm:min-h-[480px] lg:min-h-full"
+        >
+          <Image
+            src={FEATURE_IMAGE}
+            alt="Athlete preparing a barbell lift in a dark gym"
+            fill
+            unoptimized
+            sizes="(min-width: 1024px) 36vw, 100vw"
+            className="dg-feature-image object-cover object-[52%_center] transition-transform duration-700 ease-out group-hover:scale-[1.045]"
+          />
 
-          <motion.h2
-            variants={text}
-            className="mt-4 text-3xl font-semibold leading-tight sm:text-4xl"
-          >
-            Everything you need to run your gym smoothly
-          </motion.h2>
-        </div>
+          {/* Blend the neon photo into the black-and-gold surface. */}
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-gradient-to-t from-lp-canvas via-lp-canvas/60 to-transparent"
+          />
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-[radial-gradient(120%_90%_at_18%_8%,rgba(245,179,35,0.16),transparent_58%)] mix-blend-soft-light"
+          />
+          <div
+            aria-hidden
+            className="absolute inset-0 hidden bg-gradient-to-r from-transparent via-lp-canvas/10 to-lp-canvas/80 lg:block"
+          />
+          <div
+            aria-hidden
+            className="absolute inset-x-6 top-0 h-px bg-gradient-to-r from-transparent via-lp-gold/70 to-transparent"
+          />
 
-        {/* ---------- Right: cards grid ---------- */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          <div className="relative z-10 flex h-full min-h-[420px] flex-col justify-end p-6 sm:min-h-[480px] sm:p-8 lg:min-h-full">
+            <p className="inline-flex w-fit items-center gap-2 rounded-full border border-lp-gold/25 bg-black/35 px-3.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-lp-gold-highlight backdrop-blur-sm">
+              <span
+                aria-hidden
+                className="size-1.5 rounded-full bg-lp-gold shadow-[0_0_10px_rgba(245,179,35,0.9)]"
+              />
+              Powerful Features
+            </p>
+
+            <h2 className="mt-4 max-w-[17ch] text-balance text-3xl font-semibold leading-tight tracking-[-0.02em] text-lp-ink sm:text-4xl">
+              Everything you need to run your gym smoothly
+            </h2>
+
+            <span
+              aria-hidden
+              className="mt-6 block h-px w-20 bg-gradient-to-r from-lp-gold via-lp-gold/40 to-transparent"
+            />
+          </div>
+        </motion.div>
+
+        {/* ---------- Right: feature cards ---------- */}
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
           {FEATURES.map(({ title, description, Icon }) => (
             <motion.article
               key={title}
               variants={card}
               whileHover={prefersReduced ? undefined : { y: -4 }}
               transition={{ type: "spring", stiffness: 300, damping: 22 }}
-              className="group rounded-xl border border-white/10 bg-white/[0.03] p-5 backdrop-blur-sm transition-colors hover:border-amber-400/40 hover:bg-white/[0.06]"
+              className="group relative flex flex-col overflow-hidden rounded-xl border border-white/[0.07] bg-white/[0.025] p-5 backdrop-blur-sm transition-all duration-300 hover:border-lp-gold/35 hover:bg-lp-gold/[0.045] hover:shadow-[0_20px_44px_-30px_rgba(245,179,35,0.55)]"
             >
-              <div className="flex h-11 w-11 items-center justify-center rounded-full border border-amber-400/70 bg-amber-400/5 text-amber-400 transition-colors group-hover:bg-amber-400/15">
-                <Icon className="h-5 w-5" strokeWidth={1.75} />
+              <span
+                aria-hidden
+                className="pointer-events-none absolute inset-x-5 top-0 h-px bg-gradient-to-r from-transparent via-lp-gold/60 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+              />
+
+              <div className="flex size-11 items-center justify-center rounded-full border border-lp-gold/45 bg-lp-gold/[0.06] text-lp-gold transition-all duration-300 group-hover:border-lp-gold/70 group-hover:bg-lp-gold/[0.13] group-hover:shadow-[0_0_22px_-8px_rgba(245,179,35,0.8)]">
+                <Icon className="size-5" strokeWidth={1.75} aria-hidden />
               </div>
 
-              <h3 className="mt-5 text-base font-semibold text-white">
+              <h3 className="mt-5 text-base font-semibold text-lp-ink">
                 {title}
               </h3>
-              <p className="mt-2 max-w-[22ch] text-sm leading-relaxed text-white/60">
+              <p className="mt-2 text-sm leading-relaxed text-lp-muted/85">
                 {description}
               </p>
             </motion.article>
