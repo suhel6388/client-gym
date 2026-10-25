@@ -19,7 +19,7 @@ export const HERO_COPY = {
   description:
     "The all-in-one gym CRM to manage members, attendance, payments, workouts, trainers and grow your fitness business effortlessly.",
   primaryCta: { label: "Start Free Trial", href: "/signup" },
-  secondaryCta: { label: "Book a Demo", href: "/#solutions" },
+  secondaryCta: { label: "Book a Demo", href: "/signup" },
 };
 
 export type IconItem = { id: string; label: string; icon: LucideIcon };
