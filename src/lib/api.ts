@@ -100,6 +100,12 @@ export type RequestOptions = {
   query?: QueryParams;
   headers?: Record<string, string>;
   /**
+   * Return the full response body instead of unwrapping its `{ data }`
+   * envelope. Useful for endpoints that also return pagination metadata.
+   * Defaults to `true` for every request.
+   */
+  unwrap?: boolean;
+  /**
    * Extra attempts for transient timeouts/network errors.
    * Defaults to 1 for GET and 0 for everything else.
    */
@@ -237,6 +243,7 @@ export async function apiRequest<T>(
   const {
     method = "GET",
     retry = method === "GET" ? 1 : 0,
+    unwrap = true,
     ...rest
   } = options;
   const attempts = Math.max(0, retry) + 1;
@@ -251,6 +258,11 @@ export async function apiRequest<T>(
       if (response.status === 204) return undefined as T;
 
       const payload = response.data;
+
+      // Paginated endpoints keep their envelope so callers can read both the
+      // rows and the page metadata.
+      if (!unwrap) return payload as T;
+
       if (
         payload &&
         typeof payload === "object" &&
@@ -1117,6 +1129,97 @@ export function createScheduleCall(
     signal,
     // A cold Render instance can take longer than the default 30 seconds.
     timeout: 45000,
+  });
+}
+
+/** Statuses are derived from `callTime`; the database has no status column. */
+export type ScheduleCallStatusFilter = "" | "upcoming" | "today" | "past";
+
+export type ScheduleCallPagination = {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+};
+
+/** Envelope returned by the paginated/filtered list endpoint. */
+export type ScheduleCallListResponse = {
+  success?: boolean;
+  message?: string;
+  /** Total rows matching the current filters. */
+  count?: number;
+  data?: ScheduleCallDto[];
+  pagination?: ScheduleCallPagination;
+  filters?: {
+    q?: string | null;
+    status?: ScheduleCallStatusFilter | null;
+  };
+};
+
+export type ScheduleCallQuery = {
+  q?: string;
+  status?: ScheduleCallStatusFilter;
+  page?: number;
+  limit?: number;
+};
+
+export type ScheduleCallUpdateInput = {
+  clientName?: string;
+  /** ISO 8601 date-time. */
+  callTime?: string;
+  note?: string | null;
+};
+
+/**
+ * GET /schedule/ — every scheduled call, newest first.
+ *
+ * This keeps the simple array shape used by the dashboard summary. The admin
+ * table uses `fetchScheduleCallsPage` so it can also read pagination metadata.
+ */
+export function listScheduleCalls(
+  signal?: AbortSignal,
+): Promise<ScheduleCallDto[]> {
+  return apiRequest<ScheduleCallDto[]>("/schedule/", { signal });
+}
+
+/**
+ * GET /schedule/ with optional `q`, `status`, `page` and `limit`.
+ *
+ * Newer backends answer with `{ data, pagination, filters }`. The API layer
+ * keeps that envelope (`unwrap: false`) so the caller can fall back to local
+ * filtering when an older deployment ignores the query string.
+ */
+export function fetchScheduleCallsPage(
+  query: ScheduleCallQuery = {},
+  signal?: AbortSignal,
+): Promise<ScheduleCallListResponse> {
+  return apiRequest<ScheduleCallListResponse>("/schedule/", {
+    signal,
+    unwrap: false,
+    query: {
+      q: query.q?.trim() || undefined,
+      status: query.status || undefined,
+      page: query.page,
+      limit: query.limit,
+    },
+  });
+}
+
+/** PATCH /schedule/:id — update the editable fields of one call. */
+export function updateScheduleCall(
+  id: number,
+  input: ScheduleCallUpdateInput,
+): Promise<ScheduleCallDto> {
+  return apiRequest<ScheduleCallDto>(
+    `/schedule/${encodeURIComponent(String(id))}`,
+    { method: "PATCH", body: input },
+  );
+}
+
+/** DELETE /schedule/:id */
+export function deleteScheduleCall(id: number): Promise<unknown> {
+  return apiRequest(`/schedule/${encodeURIComponent(String(id))}`, {
+    method: "DELETE",
   });
 }
 

@@ -34,6 +34,7 @@ import {
   formatRelativeTime,
   platformStatusMeta,
 } from "@/lib/super-admin-view";
+import { ScheduleCallsSection } from "./ScheduleCallsSection";
 
 const GYMS_PATH = `${SUPER_ADMIN_PATH}/gyms`;
 
@@ -358,6 +359,8 @@ export function PlatformDashboard() {
           </div>
         </section>
       </div>
+
+      <ScheduleCallsSection />
 
       <div className="mt-4 grid grid-cols-1 gap-4 xl:grid-cols-3">
         <section className="rounded-2xl border border-line bg-card/60 xl:col-span-2">

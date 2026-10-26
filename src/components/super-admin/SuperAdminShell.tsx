@@ -5,10 +5,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Building2,
+  CalendarClock,
   History,
   LayoutDashboard,
   LogOut,
   Menu,
+  Settings,
   ShieldCheck,
   X,
   type LucideIcon,
@@ -42,10 +44,22 @@ const NAV_ITEMS: PlatformNavItem[] = [
     description: "Every tenant on the platform",
   },
   {
+    label: "Schedule calls",
+    href: `${SUPER_ADMIN_PATH}/schedule-calls`,
+    icon: CalendarClock,
+    description: "Landing-page call enquiries",
+  },
+  {
     label: "Activity",
     href: `${SUPER_ADMIN_PATH}/activity`,
     icon: History,
     description: "Administrative audit trail",
+  },
+  {
+    label: "Settings",
+    href: `${SUPER_ADMIN_PATH}/settings`,
+    icon: Settings,
+    description: "WhatsApp message templates",
   },
 ];
 
