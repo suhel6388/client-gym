@@ -44,6 +44,12 @@ export const AUTH_ERRORS = {
   otpExpired: "That code has expired. Request a new one below.",
   otpLocked: "Too many attempts. Request a new code and try again.",
   otpInvalid: "Invalid code. Check the 6-digit code and try again.",
+  /** A reset link whose token is missing, invalid or past its expiry. */
+  resetLinkInvalid:
+    "This reset link is invalid or has expired. Request a new one.",
+  /** Password-reset email could not be sent. */
+  resetEmailFailed:
+    "We couldn't send the reset email right now. Please try again in a moment.",
 } as const;
 
 /** Read a text field from the submitted form. */
@@ -113,22 +119,65 @@ export const resendOtpAction: FormAction = async (_state, formData) => {
 // Password reset
 // ---------------------------------------------------------------------------
 
-/** POST /auth/forgot-password — emails a reset link (never reveals accounts). */
-export const forgotPasswordAction: FormAction = async (_state, formData) => {
+/** POST /auth/forgot-password — emails a reset link or code (neutral answer). */
+export const forgotPasswordAction: FormAction<{ method: "link" | "otp" }> = async (
+  _state,
+  formData,
+) => {
+  const method = field(formData, "method") === "otp" ? "otp" : "link";
   try {
-    await forgotPassword(normalizeEmail(field(formData, "email")));
-    return { success: true };
+    await forgotPassword(normalizeEmail(field(formData, "email")), method);
+    return { success: true, data: { method } };
   } catch (error) {
+    if (error instanceof ApiError && error.status === 429) {
+      return { success: false, error: AUTH_ERRORS.rateLimited };
+    }
+    if (error instanceof ApiError && error.status >= 500) {
+      return { success: false, error: AUTH_ERRORS.resetEmailFailed };
+    }
     return { success: false, error: friendlyError(error) };
   }
 };
 
-/** POST /auth/reset-password — completes the reset with the emailed token. */
+/** POST /auth/reset-password — completes a link or OTP reset. */
 export const resetPasswordAction: FormAction = async (_state, formData) => {
+  const method = field(formData, "method") === "otp" ? "otp" : "link";
+  const newPassword = field(formData, "password");
+
   try {
-    await resetPassword(field(formData, "token"), field(formData, "password"));
+    if (method === "otp") {
+      await resetPassword({
+        method: "otp",
+        email: normalizeEmail(field(formData, "email")),
+        otp: field(formData, "otp").trim(),
+        newPassword,
+      });
+    } else {
+      await resetPassword({
+        method: "link",
+        token: field(formData, "token").trim(),
+        newPassword,
+      });
+    }
     return { success: true };
   } catch (error) {
+    if (error instanceof ApiError) {
+      if (error.code === "INVALID_TOKEN") {
+        return { success: false, error: AUTH_ERRORS.resetLinkInvalid };
+      }
+      if (error.code === "OTP_EXPIRED") {
+        return { success: false, error: AUTH_ERRORS.otpExpired };
+      }
+      if (error.code === "TOO_MANY_ATTEMPTS") {
+        return { success: false, error: AUTH_ERRORS.otpLocked };
+      }
+      if (error.code === "INVALID_OTP") {
+        return { success: false, error: AUTH_ERRORS.otpInvalid };
+      }
+      if (error.status === 429) {
+        return { success: false, error: AUTH_ERRORS.rateLimited };
+      }
+    }
     return { success: false, error: friendlyError(error) };
   }
 };

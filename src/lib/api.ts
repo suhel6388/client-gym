@@ -470,20 +470,40 @@ export function setupGym(input: SetupGymInput) {
   );
 }
 
-/** POST /auth/forgot-password — email a reset link (always a neutral answer). */
-export function forgotPassword(email: string) {
-  return apiRequest<{ message: string }>("/auth/forgot-password", {
+/** POST /auth/forgot-password — email a reset link or 6-digit code. */
+export type PasswordResetMethod = "link" | "otp";
+
+export function forgotPassword(
+  email: string,
+  method: PasswordResetMethod = "link",
+) {
+  return apiRequest<{ message: string; method: PasswordResetMethod }>(
+    "/auth/forgot-password",
+    {
+      method: "POST",
+      body: { email, method },
+    },
+  );
+}
+
+/** POST /auth/reset-password — complete the reset with a link token or OTP. */
+export type ResetPasswordInput =
+  | { method?: "link"; token: string; newPassword: string }
+  | { method?: "otp"; email: string; otp: string; newPassword: string };
+
+export function resetPassword(input: ResetPasswordInput) {
+  return apiRequest<{ message: string }>("/auth/reset-password", {
     method: "POST",
-    body: { email },
+    body: input,
   });
 }
 
-/** POST /auth/reset-password — complete the reset with the emailed token. */
-export function resetPassword(token: string, newPassword: string) {
-  return apiRequest<{ message: string }>("/auth/reset-password", {
-    method: "POST",
-    body: { token, newPassword },
-  });
+/** GET /auth/reset-password/verify — check a link token before showing the form. */
+export function verifyResetToken(token: string, signal?: AbortSignal) {
+  return apiRequest<{ valid: boolean; expiresAt: string }>(
+    "/auth/reset-password/verify",
+    { query: { token }, signal },
+  );
 }
 
 // ---------------------------------------------------------------------------

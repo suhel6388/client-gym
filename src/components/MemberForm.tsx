@@ -154,54 +154,33 @@ export function MemberForm({
       <section className="space-y-4">
         <SectionTitle icon={User} title="Personal information" />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <div className="space-y-1.5">
-            <Label htmlFor="firstName">First name</Label>
-            <Input
-              id="firstName"
-              name="firstName"
-              autoComplete="given-name"
-              placeholder="Enter first name"
-              value={values.firstName}
-              onChange={(event) => update("firstName", event.target.value)}
-              aria-invalid={Boolean(errors.firstName)}
-            />
-            <FieldError message={errors.firstName} />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="lastName">Last name</Label>
-            <Input
-              id="lastName"
-              name="lastName"
-              autoComplete="family-name"
-              placeholder="Enter last name"
-              value={values.lastName}
-              onChange={(event) => update("lastName", event.target.value)}
-              aria-invalid={Boolean(errors.lastName)}
-            />
-            <FieldError message={errors.lastName} />
-          </div>
           <div className="space-y-1.5 sm:col-span-2">
-            <Label htmlFor="email">Email address</Label>
+            <Label htmlFor="name">
+              Member name <span className="text-gold">*</span>
+            </Label>
             <Input
-              id="email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              placeholder="member@example.com"
-              value={values.email}
-              onChange={(event) => update("email", event.target.value)}
-              aria-invalid={Boolean(errors.email)}
+              id="name"
+              name="name"
+              autoComplete="name"
+              placeholder="Enter member's full name"
+              required
+              value={values.name}
+              onChange={(event) => update("name", event.target.value)}
+              aria-invalid={Boolean(errors.name)}
             />
-            <FieldError message={errors.email} />
+            <FieldError message={errors.name} />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="phone">Phone number</Label>
+            <Label htmlFor="phone">
+              Mobile number <span className="text-gold">*</span>
+            </Label>
             <Input
               id="phone"
               name="phone"
               type="tel"
               autoComplete="tel"
               placeholder="+1 (555) 000-0000"
+              required
               value={values.phone}
               onChange={(event) => update("phone", event.target.value)}
               aria-invalid={Boolean(errors.phone)}
@@ -209,12 +188,15 @@ export function MemberForm({
             <FieldError message={errors.phone} />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="dateOfBirth">Date of birth</Label>
+            <Label htmlFor="dateOfBirth">
+              Date of birth <span className="text-gold">*</span>
+            </Label>
             <Input
               id="dateOfBirth"
               name="dateOfBirth"
               type="date"
               max={new Date().toISOString().slice(0, 10)}
+              required
               value={values.dateOfBirth}
               onChange={(event) => update("dateOfBirth", event.target.value)}
               aria-invalid={Boolean(errors.dateOfBirth)}
@@ -222,12 +204,16 @@ export function MemberForm({
             <FieldError message={errors.dateOfBirth} />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="gender">Gender</Label>
+            <Label htmlFor="gender">
+              Gender <span className="text-gold">*</span>
+            </Label>
             <Select
               id="gender"
               name="gender"
+              required
               value={values.gender}
               onChange={(event) => update("gender", event.target.value as MemberFormValues["gender"])}
+              aria-invalid={Boolean(errors.gender)}
             >
               <option value="">Select gender</option>
               {GENDER_OPTIONS.map((option) => (
@@ -236,6 +222,7 @@ export function MemberForm({
                 </option>
               ))}
             </Select>
+            <FieldError message={errors.gender} />
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="timing">Preferred timing</Label>
@@ -253,7 +240,25 @@ export function MemberForm({
             </Select>
           </div>
           <div className="space-y-1.5 sm:col-span-2">
-            <Label htmlFor="address">Address</Label>
+            <Label htmlFor="email">
+              Email address <span className="text-faint">(optional)</span>
+            </Label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              placeholder="member@example.com"
+              value={values.email}
+              onChange={(event) => update("email", event.target.value)}
+              aria-invalid={Boolean(errors.email)}
+            />
+            <FieldError message={errors.email} />
+          </div>
+          <div className="space-y-1.5 sm:col-span-2">
+            <Label htmlFor="address">
+              Address <span className="text-faint">(optional)</span>
+            </Label>
             <Textarea
               id="address"
               name="address"
@@ -264,7 +269,9 @@ export function MemberForm({
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="emergencyContact">Emergency contact</Label>
+            <Label htmlFor="emergencyContact">
+              Emergency contact <span className="text-faint">(optional)</span>
+            </Label>
             <Input
               id="emergencyContact"
               name="emergencyContact"
@@ -274,7 +281,9 @@ export function MemberForm({
             />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="emergencyPhone">Emergency phone</Label>
+            <Label htmlFor="emergencyPhone">
+              Emergency phone <span className="text-faint">(optional)</span>
+            </Label>
             <Input
               id="emergencyPhone"
               name="emergencyPhone"
@@ -296,7 +305,9 @@ export function MemberForm({
         />
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-1.5 sm:col-span-2">
-            <Label htmlFor="planId">Membership plan</Label>
+            <Label htmlFor="planId">
+              Membership plan <span className="text-faint">(optional)</span>
+            </Label>
             <Select
               id="planId"
               name="planId"
@@ -318,7 +329,9 @@ export function MemberForm({
             <FieldError message={errors.planId} />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="startDate">Start date</Label>
+            <Label htmlFor="startDate">
+              Start date <span className="text-faint">(optional)</span>
+            </Label>
             <Input
               id="startDate"
               name="startDate"
@@ -330,7 +343,9 @@ export function MemberForm({
             <FieldError message={errors.startDate} />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="discount">Discount</Label>
+            <Label htmlFor="discount">
+              Discount <span className="text-faint">(optional)</span>
+            </Label>
             <Input
               id="discount"
               name="discount"
@@ -461,7 +476,7 @@ export function MemberForm({
 
       {/* Notes */}
       <section className="space-y-4">
-        <SectionTitle icon={User} title="Notes" />
+        <SectionTitle icon={User} title="Notes" hint="Optional" />
         <Textarea
           id="notes"
           name="notes"

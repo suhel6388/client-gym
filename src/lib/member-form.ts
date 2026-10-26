@@ -15,8 +15,7 @@ export type Gender =
   | "";
 
 export type MemberFormValues = {
-  firstName: string;
-  lastName: string;
+  name: string;
   email: string;
   phone: string;
   dateOfBirth: string;
@@ -67,8 +66,7 @@ export function todayIso(): string {
 
 export function emptyMemberForm(): MemberFormValues {
   return {
-    firstName: "",
-    lastName: "",
+    name: "",
     email: "",
     phone: "",
     dateOfBirth: "",
@@ -95,11 +93,9 @@ function toIsoDate(value: string | null | undefined): string {
 }
 
 export function memberToFormValues(member: MemberDto): MemberFormValues {
-  const [first, ...rest] = member.name.split(/\s+/);
   const membership = member.memberships?.[0] ?? null;
   return {
-    firstName: first ?? "",
-    lastName: rest.join(" "),
+    name: member.name,
     email: member.email ?? "",
     phone: member.phone,
     dateOfBirth: toIsoDate(member.dateOfBirth),
@@ -135,7 +131,7 @@ export function computeExpiry(plan: PlanDto | undefined, startDate: string): str
 }
 
 export function fullName(values: MemberFormValues): string {
-  return `${values.firstName} ${values.lastName}`.trim().replace(/\s+/g, " ");
+  return values.name.trim().replace(/\s+/g, " ");
 }
 
 /** Maps the form values onto the member payload the API expects. */
@@ -160,24 +156,27 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 export function validateMemberForm(values: MemberFormValues): MemberFormErrors {
   const errors: MemberFormErrors = {};
 
-  if (!values.firstName.trim()) errors.firstName = "First name is required.";
-  if (!values.lastName.trim()) errors.lastName = "Last name is required.";
+  // Required: member name, mobile number, gender and date of birth.
+  if (!values.name.trim()) errors.name = "Member name is required.";
 
-  if (!values.email.trim()) errors.email = "Email is required.";
-  else if (!EMAIL_RE.test(values.email.trim())) errors.email = "Enter a valid email address.";
-
-  if (!values.phone.trim()) errors.phone = "Phone number is required.";
+  if (!values.phone.trim()) errors.phone = "Mobile number is required.";
   else if (values.phone.replace(/\D/g, "").length < 7)
-    errors.phone = "Enter a valid phone number (at least 7 digits).";
+    errors.phone = "Enter a valid mobile number (at least 7 digits).";
 
-  if (values.dateOfBirth) {
+  if (!values.gender) errors.gender = "Gender is required.";
+
+  if (!values.dateOfBirth) {
+    errors.dateOfBirth = "Date of birth is required.";
+  } else {
     const dob = new Date(values.dateOfBirth);
     if (Number.isNaN(dob.getTime())) errors.dateOfBirth = "Enter a valid date.";
-    else if (dob.getTime() > Date.now()) errors.dateOfBirth = "Date of birth can't be in the future.";
+    else if (dob.getTime() > Date.now())
+      errors.dateOfBirth = "Date of birth can't be in the future.";
   }
 
-  if (values.planId && !values.startDate) {
-    errors.startDate = "Start date is required.";
+  // Everything below is optional: validate only when the user supplied it.
+  if (values.email.trim() && !EMAIL_RE.test(values.email.trim())) {
+    errors.email = "Enter a valid email address.";
   }
 
   if (values.discount.trim() !== "") {
