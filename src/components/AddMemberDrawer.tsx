@@ -60,6 +60,15 @@ export function AddMemberDrawer({
     [member],
   );
 
+  // The edit drawer does not fetch the plan list, so include the member's
+  // current plan to keep the read-only select and fee preview populated.
+  const formPlans = useMemo(() => {
+    if (mode !== "edit" || !member) return plans;
+    const current = member.memberships?.[0]?.plan;
+    if (!current || plans.some((plan) => plan.id === current.id)) return plans;
+    return [current, ...plans];
+  }, [mode, member, plans]);
+
   // Fetch plans whenever the drawer opens in create mode.
   useEffect(() => {
     if (!open || mode === "edit") return;
@@ -130,13 +139,9 @@ export function AddMemberDrawer({
                   }
                 : {
                     title: "Adding member…",
-                    description: values.planId
-                      ? values.collectPayment
-                        ? "Creating the member, membership and payment. Please wait…"
-                        : "Creating the member and membership. Please wait…"
-                      : values.collectPayment
-                        ? "Creating the member profile and payment. Please wait…"
-                        : "Creating the member profile. Please wait…",
+                    description: values.collectPayment
+                      ? "Creating the member, membership and payment. Please wait…"
+                      : "Creating the member and membership. Please wait…",
                   },
             success: ({ member: saved }) =>
               mode === "edit"
@@ -233,7 +238,8 @@ export function AddMemberDrawer({
         <div className="scroll-thin flex-1 overflow-y-auto px-6 py-6">
           {plansError && (
             <div className="mb-4 rounded-lg border border-warning/40 bg-warning/10 px-3.5 py-2.5 text-xs font-medium text-warning">
-              {plansError} You can still save the member without a plan.
+              {plansError} A membership plan is required, so retry once plans
+              load.
             </div>
           )}
           <MemberForm
@@ -241,7 +247,7 @@ export function AddMemberDrawer({
             formId={FORM_ID}
             mode={mode}
             initialValues={initialValues}
-            plans={plans}
+            plans={formPlans}
             plansLoading={plansLoading}
             submitting={submitting}
             serverError={serverError}

@@ -14,6 +14,9 @@ export type Gender =
   | "prefer-not-to-say"
   | "";
 
+/** Empty while the member has not picked a batch yet. */
+export type BatchTiming = TimingDto | "";
+
 export type MemberFormValues = {
   name: string;
   email: string;
@@ -23,7 +26,7 @@ export type MemberFormValues = {
   address: string;
   emergencyContact: string;
   emergencyPhone: string;
-  timing: TimingDto;
+  timing: BatchTiming;
   planId: string;
   startDate: string;
   /** Discount in major units (e.g. rupees), as typed by the user. */
@@ -74,7 +77,7 @@ export function emptyMemberForm(): MemberFormValues {
     address: "",
     emergencyContact: "",
     emergencyPhone: "",
-    timing: "MORNING",
+    timing: "",
     planId: "",
     startDate: todayIso(),
     discount: "0",
@@ -145,7 +148,8 @@ export function toMemberInput(values: MemberFormValues): MemberInput {
     address: values.address.trim() || null,
     emergencyContact: values.emergencyContact.trim() || null,
     emergencyPhone: values.emergencyPhone.trim() || null,
-    timing: values.timing,
+    // Validation blocks an empty timing, so this is always a real enum value.
+    timing: values.timing || "MORNING",
     joinedAt: values.startDate || undefined,
     notes: values.notes.trim() || null,
   };
@@ -153,10 +157,13 @@ export function toMemberInput(values: MemberFormValues): MemberInput {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export function validateMemberForm(values: MemberFormValues): MemberFormErrors {
+export function validateMemberForm(
+  values: MemberFormValues,
+  { requireMembership = true }: { requireMembership?: boolean } = {},
+): MemberFormErrors {
   const errors: MemberFormErrors = {};
 
-  // Required: member name, mobile number, gender and date of birth.
+  // Required: member details.
   if (!values.name.trim()) errors.name = "Member name is required.";
 
   if (!values.phone.trim()) errors.phone = "Mobile number is required.";
@@ -174,16 +181,33 @@ export function validateMemberForm(values: MemberFormValues): MemberFormErrors {
       errors.dateOfBirth = "Date of birth can't be in the future.";
   }
 
+  // Required: batch timing.
+  if (!values.timing) errors.timing = "Batch timing is required.";
+
+  // The plan, start date and discount are required when creating a member.
+  // The edit drawer only saves the member profile, so it does not force them.
+  if (requireMembership) {
+    if (!values.planId) errors.planId = "Membership plan is required.";
+
+    if (!values.startDate) {
+      errors.startDate = "Start date is required.";
+    } else if (Number.isNaN(new Date(values.startDate).getTime())) {
+      errors.startDate = "Enter a valid start date.";
+    }
+
+    if (!values.discount.trim()) {
+      errors.discount = "Discount is required. Enter 0 for no discount.";
+    } else {
+      const discount = Number(values.discount);
+      if (!Number.isFinite(discount) || discount < 0) {
+        errors.discount = "Discount must be zero or more.";
+      }
+    }
+  }
+
   // Everything below is optional: validate only when the user supplied it.
   if (values.email.trim() && !EMAIL_RE.test(values.email.trim())) {
     errors.email = "Enter a valid email address.";
-  }
-
-  if (values.discount.trim() !== "") {
-    const discount = Number(values.discount);
-    if (Number.isNaN(discount) || discount < 0) {
-      errors.discount = "Discount must be zero or more.";
-    }
   }
 
   if (values.collectPayment) {

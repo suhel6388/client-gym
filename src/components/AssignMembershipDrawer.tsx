@@ -194,7 +194,7 @@ export function AssignMembershipDrawer({
             await createMembership({
               memberId,
               planId,
-              startDate: startDate || undefined,
+              startDate,
               discountPaise: Math.max(0, Math.round((Number(discount) || 0) * 100)),
             });
             if (collectPayment) {

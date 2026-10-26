@@ -53,13 +53,9 @@ export function AddMemberPageClient() {
           {
             loading: {
               title: "Adding member…",
-              description: values.planId
-                ? values.collectPayment
-                  ? "Creating the member, membership and payment. Please wait…"
-                  : "Creating the member and membership. Please wait…"
-                : values.collectPayment
-                  ? "Creating the member profile and payment. Please wait…"
-                  : "Creating the member profile. Please wait…",
+              description: values.collectPayment
+                ? "Creating the member, membership and payment. Please wait…"
+                : "Creating the member and membership. Please wait…",
             },
             success: ({ member }) => ({
               title: "Member added",
@@ -123,7 +119,7 @@ export function AddMemberPageClient() {
       <div className="mt-6 rounded-card border border-line bg-card p-6 shadow-card animate-fade-up">
         {plansError && (
           <div className="mb-5 rounded-lg border border-warning/40 bg-warning/10 px-3.5 py-2.5 text-xs font-medium text-warning">
-            {plansError} You can still save the member without a plan.
+            {plansError} A membership plan is required, so retry once plans load.
           </div>
         )}
 

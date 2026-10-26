@@ -30,34 +30,37 @@ function errorMessage(error: unknown, fallback: string): string {
 export async function createMemberFromForm(
   values: MemberFormValues,
 ): Promise<CreateMemberResult> {
+  // The form validates both fields, but re-check before creating the member so
+  // this flow can never produce a member without the required membership.
+  if (!values.planId) throw new Error("Membership plan is required.");
+  if (!values.startDate) throw new Error("Start date is required.");
+
   // Fatal: if this throws, no member exists and the form can be retried.
   const member = await createMember(toMemberInput(values));
 
   const warnings: string[] = [];
   let membershipCreated = false;
 
-  if (values.planId) {
-    try {
-      await createMembership({
-        memberId: member.id,
-        planId: values.planId,
-        startDate: values.startDate || undefined,
-        discountPaise: Math.max(
-          0,
-          Math.round((Number(values.discount) || 0) * 100),
-        ),
-      });
-      membershipCreated = true;
-    } catch (error) {
-      warnings.push(
-        `Membership could not be created: ${errorMessage(error, "unknown error")}`,
-      );
-    }
+  try {
+    await createMembership({
+      memberId: member.id,
+      planId: values.planId,
+      startDate: values.startDate,
+      discountPaise: Math.max(
+        0,
+        Math.round((Number(values.discount) || 0) * 100),
+      ),
+    });
+    membershipCreated = true;
+  } catch (error) {
+    warnings.push(
+      `Membership could not be created: ${errorMessage(error, "unknown error")}`,
+    );
   }
 
   // Don't take a payment for a membership that was never attached — that would
-  // leave the payment ledger inconsistent. A plan-less payment is allowed.
-  if (values.collectPayment && (!values.planId || membershipCreated)) {
+  // leave the payment ledger inconsistent.
+  if (values.collectPayment && membershipCreated) {
     try {
       await createPayment({
         memberId: member.id,
@@ -72,7 +75,7 @@ export async function createMemberFromForm(
         `Payment could not be recorded: ${errorMessage(error, "unknown error")}`,
       );
     }
-  } else if (values.collectPayment && values.planId) {
+  } else if (values.collectPayment) {
     warnings.push("Payment was not recorded because the membership failed.");
   }
 

@@ -745,15 +745,18 @@ export type MemberInput = {
   emergencyContact?: string | null;
   emergencyPhone?: string | null;
   joinedAt?: string;
-  timing?: TimingDto;
+  /** Required on create; `Partial<MemberInput>` keeps PATCH optional. */
+  timing: TimingDto;
   notes?: string | null;
 };
 
 export type MembershipInput = {
   memberId: string;
   planId: string;
-  startDate?: string;
-  discountPaise?: number;
+  /** Required. `YYYY-MM-DD` or an ISO date-time. */
+  startDate: string;
+  /** Required. Use `0` for no discount. */
+  discountPaise: number;
 };
 
 export type PaymentInput = {

@@ -108,7 +108,9 @@ export function MemberForm({
     event.preventDefault();
     // A second submit can arrive via Enter while the request is in flight.
     if (submitting) return;
-    const nextErrors = validateMemberForm(values);
+    const nextErrors = validateMemberForm(values, {
+      requireMembership: mode === "create",
+    });
     setErrors(nextErrors);
     if (hasErrors(nextErrors)) return;
     onSubmit(values);
@@ -225,19 +227,25 @@ export function MemberForm({
             <FieldError message={errors.gender} />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="timing">Preferred timing</Label>
+            <Label htmlFor="timing">
+              Batch timing <span className="text-gold">*</span>
+            </Label>
             <Select
               id="timing"
               name="timing"
+              required
               value={values.timing}
               onChange={(event) => update("timing", event.target.value as MemberFormValues["timing"])}
+              aria-invalid={Boolean(errors.timing)}
             >
+              <option value="">Select batch timing</option>
               {TIMING_OPTIONS.map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
                 </option>
               ))}
             </Select>
+            <FieldError message={errors.timing} />
           </div>
           <div className="space-y-1.5 sm:col-span-2">
             <Label htmlFor="email">
@@ -306,13 +314,19 @@ export function MemberForm({
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="space-y-1.5 sm:col-span-2">
             <Label htmlFor="planId">
-              Membership plan <span className="text-faint">(optional)</span>
+              Membership plan{" "}
+              {mode === "create" ? (
+                <span className="text-gold">*</span>
+              ) : (
+                <span className="text-faint">(current)</span>
+              )}
             </Label>
             <Select
               id="planId"
               name="planId"
+              required={mode === "create"}
               value={values.planId}
-              disabled={plansLoading}
+              disabled={plansLoading || mode === "edit"}
               onChange={(event) => update("planId", event.target.value)}
               aria-invalid={Boolean(errors.planId)}
             >
@@ -327,15 +341,23 @@ export function MemberForm({
               ))}
             </Select>
             <FieldError message={errors.planId} />
+            {mode === "create" && !plansLoading && plans.length === 0 && (
+              <p className="text-[11px] font-medium text-warning">
+                No active membership plans. Create a plan before adding a
+                member.
+              </p>
+            )}
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="startDate">
-              Start date <span className="text-faint">(optional)</span>
+              Start date{" "}
+              {mode === "create" && <span className="text-gold">*</span>}
             </Label>
             <Input
               id="startDate"
               name="startDate"
               type="date"
+              required={mode === "create"}
               value={values.startDate}
               onChange={(event) => update("startDate", event.target.value)}
               aria-invalid={Boolean(errors.startDate)}
@@ -344,7 +366,8 @@ export function MemberForm({
           </div>
           <div className="space-y-1.5">
             <Label htmlFor="discount">
-              Discount <span className="text-faint">(optional)</span>
+              Discount{" "}
+              {mode === "create" && <span className="text-gold">*</span>}
             </Label>
             <Input
               id="discount"
@@ -353,6 +376,8 @@ export function MemberForm({
               min="0"
               step="0.01"
               inputMode="decimal"
+              placeholder="0"
+              required={mode === "create"}
               value={values.discount}
               onChange={(event) => update("discount", event.target.value)}
               aria-invalid={Boolean(errors.discount)}
