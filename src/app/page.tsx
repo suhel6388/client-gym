@@ -10,7 +10,7 @@ import GymReward from "@/components/landing/Reward";
 import GymFooter from "@/components/landing/Footer";
 
 export const metadata: Metadata = {
-  title: "Gym Management CRM",
+  title: "DarkGold Gym Managment",
   description:
     "The all-in-one gym CRM for members, attendance, payments, workouts, trainers and business growth.",
 };

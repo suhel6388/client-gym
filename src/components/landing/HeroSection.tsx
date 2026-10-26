@@ -1,6 +1,14 @@
 import { ArrowRight, CalendarDays } from "lucide-react";
 import Link from "next/link";
 import { HeroVisual } from "./HeroVisual";
+import {
+  HeroColumn,
+  HeroItem,
+  HeroList,
+  HeroListItem,
+  HeroReveal,
+  HeroVisualReveal,
+} from "./HeroMotion";
 import { FEATURE_HIGHLIGHTS, HERO_COPY, TRUST_INDICATORS } from "./content";
 
 export function HeroSection() {
@@ -19,34 +27,38 @@ export function HeroSection() {
         <span className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-lp-gold/20 to-transparent" />
       </div>
 
-      <div className="relative z-10 mx-auto grid w-full max-w-[1440px] gap-14 px-5 pb-16 pt-12 sm:px-8 sm:pb-20 sm:pt-14 lg:px-10 lg:pb-[5.5rem] lg:pt-16 xl:grid-cols-[minmax(0,1.04fr)_minmax(0,0.96fr)] xl:items-center xl:gap-10 xl:px-12 xl:pb-14 xl:pt-12">
+      <HeroReveal className="relative z-10 mx-auto grid w-full max-w-[1440px] gap-14 px-5 pb-16 pt-12 sm:px-8 sm:pb-20 sm:pt-14 lg:px-10 lg:pb-[5.5rem] lg:pt-16 xl:grid-cols-[minmax(0,1.04fr)_minmax(0,0.96fr)] xl:items-center xl:gap-10 xl:px-12 xl:pb-14 xl:pt-12">
         {/* Marketing copy */}
-        <div className="min-w-0 lg:mx-auto lg:max-w-[760px] xl:mx-0 xl:max-w-none">
-          <div className="inline-flex items-center gap-2 rounded-full border border-lp-gold/25 bg-lp-gold/[0.055] px-3.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-lp-gold-highlight shadow-[inset_0_1px_0_rgba(255,255,255,0.045)]">
+        <HeroColumn className="min-w-0 lg:mx-auto lg:max-w-[760px] xl:mx-0 xl:max-w-none">
+          <HeroItem className="inline-flex items-center gap-2 rounded-full border border-lp-gold/25 bg-lp-gold/[0.055] px-3.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-lp-gold-highlight shadow-[inset_0_1px_0_rgba(255,255,255,0.045)]">
             <span aria-hidden className="relative flex size-1.5">
               <span className="absolute inset-0 rounded-full bg-lp-gold shadow-[0_0_10px_rgba(245,179,35,0.9)]" />
             </span>
             {HERO_COPY.badge}
-          </div>
+          </HeroItem>
 
-          <h1 className="mt-6 max-w-[670px] text-balance text-[clamp(2.5rem,4.2vw,3.55rem)] font-bold leading-[1.02] tracking-[-0.05em] text-lp-ink xl:text-[3.25rem] min-[1440px]:text-[3.55rem]">
-            {HERO_COPY.headline.lead}
-            <br />
-            {HERO_COPY.headline.continuation}
-            <span className="dg-gold-text">{HERO_COPY.headline.brand}</span>
-          </h1>
+          <HeroItem className="mt-6">
+            <h1 className="max-w-[670px] text-balance text-[clamp(2.5rem,4.2vw,3.55rem)] font-bold leading-[1.02] tracking-[-0.05em] text-lp-ink xl:text-[3.25rem] min-[1440px]:text-[3.55rem]">
+              {HERO_COPY.headline.lead}
+              <br />
+              {HERO_COPY.headline.continuation}
+              <span className="dg-gold-text">{HERO_COPY.headline.brand}</span>
+            </h1>
+          </HeroItem>
 
-          <p className="mt-5 max-w-[570px] text-[14.5px] leading-7 text-lp-muted sm:text-[15.5px]">
-            {HERO_COPY.description}
-          </p>
+          <HeroItem className="mt-5">
+            <p className="max-w-[570px] text-[14.5px] leading-7 text-lp-muted sm:text-[15.5px]">
+              {HERO_COPY.description}
+            </p>
+          </HeroItem>
 
-          <div className="mt-8">
+          <HeroItem className="mt-8">
             <h2 className="sr-only">Core gym management features</h2>
-            <ul className="flex max-w-[760px] flex-wrap items-start gap-x-7 gap-y-5 min-[1440px]:flex-nowrap min-[1440px]:gap-x-8">
+            <HeroList className="flex max-w-[760px] flex-wrap items-start gap-x-7 gap-y-5 min-[1440px]:flex-nowrap min-[1440px]:gap-x-8">
               {FEATURE_HIGHLIGHTS.map((feature) => {
                 const Icon = feature.icon;
                 return (
-                  <li
+                  <HeroListItem
                     key={feature.id}
                     id={feature.id}
                     className="flex w-[84px] scroll-mt-28 flex-col items-center gap-2 text-center"
@@ -59,13 +71,13 @@ export function HeroSection() {
                     <span className="text-[11.5px] font-medium leading-4 text-lp-ink/85">
                       {feature.label}
                     </span>
-                  </li>
+                  </HeroListItem>
                 );
               })}
-            </ul>
-          </div>
+            </HeroList>
+          </HeroItem>
 
-          <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
+          <HeroItem className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
             <Link
               href={HERO_COPY.primaryCta.href}
               className="group inline-flex h-[52px] items-center justify-center gap-6 rounded-xl bg-[linear-gradient(135deg,#FFD15C_0%,#F5B323_52%,#E7A310_100%)] px-6 text-[13.5px] font-bold text-[#171203] shadow-[0_14px_36px_-14px_rgba(245,179,35,0.75)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_18px_42px_-12px_rgba(245,179,35,0.9)] focus-visible:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lp-gold-highlight sm:w-auto"
@@ -89,13 +101,13 @@ export function HeroSection() {
                 strokeWidth={1.9}
               />
             </Link>
-          </div>
+          </HeroItem>
 
-          <ul className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2.5 pt-5">
+          <HeroList className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2.5 pt-5">
             {TRUST_INDICATORS.map((indicator) => {
               const Icon = indicator.icon;
               return (
-                <li
+                <HeroListItem
                   key={indicator.label}
                   className="flex items-center gap-2 text-[11.5px] font-medium text-lp-ink/80"
                 >
@@ -105,15 +117,17 @@ export function HeroSection() {
                     aria-hidden
                   />
                   {indicator.label}
-                </li>
+                </HeroListItem>
               );
             })}
-          </ul>
-        </div>
+          </HeroList>
+        </HeroColumn>
 
         {/* Product preview with athlete backdrop */}
-        <HeroVisual />
-      </div>
+        <HeroVisualReveal className="min-w-0">
+          <HeroVisual />
+        </HeroVisualReveal>
+      </HeroReveal>
     </section>
   );
 }

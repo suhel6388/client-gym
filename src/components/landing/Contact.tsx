@@ -3,7 +3,8 @@
 import { useState, type FormEvent } from "react";
 import { motion, useReducedMotion, type Variants } from "framer-motion";
 import { Phone, Mail, MessageCircle, Send, CheckCircle2 } from "lucide-react";
-
+import Image from "next/image";
+const ATHLETE_SRC = "/images/hero-athlete.png";
 /* ---------- Config ---------- */
 
 const PHONE_DISPLAY = "+91 63889 39189";
@@ -87,8 +88,19 @@ export default function GymContact() {
     >
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-40 top-1/4 -z-10 h-[420px] w-[520px] rounded-full bg-lp-gold/[0.055] blur-3xl"
+        className="pointer-events-none  absolute -right-40 top-1/4 -z-10 h-[420px] w-[520px] rounded-full bg-lp-gold/[0.080] blur-3xl"
       />
+  
+             <Image
+               src={ATHLETE_SRC}
+               alt=""
+               fill
+               priority
+               unoptimized
+            
+               className="object-cover object-[62%_0%] opacity-10"
+             />
+        
       <div aria-hidden className="absolute inset-x-0 top-0 h-px bg-lp-line/40" />
       <div aria-hidden className="absolute inset-x-0 bottom-0 h-px bg-lp-line/30" />
 
