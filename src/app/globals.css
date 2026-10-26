@@ -269,6 +269,74 @@ html:has(.dg-landing) {
 }
 
 /* ---------------------------------------------------------------------------
+   Schedule-a-call dialog — centred modal with fade/scale motion
+   Radix keeps the portal mounted until these exit animations finish.
+   --------------------------------------------------------------------------- */
+.dg-dialog-overlay[data-state="open"] {
+  animation: dg-dialog-overlay-in 220ms ease-out both;
+}
+
+.dg-dialog-overlay[data-state="closed"] {
+  animation: dg-dialog-overlay-out 180ms ease-in both;
+}
+
+.dg-dialog-content {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  max-height: calc(100dvh - 1.5rem);
+  transform: translate(-50%, -50%);
+}
+
+.dg-dialog-content[data-state="open"] {
+  animation: dg-dialog-content-in 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.dg-dialog-content[data-state="closed"] {
+  animation: dg-dialog-content-out 180ms ease-in both;
+}
+
+@keyframes dg-dialog-overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes dg-dialog-overlay-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes dg-dialog-content-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -47%) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes dg-dialog-content-out {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.97);
+  }
+}
+
+/* ---------------------------------------------------------------------------
    Landing navbar — animated gold underline + restrained radial glow
    --------------------------------------------------------------------------- */
 .dg-nav-link {

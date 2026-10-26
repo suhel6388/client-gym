@@ -1,4 +1,4 @@
-import { ArrowRight, CalendarDays } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { HeroVisual } from "./HeroVisual";
 import {
@@ -9,6 +9,7 @@ import {
   HeroReveal,
   HeroVisualReveal,
 } from "./HeroMotion";
+import { ScheduleCallLauncher } from "./ScheduleCallDialog";
 import { FEATURE_HIGHLIGHTS, HERO_COPY, TRUST_INDICATORS } from "./content";
 
 export function HeroSection() {
@@ -90,17 +91,7 @@ export function HeroSection() {
               />
             </Link>
 
-            <Link
-              href={HERO_COPY.secondaryCta.href}
-              className="group inline-flex h-[52px] items-center justify-center gap-6 rounded-xl border border-lp-gold/35 bg-black/10 px-6 text-[13.5px] font-semibold text-lp-ink transition-all duration-300 hover:border-lp-gold/65 hover:bg-lp-gold/[0.065] hover:text-lp-gold-highlight focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lp-gold-highlight sm:w-auto"
-            >
-              {HERO_COPY.secondaryCta.label}
-              <CalendarDays
-                aria-hidden
-                className="size-4 text-lp-gold transition-transform duration-300 group-hover:scale-105"
-                strokeWidth={1.9}
-              />
-            </Link>
+            <ScheduleCallLauncher label={HERO_COPY.secondaryCta.label} />
           </HeroItem>
 
           <HeroList className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2.5 pt-5">

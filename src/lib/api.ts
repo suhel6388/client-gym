@@ -1079,6 +1079,48 @@ export function deleteReceptionist(id: string) {
 }
 
 // ---------------------------------------------------------------------------
+// Schedule a call — `/api/v1/schedule/` (public landing page)
+// ---------------------------------------------------------------------------
+//
+// The backend rate-limits this endpoint to one call per detected IP every 24
+// hours. `ipAddress` is deliberately not part of the request: the server reads
+// the client address from the connection / trusted proxy headers and stores it.
+
+export type ScheduleCallInput = {
+  clientName: string;
+  mob: string;
+  /** ISO 8601 date-time, e.g. `2026-10-27T10:00:00.000Z`. */
+  callTime: string;
+  note?: string | null;
+};
+
+export type ScheduleCallDto = {
+  id: number;
+  clientName: string;
+  /** The backend column is named `Mob`; keep the server casing here. */
+  Mob: string;
+  callTime: string;
+  note: string | null;
+  ipAddress: string;
+  createdAt: string;
+  updatedAt?: string;
+};
+
+/** POST /schedule/ — create a scheduled call (no auth required). */
+export function createScheduleCall(
+  input: ScheduleCallInput,
+  signal?: AbortSignal,
+): Promise<ScheduleCallDto> {
+  return apiRequest<ScheduleCallDto>("/schedule/", {
+    method: "POST",
+    body: input,
+    signal,
+    // A cold Render instance can take longer than the default 30 seconds.
+    timeout: 45000,
+  });
+}
+
+// ---------------------------------------------------------------------------
 // Reports
 // ---------------------------------------------------------------------------
 
