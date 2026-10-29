@@ -132,6 +132,9 @@ export const forgotPasswordAction: FormAction<{ method: "link" | "otp" }> = asyn
     if (error instanceof ApiError && error.status === 429) {
       return { success: false, error: AUTH_ERRORS.rateLimited };
     }
+    if (error instanceof ApiError && error.status === 502) {
+      return { success: false, error: AUTH_ERRORS.resetEmailFailed };
+    }
     if (error instanceof ApiError && error.status >= 500) {
       return { success: false, error: AUTH_ERRORS.resetEmailFailed };
     }

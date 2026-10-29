@@ -60,7 +60,13 @@ export default function ForgotPasswordScreen() {
         { dedupeKey: "forgot-password-sent" },
       );
     },
-    (state) => setFormError(state.error),
+    (state) => {
+      setFormError(state.error);
+      toast.error("Reset email failed", state.error, {
+        dedupeKey: "forgot-password-failed",
+        persistent: true,
+      });
+    },
   );
   // Sends a plain object as FormData, inside a React transition.
   const submit = useMemo(() => createSubmitHandler(formAction), [formAction]);

@@ -1607,6 +1607,133 @@ export type PlatformMutationResult = {
   [key: string]: unknown;
 };
 
+export type PlatformOwnerRow = {
+  id: string;
+  name: string;
+  email: string;
+  phone: string | null;
+  role: string;
+  /** Canonical gym-owner label returned by the API (stored role is ADMIN). */
+  roleLabel?: string;
+  gymId: string | null;
+  emailVerified: boolean;
+  createdAt: string;
+  gym: {
+    id: string;
+    name: string;
+    email: string | null;
+    phone: string | null;
+    createdAt: string;
+  } | null;
+  subscription: {
+    id: string;
+    status: Exclude<PlatformSubscriptionStatus, "NO_SUBSCRIPTION">;
+    effectiveStatus: PlatformSubscriptionStatus;
+    planId: string | null;
+    planName: string | null;
+    pricePaise: number;
+    expiresAt: string | null;
+    remainingDays: number;
+  } | null;
+};
+
+export type PlatformOwnerList = {
+  owners: PlatformOwnerRow[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
+  filters: {
+    q: string | null;
+    sort: PlatformGymSort;
+  };
+};
+
+export type PlatformOwnerFilters = {
+  q?: string;
+  page?: number;
+  limit?: number;
+  sort?: PlatformGymSort;
+};
+
+export type CreatePlatformGymOwnerInput = {
+  ownerName: string;
+  ownerEmail: string;
+  ownerPhone: string;
+  gymName: string;
+  gymEmail?: string;
+  gymPhone?: string;
+  gymAddress?: string;
+  /** PASSWORD creates the credential now; INVITE emails a password-setup link. */
+  mode: "PASSWORD" | "INVITE";
+  password?: string;
+  /** Optional plan to activate immediately instead of the free trial. */
+  planId?: string;
+  reason?: string;
+};
+
+export type CreatePlatformGymOwnerResult = {
+  gym: {
+    id: string;
+    name: string;
+    email: string | null;
+    phone: string | null;
+    address: string | null;
+    createdAt: string;
+    registeredAt: string;
+  };
+  owner: {
+    id: string;
+    name: string;
+    email: string;
+    phone: string | null;
+    role: string;
+    roleLabel?: string;
+    gymId: string | null;
+    emailVerified: boolean;
+    createdAt: string;
+  };
+  subscription:
+    | (PlatformSubscription & { expiresAt: string | null })
+    | null;
+  invitation: {
+    mode: "PASSWORD" | "INVITE";
+    email: string;
+    requiresEmail: boolean;
+    sent?: boolean;
+    warning?: string | null;
+  };
+};
+
+/** GET /super-admin/owners — paginated owner directory with search. */
+export function listPlatformOwners(
+  filters: PlatformOwnerFilters = {},
+  signal?: AbortSignal,
+) {
+  return apiRequest<PlatformOwnerList>("/super-admin/owners", {
+    signal,
+    query: {
+      q: filters.q?.trim() || undefined,
+      page: filters.page,
+      limit: filters.limit,
+      sort: filters.sort,
+    },
+  });
+}
+
+/**
+ * POST /super-admin/gyms — create a gym and its owner in one transaction.
+ * `unwrap: false` keeps the server's human-readable success message.
+ */
+export function createPlatformGymOwner(input: CreatePlatformGymOwnerInput) {
+  return apiRequest<{ message?: string; data: CreatePlatformGymOwnerResult }>(
+    "/super-admin/gyms",
+    { method: "POST", body: input, unwrap: false },
+  );
+}
+
 /** GET /super-admin/stats — real database totals. */
 export function fetchPlatformStats(signal?: AbortSignal) {
   return apiRequest<PlatformStats>("/super-admin/stats", { signal });

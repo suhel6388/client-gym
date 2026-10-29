@@ -12,6 +12,7 @@ import {
   RefreshCw,
   Search,
   SlidersHorizontal,
+  UserPlus,
   UserRound,
 } from "lucide-react";
 import { Avatar } from "@/components/ui/Avatar";
@@ -34,6 +35,7 @@ import {
   platformInitials,
   platformStatusMeta,
 } from "@/lib/super-admin-view";
+import { CreateGymOwnerDialog } from "./CreateGymOwnerDialog";
 
 const PAGE_SIZE = 20;
 
@@ -71,6 +73,7 @@ export function PlatformGymsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
+  const [createOpen, setCreateOpen] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(search.trim()), 350);
@@ -160,14 +163,20 @@ export function PlatformGymsPage() {
             </p>
           )}
         </div>
-        <Button variant="secondary" size="md" onClick={reload} disabled={loading}>
-          <RefreshCw
-            className={cn("size-4", loading && "animate-spin")}
-            strokeWidth={2}
-            aria-hidden
-          />
-          Refresh
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button variant="secondary" size="md" onClick={reload} disabled={loading}>
+            <RefreshCw
+              className={cn("size-4", loading && "animate-spin")}
+              strokeWidth={2}
+              aria-hidden
+            />
+            Refresh
+          </Button>
+          <Button variant="primary" size="md" onClick={() => setCreateOpen(true)}>
+            <UserPlus className="size-4" strokeWidth={2} aria-hidden />
+            Create gym owner
+          </Button>
+        </div>
       </div>
 
       <div className="mt-5 rounded-2xl border border-line bg-card/60 p-3 sm:p-4">
@@ -526,6 +535,19 @@ export function PlatformGymsPage() {
         <ChevronsUpDown className="size-3.5" strokeWidth={1.75} aria-hidden />
         Search covers gym name, gym ID, owner name, owner email and phone.
       </div>
+
+      <CreateGymOwnerDialog
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        onCreated={() => {
+          setSearch("");
+          setDebouncedSearch("");
+          setStatus("");
+          setSort("newest");
+          setPage(1);
+          reload();
+        }}
+      />
     </div>
   );
 }

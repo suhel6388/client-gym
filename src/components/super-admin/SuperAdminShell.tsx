@@ -12,6 +12,7 @@ import {
   Menu,
   Settings,
   ShieldCheck,
+  UsersRound,
   X,
   type LucideIcon,
 } from "lucide-react";
@@ -42,6 +43,12 @@ const NAV_ITEMS: PlatformNavItem[] = [
     href: `${SUPER_ADMIN_PATH}/gyms`,
     icon: Building2,
     description: "Every tenant on the platform",
+  },
+  {
+    label: "Owners",
+    href: `${SUPER_ADMIN_PATH}/owners`,
+    icon: UsersRound,
+    description: "Gym owner accounts",
   },
   {
     label: "Schedule calls",

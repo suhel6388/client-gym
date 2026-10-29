@@ -119,6 +119,7 @@ export function platformInitials(name: string | null | undefined): string {
 }
 
 const ACTION_LABELS: Record<string, string> = {
+  GYM_CREATED: "Gym created",
   SUBSCRIPTION_PLAN_ASSIGNED: "Plan assigned",
   SUBSCRIPTION_PLAN_CHANGED: "Plan changed",
   SUBSCRIPTION_EXTENDED: "Expiry extended",
@@ -151,6 +152,7 @@ export function auditActionLabel(action: string): string {
 export function auditActionTone(action: string): BadgeTone {
   if (action.includes("SUSPEND") || action.includes("FAILED")) return "danger";
   if (action.includes("TRIAL")) return "gold";
+  if (action === "GYM_CREATED") return "success";
   if (action.includes("END") || action.includes("CANCEL")) return "warning";
   if (action.includes("ACTIV") || action.includes("ASSIGN") || action.includes("EXTEND")) {
     return "success";

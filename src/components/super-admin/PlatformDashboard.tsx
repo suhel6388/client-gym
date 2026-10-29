@@ -13,6 +13,7 @@ import {
   ShieldAlert,
   Sparkles,
   TriangleAlert,
+  UserPlus,
   Users,
   Wallet,
   type LucideIcon,
@@ -35,6 +36,7 @@ import {
   platformStatusMeta,
 } from "@/lib/super-admin-view";
 import { ScheduleCallsSection } from "./ScheduleCallsSection";
+import { CreateGymOwnerDialog } from "./CreateGymOwnerDialog";
 
 const GYMS_PATH = `${SUPER_ADMIN_PATH}/gyms`;
 
@@ -146,6 +148,7 @@ export function PlatformDashboard() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [reloadKey, setReloadKey] = useState(0);
+  const [createOpen, setCreateOpen] = useState(false);
 
   const load = useCallback(() => setReloadKey((value) => value + 1), []);
 
@@ -205,7 +208,7 @@ export function PlatformDashboard() {
             </p>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button variant="secondary" size="md" onClick={load} disabled={loading}>
             <RefreshCw
               className={cn("size-4", loading && "animate-spin")}
@@ -213,6 +216,10 @@ export function PlatformDashboard() {
               aria-hidden
             />
             Refresh
+          </Button>
+          <Button variant="primary" size="md" onClick={() => setCreateOpen(true)}>
+            <UserPlus className="size-4" strokeWidth={2} aria-hidden />
+            Create gym owner
           </Button>
           <Link
             href={GYMS_PATH}
@@ -519,6 +526,12 @@ export function PlatformDashboard() {
           Revenue is derived from successful payments.
         </span>
       </div>
+
+      <CreateGymOwnerDialog
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        onCreated={() => load()}
+      />
     </div>
   );
 }
