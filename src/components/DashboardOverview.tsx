@@ -2,10 +2,10 @@
 
 import { AlertTriangle, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
-import { ApiError, fetchDashboardReport } from "@/lib/api";
+import { ApiError, fetchDashboardReport, fetchMemberJoins } from "@/lib/api";
 import { buildDashboardView, type DashboardView } from "@/lib/dashboard-view";
 import { formatCurrency, formatNumber } from "@/lib/format";
-import { listMembers, listMemberships, listPayments } from "@/lib/members-api";
+import { listMemberships, listPayments } from "@/lib/members-api";
 import { useSession } from "./auth/SessionProvider";
 import { DashboardAnalytics } from "./DashboardAnalytics";
 import { DashboardToolbar } from "./DashboardToolbar";
@@ -34,14 +34,16 @@ export function DashboardOverview() {
     setStatus("loading");
     setError(null);
     try {
-      const [report, payments, memberships, members] = await Promise.all([
+      const [report, payments, memberships, memberJoins] = await Promise.all([
         fetchDashboardReport(signal),
         listPayments(signal),
         listMemberships(undefined, signal),
-        listMembers(undefined, signal),
+        fetchMemberJoins(signal, { includePlan: true }),
       ]);
       if (signal?.aborted) return;
-      setView(buildDashboardView({ report, payments, memberships, members }));
+      setView(
+        buildDashboardView({ report, payments, memberships, members: memberJoins }),
+      );
       setStatus("ready");
     } catch (caught) {
       if (signal?.aborted) return;

@@ -22,11 +22,10 @@ import { inWindow, toDateKey, todayKey } from "@/lib/date-window";
 import { formatCurrencyInr, formatNumber } from "@/lib/format";
 import { paiseToAmount } from "@/lib/members-api";
 import type {
-  MemberDto,
   MembershipWithRelationsDto,
   PaymentDto,
 } from "@/lib/members-api";
-import type { ExpenseDto } from "@/lib/api";
+import type { ExpenseDto, MemberJoinDto } from "@/lib/api";
 import { fetchReportsData } from "@/lib/reports-service";
 import { summarizePayments, type PaymentRow } from "@/lib/payments-view";
 import {
@@ -91,7 +90,7 @@ export function ReportsPage() {
   const [payments, setPayments] = useState<PaymentDto[]>([]);
   const [expenses, setExpenses] = useState<ExpenseDto[]>([]);
   const [memberships, setMemberships] = useState<MembershipWithRelationsDto[]>([]);
-  const [members, setMembers] = useState<MemberDto[]>([]);
+  const [members, setMembers] = useState<MemberJoinDto[]>([]);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [error, setError] = useState<string | null>(null);
   const [refreshing, setRefreshing] = useState(false);

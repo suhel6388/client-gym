@@ -1,12 +1,7 @@
-import { listExpenses } from "./api";
-import {
-  listMembers,
-  listMemberships,
-  listPayments,
-} from "./members-api";
-import type { ExpenseDto } from "./api";
+import { fetchMemberJoins, listExpenses } from "./api";
+import { listMemberships, listPayments } from "./members-api";
+import type { ExpenseDto, MemberJoinDto } from "./api";
 import type {
-  MemberDto,
   MembershipWithRelationsDto,
   PaymentDto,
 } from "./members-api";
@@ -15,15 +10,17 @@ export type ReportsBundle = {
   payments: PaymentDto[];
   expenses: ExpenseDto[];
   memberships: MembershipWithRelationsDto[];
-  members: MemberDto[];
+  members: MemberJoinDto[];
 };
 
 /**
  * Loads everything the Reports page aggregates.
  *
  * The backend has no single report endpoint for these views, so the page
- * combines the same live collections the rest of the app uses:
- * `GET /payments`, `/expenses`, `/memberships` and `/members`.
+ * combines live collections: `GET /payments`, `/expenses`, `/memberships` and
+ * the lightweight `/reports/member-joins` feed. The last one replaces a full
+ * `/members` download (with memberships and plans) that was only used to
+ * count join dates.
  *
  * All four reads run in parallel and share one `AbortSignal`, so navigating
  * away cancels every in-flight request instead of updating unmounted state.
@@ -35,7 +32,7 @@ export async function fetchReportsData(options?: {
     listPayments(options?.signal),
     listExpenses(undefined, options?.signal),
     listMemberships(undefined, options?.signal),
-    listMembers(undefined, options?.signal),
+    fetchMemberJoins(options?.signal),
   ]);
   return { payments, expenses, memberships, members };
 }

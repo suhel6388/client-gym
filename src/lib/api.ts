@@ -1274,6 +1274,35 @@ export function fetchDueMemberships(
   });
 }
 
+/** Minimal member row used by dashboard/report join-date calculations. */
+export type MemberJoinDto = {
+  id: string;
+  joinedAt: string;
+  /** Present only when `includePlan` is requested (dashboard). */
+  memberships?: {
+    endDate: string;
+    plan: { id: string; name: string } | null;
+  }[];
+};
+
+/**
+ * GET /reports/member-joins
+ *
+ * Returns only ids and join dates. Dashboard and Reports used to download the
+ * full member collection (with memberships and plans) solely to count joins.
+ * `includePlan` adds the member's latest plan name for the dashboard's recent
+ * payments table without restoring the full member payload.
+ */
+export function fetchMemberJoins(
+  signal?: AbortSignal,
+  options?: { includePlan?: boolean },
+): Promise<MemberJoinDto[]> {
+  return apiRequest<MemberJoinDto[]>("/reports/member-joins", {
+    signal,
+    query: options?.includePlan ? { include: "plan" } : undefined,
+  });
+}
+
 // ---------------------------------------------------------------------------
 // SaaS subscription & billing
 // ---------------------------------------------------------------------------

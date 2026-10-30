@@ -1,6 +1,6 @@
 import type {
   DashboardReport,
-  MemberDto,
+  MemberJoinDto,
   MembershipWithRelationsDto,
   PaymentDto,
 } from "./api";
@@ -187,7 +187,8 @@ export function buildDashboardView(input: {
   report: DashboardReport;
   payments: PaymentDto[];
   memberships: MembershipWithRelationsDto[];
-  members: MemberDto[];
+  /** Ids and join dates only — the dashboard never renders member profiles. */
+  members: MemberJoinDto[];
 }): DashboardView {
   const { report, payments, memberships, members } = input;
   const now = new Date();
@@ -487,10 +488,9 @@ export function buildDashboardView(input: {
   for (const member of members) {
     const latest = member.memberships?.[0];
     if (!latest) continue;
-    const end = parseDate(latest.endDate)?.getTime() ?? 0;
     planByMember.set(member.id, {
       name: latest.plan?.name ?? "—",
-      end,
+      end: parseDate(latest.endDate)?.getTime() ?? 0,
     });
   }
   for (const membership of memberships) {

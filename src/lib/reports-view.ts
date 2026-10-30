@@ -19,12 +19,8 @@ import {
   toSubscriptionRow,
   type SubscriptionRow,
 } from "./membership-view";
-import type {
-  MemberDto,
-  MembershipWithRelationsDto,
-  PaymentDto,
-} from "./members-api";
-import type { ExpenseDto } from "./api";
+import type { MembershipWithRelationsDto, PaymentDto } from "./members-api";
+import type { ExpenseDto, MemberJoinDto } from "./api";
 
 /* -- Range selection ------------------------------------------------------ */
 
@@ -107,14 +103,14 @@ export type ReportRows = {
   payments: PaymentRow[];
   expenses: ExpenseRow[];
   subscriptions: SubscriptionRow[];
-  members: MemberDto[];
+  members: MemberJoinDto[];
 };
 
 export function toReportRows(input: {
   payments: PaymentDto[];
   expenses: ExpenseDto[];
   memberships: MembershipWithRelationsDto[];
-  members: MemberDto[];
+  members: MemberJoinDto[];
 }): ReportRows {
   const payments = toPaymentRows(input.payments);
   const expenses = toExpenseRows(input.expenses);
@@ -125,7 +121,7 @@ export function toReportRows(input: {
   return { payments, expenses, subscriptions, members: input.members };
 }
 
-function memberJoinKey(member: MemberDto): string | null {
+function memberJoinKey(member: MemberJoinDto): string | null {
   if (!member.joinedAt) return null;
   const time = new Date(member.joinedAt).getTime();
   if (Number.isNaN(time)) return null;
