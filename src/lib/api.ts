@@ -1293,14 +1293,44 @@ export type MemberJoinDto = {
  * `includePlan` adds the member's latest plan name for the dashboard's recent
  * payments table without restoring the full member payload.
  */
-export function fetchMemberJoins(
+export async function fetchMemberJoins(
   signal?: AbortSignal,
   options?: { includePlan?: boolean },
 ): Promise<MemberJoinDto[]> {
-  return apiRequest<MemberJoinDto[]>("/reports/member-joins", {
-    signal,
-    query: options?.includePlan ? { include: "plan" } : undefined,
-  });
+  try {
+    return await apiRequest<MemberJoinDto[]>("/reports/member-joins", {
+      signal,
+      query: options?.includePlan ? { include: "plan" } : undefined,
+    });
+  } catch (error) {
+    // Older API deployments predate this lightweight feed and answer 404
+    // ("Route not found"). Fall back to GET /members so the dashboard and
+    // reports still load instead of failing the whole page.
+    if (!(error instanceof ApiError) || error.status !== 404) throw error;
+
+    const members = await listMembers(undefined, signal);
+    return members.map((member) => ({
+      id: member.id,
+      joinedAt: member.joinedAt,
+      ...(options?.includePlan
+        ? {
+            memberships: (member.memberships ?? [])
+              .slice()
+              .sort(
+                (a, b) =>
+                  new Date(b.endDate).getTime() - new Date(a.endDate).getTime(),
+              )
+              .slice(0, 1)
+              .map((membership) => ({
+                endDate: membership.endDate,
+                plan: membership.plan
+                  ? { id: membership.plan.id, name: membership.plan.name }
+                  : null,
+              })),
+          }
+        : {}),
+    }));
+  }
 }
 
 // ---------------------------------------------------------------------------
