@@ -159,7 +159,7 @@ export default function GymAbout() {
                 variants={card}
                 whileHover={prefersReduced ? undefined : { y: -4 }}
                 transition={{ type: "spring", stiffness: 300, damping: 22 }}
-                className="group rounded-xl border border-white/[0.07] bg-white/[0.025] p-5 backdrop-blur-sm transition-all duration-300 hover:border-lp-gold/35 hover:bg-lp-gold/[0.045] hover:shadow-[0_20px_44px_-30px_rgba(245,179,35,0.55)]"
+                className="group rounded-xl border border-lp-line bg-lp-card/70 p-5 backdrop-blur-sm transition-all duration-300 hover:border-lp-gold/35 hover:bg-lp-gold/[0.045] hover:shadow-[0_20px_44px_-30px_rgba(245,179,35,0.55)]"
               >
                 <div className="flex size-11 items-center justify-center rounded-full border border-lp-gold/45 bg-lp-gold/[0.06] text-lp-gold transition-all duration-300 group-hover:border-lp-gold/70 group-hover:bg-lp-gold/[0.13] group-hover:shadow-[0_0_22px_-8px_rgba(245,179,35,0.8)]">
                   <Icon className="size-5" strokeWidth={1.75} aria-hidden />
@@ -176,7 +176,7 @@ export default function GymAbout() {
         </div>
 
         {/* ---------- Stats strip ---------- */}
-        <div className="mt-14 grid grid-cols-2 gap-y-8 rounded-xl border border-white/[0.07] bg-white/[0.025] px-4 py-8 lg:grid-cols-4">
+        <div className="mt-14 grid grid-cols-2 gap-y-8 rounded-xl border border-lp-line bg-lp-card/70 px-4 py-8 lg:grid-cols-4">
           {STATS.map(({ value, label }, i) => (
             <motion.div
               key={label}

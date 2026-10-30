@@ -43,14 +43,14 @@ export function ExpenseTrendChart({
         >
           <defs>
             <linearGradient id="expenseGold" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#F6D477" />
-              <stop offset="60%" stopColor="#E8B84D" />
-              <stop offset="100%" stopColor="#B8862D" />
+              <stop offset="0%" stopColor="var(--color-gold-soft)" />
+              <stop offset="60%" stopColor="var(--color-gold)" />
+              <stop offset="100%" stopColor="var(--color-gold-deep)" />
             </linearGradient>
           </defs>
 
           <CartesianGrid
-            stroke="#303034"
+            stroke="var(--color-line)"
             strokeOpacity={0.55}
             strokeDasharray="3 6"
             vertical={false}
@@ -60,7 +60,7 @@ export function ExpenseTrendChart({
             dataKey="label"
             tickLine={false}
             axisLine={false}
-            tick={{ fill: "#71717A", fontSize: 11 }}
+            tick={{ fill: "var(--color-faint)", fontSize: 11 }}
             dy={8}
             interval="preserveStartEnd"
             minTickGap={16}
@@ -68,14 +68,14 @@ export function ExpenseTrendChart({
           <YAxis
             tickLine={false}
             axisLine={false}
-            tick={{ fill: "#71717A", fontSize: 11 }}
+            tick={{ fill: "var(--color-faint)", fontSize: 11 }}
             width={62}
             tickFormatter={(value: number) => formatCompactCurrencyInr(value)}
           />
 
           <Tooltip
             content={<ChartTooltip formatter={formatCurrencyInr} />}
-            cursor={{ fill: "#FFFFFF", fillOpacity: 0.045 }}
+            cursor={{ fill: "var(--color-ink)", fillOpacity: 0.05 }}
           />
 
           <Bar

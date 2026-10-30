@@ -120,7 +120,7 @@ export default function GymFooter() {
                 aria-label={label}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex size-10 items-center justify-center rounded-full border border-white/15 text-lp-muted transition-all duration-300 hover:-translate-y-0.5 hover:border-lp-gold/60 hover:bg-lp-gold/[0.07] hover:text-lp-gold-highlight hover:shadow-[0_0_22px_-8px_rgba(245,179,35,0.8)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lp-gold-highlight"
+                className="flex size-10 items-center justify-center rounded-full border border-lp-line text-lp-muted transition-all duration-300 hover:-translate-y-0.5 hover:border-lp-gold/60 hover:bg-lp-gold/[0.07] hover:text-lp-gold-highlight hover:shadow-[0_0_22px_-8px_rgba(245,179,35,0.8)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lp-gold-highlight"
               >
                 <Icon className="size-4" aria-hidden />
               </a>

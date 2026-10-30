@@ -21,7 +21,7 @@ export default function GymReward() {
         whileInView={{ opacity: 1, y: 0, scale: 1 }}
         viewport={{ once: true, amount: 0.4 }}
         transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-        className="relative mx-auto flex max-w-[1200px] flex-col items-center gap-6 overflow-hidden rounded-2xl border border-lp-gold/45 bg-[linear-gradient(135deg,rgba(245,179,35,0.09),rgba(16,17,18,0.9)_46%,rgba(7,6,4,0.96))] px-6 py-8 text-center shadow-[0_0_50px_-20px_rgba(245,179,35,0.55)] md:flex-row md:justify-between md:px-12 md:text-left"
+        className="dg-dark-preview relative mx-auto flex max-w-[1200px] flex-col items-center gap-6 overflow-hidden rounded-2xl border border-lp-gold/45 bg-[linear-gradient(135deg,rgba(245,179,35,0.09),rgba(16,17,18,0.9)_46%,rgba(7,6,4,0.96))] px-6 py-8 text-center shadow-[0_0_50px_-20px_rgba(245,179,35,0.55)] md:flex-row md:justify-between md:px-12 md:text-left"
       >
         <span
           aria-hidden

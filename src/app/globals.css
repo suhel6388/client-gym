@@ -1,37 +1,139 @@
 @import "tailwindcss";
 
-/* ---------------------------------------------------------------------------
-   Ironclad CRM — "Black & Gold" design tokens
-   --------------------------------------------------------------------------- */
-@theme {
-  /* Surfaces */
-  --color-canvas: #0b0b0d;
-  --color-panel: #171719;
-  --color-nav: #202023;
-  --color-card: #1c1c1f;
-  --color-card-hover: #252528;
-  --color-elevated: #202024;
+/* `dark:` utilities follow the `.dark` class set by next-themes instead of
+   the OS media query, so every component switches with the toggle. */
+@custom-variant dark (&:where(.dark, .dark *));
 
-  /* Gold accent */
-  --color-gold: #e8b84d;
-  --color-gold-bright: #ffc857;
-  --color-gold-deep: #b8862d;
-  --color-gold-soft: #f6d477;
+/* ---------------------------------------------------------------------------
+   DarkGoldGym — semantic "Black & Gold" design tokens
+   ---------------------------------------------------------------------------
+   Every surface/text/line token is a CSS variable so `next-themes` can switch
+   the whole application at runtime. Light is the semantic default; the `.dark`
+   class (set by next-themes) restores the original premium black-and-gold
+   palette. Utilities such as `bg-canvas`/`text-ink` resolve through @theme
+   inline, so existing components switch themes without per-page overrides.
+   --------------------------------------------------------------------------- */
+:root {
+  color-scheme: light;
+
+  /* Surfaces */
+  --canvas: #f6f6f7;
+  --panel: #ffffff;
+  --nav: #ffffff;
+  --card: #ffffff;
+  --card-hover: #f4f4f5;
+  --elevated: #ffffff;
+
+  /* Gold accent (darker in light mode for readable text on white) */
+  --gold: #96660a;
+  --gold-bright: #b8860b;
+  --gold-deep: #7a5408;
+  --gold-soft: #c79a2e;
 
   /* Text */
-  --color-ink: #f5f5f5;
-  --color-subtle: #a1a1aa;
-  --color-faint: #71717a;
+  --ink: #18181b;
+  --subtle: #52525b;
+  --faint: #71717a;
 
   /* Lines */
-  --color-line: #303034;
-  --color-line-soft: #26262a;
-  --color-line-strong: #3f3f46;
+  --line: #e4e4e7;
+  --line-soft: #efeff1;
+  --line-strong: #d4d4d8;
 
   /* Status */
-  --color-success: #4ade80;
-  --color-warning: #fbbf24;
-  --color-danger: #f87171;
+  --success: #15803d;
+  --warning: #b45309;
+  --danger: #dc2626;
+
+  /* Chrome */
+  --selection-bg: rgba(184, 134, 11, 0.22);
+  --selection-ink: #18181b;
+  --scrollbar-thumb: #d4d4d8;
+  --scrollbar-thumb-hover: #a1a1aa;
+
+  /* Elevation */
+  --elevation-card: 0 1px 2px rgba(16, 24, 40, 0.06),
+    0 14px 30px -24px rgba(16, 24, 40, 0.32);
+  --elevation-pop: 0 18px 44px -14px rgba(16, 24, 40, 0.22),
+    0 0 0 1px rgba(228, 228, 231, 0.9);
+  --elevation-gold: 0 10px 28px -14px rgba(184, 134, 11, 0.45);
+}
+
+.dark {
+  color-scheme: dark;
+
+  /* Surfaces */
+  --canvas: #0b0b0d;
+  --panel: #171719;
+  --nav: #202023;
+  --card: #1c1c1f;
+  --card-hover: #252528;
+  --elevated: #202024;
+
+  /* Gold accent */
+  --gold: #e8b84d;
+  --gold-bright: #ffc857;
+  --gold-deep: #b8862d;
+  --gold-soft: #f6d477;
+
+  /* Text */
+  --ink: #f5f5f5;
+  --subtle: #a1a1aa;
+  --faint: #71717a;
+
+  /* Lines */
+  --line: #303034;
+  --line-soft: #26262a;
+  --line-strong: #3f3f46;
+
+  /* Status */
+  --success: #4ade80;
+  --warning: #fbbf24;
+  --danger: #f87171;
+
+  /* Chrome */
+  --selection-bg: rgba(232, 184, 77, 0.28);
+  --selection-ink: #ffffff;
+  --scrollbar-thumb: #303034;
+  --scrollbar-thumb-hover: #45454c;
+
+  /* Elevation */
+  --elevation-card: 0 1px 2px rgba(0, 0, 0, 0.5),
+    0 14px 30px -22px rgba(0, 0, 0, 0.9);
+  --elevation-pop: 0 18px 44px -14px rgba(0, 0, 0, 0.9),
+    0 0 0 1px rgba(48, 48, 52, 0.9);
+  --elevation-gold: 0 10px 28px -14px rgba(232, 184, 77, 0.55);
+}
+
+@theme inline {
+  /* Surfaces */
+  --color-canvas: var(--canvas);
+  --color-panel: var(--panel);
+  --color-nav: var(--nav);
+  --color-card: var(--card);
+  --color-card-hover: var(--card-hover);
+  --color-elevated: var(--elevated);
+
+  /* Gold accent */
+  --color-gold: var(--gold);
+  --color-gold-bright: var(--gold-bright);
+  --color-gold-deep: var(--gold-deep);
+  --color-gold-soft: var(--gold-soft);
+
+  /* Text */
+  --color-ink: var(--ink);
+  --color-subtle: var(--subtle);
+  --color-faint: var(--faint);
+
+  /* Lines */
+  --color-line: var(--line);
+  --color-line-soft: var(--line-soft);
+  --color-line-strong: var(--line-strong);
+
+  /* Status */
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-danger: var(--danger);
 
   /* Typography */
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
@@ -43,11 +145,9 @@
   --radius-card: 12px;
 
   /* Elevation */
-  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.5),
-    0 14px 30px -22px rgba(0, 0, 0, 0.9);
-  --shadow-pop: 0 18px 44px -14px rgba(0, 0, 0, 0.9),
-    0 0 0 1px rgba(48, 48, 52, 0.9);
-  --shadow-gold: 0 10px 28px -14px rgba(232, 184, 77, 0.55);
+  --shadow-card: var(--elevation-card);
+  --shadow-pop: var(--elevation-pop);
+  --shadow-gold: var(--elevation-gold);
 
   /* Motion */
   --animate-fade-up: fade-up 0.55s cubic-bezier(0.22, 1, 0.36, 1) both;
@@ -55,6 +155,8 @@
   --animate-pop: pop 0.16s ease-out both;
   --animate-toast-in: toast-in 0.22s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-toast-out: toast-out 0.18s ease-in both;
+  --animate-theme-icon-in: theme-icon-in 0.35s cubic-bezier(0.22, 1, 0.36, 1)
+    both;
 }
 
 @keyframes fade-up {
@@ -128,6 +230,18 @@
   }
 }
 
+/* Sun/moon swap inside the Lightswind theme toggle. */
+@keyframes theme-icon-in {
+  from {
+    opacity: 0;
+    transform: rotate(-70deg) scale(0.55);
+  }
+  to {
+    opacity: 1;
+    transform: rotate(0deg) scale(1);
+  }
+}
+
 /* Toast lifetime indicator. Kept as plain classes (not utilities) so the
    animation name and fill mode stay predictable. */
 .toast-progress-bar {
@@ -163,6 +277,10 @@
 
 @layer base {
   html {
+    color-scheme: light;
+  }
+
+  html.dark {
     color-scheme: dark;
   }
 
@@ -175,8 +293,8 @@
   }
 
   ::selection {
-    background-color: rgba(232, 184, 77, 0.28);
-    color: #ffffff;
+    background-color: var(--selection-bg);
+    color: var(--selection-ink);
   }
 
   :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
@@ -210,20 +328,62 @@
    Scoped tokens so the marketing surface can use its own near-black palette
    without changing the authenticated app's existing design tokens.
    --------------------------------------------------------------------------- */
-@theme {
-  --color-lp-canvas: #070604;
-  --color-lp-nav: #080909;
-  --color-lp-card: #101112;
-  --color-lp-surface: #171819;
-  --color-lp-gold: #f5b323;
-  --color-lp-gold-highlight: #ffd15c;
-  --color-lp-ink: #ffffff;
-  --color-lp-muted: #b9b2a2;
-  --color-lp-line: rgba(245, 179, 35, 0.18);
+:root {
+  --lp-canvas: #fbfaf6;
+  --lp-nav: #fffdf8;
+  --lp-card: #ffffff;
+  --lp-surface: #f5f1e7;
+  --lp-gold: #9a6b09;
+  --lp-gold-highlight: #855c07;
+  --lp-ink: #17120a;
+  --lp-muted: #57534e;
+  --lp-line: rgba(154, 107, 9, 0.22);
+  --lp-grid-line: rgba(23, 18, 10, 0.045);
+}
+
+.dark {
+  --lp-canvas: #070604;
+  --lp-nav: #080909;
+  --lp-card: #101112;
+  --lp-surface: #171819;
+  --lp-gold: #f5b323;
+  --lp-gold-highlight: #ffd15c;
+  --lp-ink: #ffffff;
+  --lp-muted: #b9b2a2;
+  --lp-line: rgba(245, 179, 35, 0.18);
+  --lp-grid-line: rgba(255, 255, 255, 0.025);
+}
+
+@theme inline {
+  --color-lp-canvas: var(--lp-canvas);
+  --color-lp-nav: var(--lp-nav);
+  --color-lp-card: var(--lp-card);
+  --color-lp-surface: var(--lp-surface);
+  --color-lp-gold: var(--lp-gold);
+  --color-lp-gold-highlight: var(--lp-gold-highlight);
+  --color-lp-ink: var(--lp-ink);
+  --color-lp-muted: var(--lp-muted);
+  --color-lp-line: var(--lp-line);
 }
 
 .dg-landing {
   background-color: var(--color-lp-canvas);
+}
+
+/* Intentionally-dark product previews (hero dashboard mock, dashboard preview
+   and the reward banner) pin the landing tokens to their dark values so their
+   white/gold text stays readable on the black surface in light mode too. */
+.dg-dark-preview {
+  --lp-canvas: #070604;
+  --lp-nav: #080909;
+  --lp-card: #101112;
+  --lp-surface: #171819;
+  --lp-gold: #f5b323;
+  --lp-gold-highlight: #ffd15c;
+  --lp-ink: #ffffff;
+  --lp-muted: #b9b2a2;
+  --lp-line: rgba(245, 179, 35, 0.18);
+  --lp-grid-line: rgba(255, 255, 255, 0.025);
 }
 
 /* Smooth in-page anchor navigation for the marketing page only. The offset
@@ -249,6 +409,12 @@ html:has(.dg-landing) {
 .dg-lp-section {
   background-color: var(--color-lp-canvas);
   background-image:
+    radial-gradient(65% 46% at 50% 0%, rgba(184, 134, 11, 0.07), transparent 72%),
+    linear-gradient(180deg, #fbfaf6 0%, #f5f1e7 100%);
+}
+
+.dark .dg-lp-section {
+  background-image:
     radial-gradient(65% 46% at 50% 0%, rgba(245, 179, 35, 0.055), transparent 72%),
     linear-gradient(180deg, #080706 0%, #060504 100%);
 }
@@ -261,11 +427,25 @@ html:has(.dg-landing) {
   transform: scale(1.02);
 }
 
+:root .dg-feature-image {
+  filter: grayscale(0.35) sepia(0.22) saturate(0.92) contrast(1.04)
+    brightness(0.9);
+}
+
+.dark .dg-feature-image {
+  filter: grayscale(0.55) sepia(0.32) saturate(0.82) contrast(1.06)
+    brightness(0.72);
+}
+
 .dg-gold-text {
-  background-image: linear-gradient(135deg, #ffd15c 0%, #f5b323 55%, #e7a310 100%);
+  background-image: linear-gradient(135deg, #b8860b 0%, #96660a 55%, #7a5408 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
+}
+
+.dark .dg-gold-text {
+  background-image: linear-gradient(135deg, #ffd15c 0%, #f5b323 55%, #e7a310 100%);
 }
 
 /* ---------------------------------------------------------------------------
@@ -531,6 +711,13 @@ html:has(.dg-landing) {
    --------------------------------------------------------------------------- */
 .dg-hero-surface {
   background:
+    radial-gradient(60% 50% at 78% 18%, rgba(184, 134, 11, 0.1), transparent 70%),
+    radial-gradient(50% 50% at 8% 90%, rgba(184, 134, 11, 0.055), transparent 70%),
+    linear-gradient(180deg, #fffdf8 0%, #f7f2e7 100%);
+}
+
+.dark .dg-hero-surface {
+  background:
     radial-gradient(60% 50% at 78% 18%, rgba(245, 179, 35, 0.12), transparent 70%),
     radial-gradient(50% 50% at 8% 90%, rgba(245, 179, 35, 0.05), transparent 70%),
     linear-gradient(180deg, #0a0907 0%, #060504 100%);
@@ -538,8 +725,8 @@ html:has(.dg-landing) {
 
 .dg-hero-grid {
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    linear-gradient(var(--lp-grid-line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--lp-grid-line) 1px, transparent 1px);
   background-size: 56px 56px;
   -webkit-mask-image: radial-gradient(ellipse at 70% 30%, #000 20%, transparent 75%);
   mask-image: radial-gradient(ellipse at 70% 30%, #000 20%, transparent 75%);
@@ -655,6 +842,16 @@ html:has(.dg-landing) {
   filter: grayscale(0.45) sepia(0.34) saturate(0.86) contrast(1.14)
     brightness(0.55);
   transform: scale(1.03);
+}
+
+:root .dg-hero-athlete-image {
+  filter: grayscale(0.35) sepia(0.26) saturate(0.92) contrast(1.08)
+    brightness(0.82);
+}
+
+.dark .dg-hero-athlete-image {
+  filter: grayscale(0.45) sepia(0.34) saturate(0.86) contrast(1.14)
+    brightness(0.55);
 }
 
 .dg-hero-athlete-light {
@@ -857,20 +1054,54 @@ html:has(.dg-landing) {
 /* ---------------------------------------------------------------------------
    DarkGoldGym — authentication theme (brand palette)
    --------------------------------------------------------------------------- */
-@theme {
-  --color-auth-canvas: #080808;
-  --color-auth-card: #111111;
-  --color-auth-gold: #d4af37;
-  --color-auth-gold-highlight: #f5d76e;
-  --color-auth-ink: #ffffff;
-  --color-auth-muted: #a1a1aa;
-  --color-auth-faint: #71717a;
-  --color-auth-line: #27272a;
-  --color-auth-line-strong: #3f3f46;
+:root {
+  --auth-canvas: #f8f6f1;
+  --auth-card: #ffffff;
+  --auth-input: #ffffff;
+  --auth-gold: #96660a;
+  --auth-gold-highlight: #7a5408;
+  --auth-ink: #18181b;
+  --auth-muted: #52525b;
+  --auth-faint: #71717a;
+  --auth-line: #e4e4e7;
+  --auth-line-strong: #d4d4d8;
 
-  --shadow-auth-card: 0 1px 2px rgba(0, 0, 0, 0.6),
+  --auth-elevation-card: 0 1px 2px rgba(16, 24, 40, 0.06),
+    0 24px 48px -28px rgba(16, 24, 40, 0.28);
+  --auth-elevation-gold: 0 10px 24px -12px rgba(150, 102, 10, 0.4);
+}
+
+.dark {
+  --auth-canvas: #080808;
+  --auth-card: #111111;
+  --auth-input: #0b0b0b;
+  --auth-gold: #d4af37;
+  --auth-gold-highlight: #f5d76e;
+  --auth-ink: #ffffff;
+  --auth-muted: #a1a1aa;
+  --auth-faint: #71717a;
+  --auth-line: #27272a;
+  --auth-line-strong: #3f3f46;
+
+  --auth-elevation-card: 0 1px 2px rgba(0, 0, 0, 0.6),
     0 24px 48px -24px rgba(0, 0, 0, 0.9);
-  --shadow-auth-gold: 0 10px 24px -12px rgba(212, 175, 55, 0.45);
+  --auth-elevation-gold: 0 10px 24px -12px rgba(212, 175, 55, 0.45);
+}
+
+@theme inline {
+  --color-auth-canvas: var(--auth-canvas);
+  --color-auth-card: var(--auth-card);
+  --color-auth-input: var(--auth-input);
+  --color-auth-gold: var(--auth-gold);
+  --color-auth-gold-highlight: var(--auth-gold-highlight);
+  --color-auth-ink: var(--auth-ink);
+  --color-auth-muted: var(--auth-muted);
+  --color-auth-faint: var(--auth-faint);
+  --color-auth-line: var(--auth-line);
+  --color-auth-line-strong: var(--auth-line-strong);
+
+  --shadow-auth-card: var(--auth-elevation-card);
+  --shadow-auth-gold: var(--auth-elevation-gold);
 
   --animate-auth-fade-up: auth-fade-up 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
@@ -891,16 +1122,24 @@ html:has(.dg-landing) {
 .auth-backdrop {
   background-color: var(--color-auth-canvas);
   background-image:
+    radial-gradient(56rem 36rem at 12% -10%, rgba(184, 134, 11, 0.09), transparent 60%),
+    radial-gradient(48rem 32rem at 110% 112%, rgba(184, 134, 11, 0.055), transparent 55%),
+    linear-gradient(rgba(23, 18, 10, 0.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(23, 18, 10, 0.028) 1px, transparent 1px);
+  background-size: auto, auto, 44px 44px, 44px 44px;
+}
+
+.dark .auth-backdrop {
+  background-image:
     radial-gradient(56rem 36rem at 12% -10%, rgba(212, 175, 55, 0.07), transparent 60%),
     radial-gradient(48rem 32rem at 110% 112%, rgba(245, 215, 110, 0.05), transparent 55%),
     linear-gradient(rgba(255, 255, 255, 0.014) 1px, transparent 1px),
     linear-gradient(90deg, rgba(255, 255, 255, 0.014) 1px, transparent 1px);
-  background-size: auto, auto, 44px 44px, 44px 44px;
 }
 
 .scroll-thin {
   scrollbar-width: thin;
-  scrollbar-color: #303034 transparent;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
 }
 
 .scroll-thin::-webkit-scrollbar {
@@ -913,14 +1152,51 @@ html:has(.dg-landing) {
 }
 
 .scroll-thin::-webkit-scrollbar-thumb {
-  background-color: #303034;
+  background-color: var(--scrollbar-thumb);
   border: 2px solid transparent;
   border-radius: 999px;
   background-clip: content-box;
 }
 
 .scroll-thin::-webkit-scrollbar-thumb:hover {
-  background-color: #45454c;
+  background-color: var(--scrollbar-thumb-hover);
+}
+
+/* ---------------------------------------------------------------------------
+   Theme switching
+   ---------------------------------------------------------------------------
+   Lightswind's `swipe-down` animation clips the incoming root snapshot from
+   top to bottom. Disabling the default cross-fade keeps the wipe crisp.
+   --------------------------------------------------------------------------- */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* Theme buttons inherit each surface's own muted/gold palette. */
+.dg-landing [data-theme-toggle] {
+  border: 1px solid var(--color-lp-line);
+  background-color: color-mix(in srgb, var(--color-lp-gold) 6%, transparent);
+  color: var(--color-lp-muted);
+}
+
+.dg-landing [data-theme-toggle]:hover {
+  border-color: color-mix(in srgb, var(--color-lp-gold) 48%, transparent);
+  background-color: color-mix(in srgb, var(--color-lp-gold) 12%, transparent);
+  color: var(--color-lp-gold-highlight);
+}
+
+.auth-backdrop [data-theme-toggle] {
+  border-color: var(--color-auth-line);
+  background-color: color-mix(in srgb, var(--color-auth-card) 80%, transparent);
+  color: var(--color-auth-muted);
+}
+
+.auth-backdrop [data-theme-toggle]:hover {
+  border-color: color-mix(in srgb, var(--color-auth-gold) 45%, transparent);
+  background-color: var(--color-auth-card);
+  color: var(--color-auth-gold);
 }
 
 @media (prefers-reduced-motion: reduce) {

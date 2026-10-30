@@ -40,7 +40,7 @@ const reduced: Variants = {
 type Status = "idle" | "sending" | "success" | "error";
 
 const inputClass =
-  "w-full rounded-lg border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm text-lp-ink placeholder:text-lp-muted/45 transition-colors duration-200 hover:border-white/[0.14] focus:border-lp-gold focus:outline-none focus:ring-1 focus:ring-lp-gold/50";
+  "w-full rounded-lg border border-lp-line bg-lp-card px-4 py-3 text-sm text-lp-ink placeholder:text-lp-muted/45 transition-colors duration-200 hover:border-lp-line focus:border-lp-gold focus:outline-none focus:ring-1 focus:ring-lp-gold/50";
 
 /* ---------- Component ---------- */
 
@@ -160,7 +160,7 @@ export default function GymContact() {
             <motion.a
               variants={v}
               href={`tel:${PHONE_TEL}`}
-              className="group flex items-center gap-4 rounded-xl border border-white/[0.07] bg-white/[0.025] p-5 transition-all duration-300 hover:border-lp-gold/40 hover:bg-lp-gold/[0.04]"
+              className="group flex items-center gap-4 rounded-xl border border-lp-line bg-lp-card/70 p-5 transition-all duration-300 hover:border-lp-gold/40 hover:bg-lp-gold/[0.04]"
             >
               <span className="flex size-12 shrink-0 items-center justify-center rounded-full border border-lp-gold/45 bg-lp-gold/[0.06] text-lp-gold transition-colors group-hover:border-lp-gold/70 group-hover:bg-lp-gold/[0.12]">
                 <Phone className="size-5" strokeWidth={1.75} aria-hidden />
@@ -176,7 +176,7 @@ export default function GymContact() {
             <motion.a
               variants={v}
               href={`mailto:${EMAIL}`}
-              className="group flex items-center gap-4 rounded-xl border border-white/[0.07] bg-white/[0.025] p-5 transition-all duration-300 hover:border-lp-gold/40 hover:bg-lp-gold/[0.04]"
+              className="group flex items-center gap-4 rounded-xl border border-lp-line bg-lp-card/70 p-5 transition-all duration-300 hover:border-lp-gold/40 hover:bg-lp-gold/[0.04]"
             >
               <span className="flex size-12 shrink-0 items-center justify-center rounded-full border border-lp-gold/45 bg-lp-gold/[0.06] text-lp-gold transition-colors group-hover:border-lp-gold/70 group-hover:bg-lp-gold/[0.12]">
                 <Mail className="size-5" strokeWidth={1.75} aria-hidden />
@@ -193,7 +193,7 @@ export default function GymContact() {
           {/* ---------- Right: form ---------- */}
           <motion.div
             variants={v}
-            className="rounded-xl border border-white/[0.07] bg-white/[0.025] p-6 backdrop-blur-sm sm:p-8"
+            className="rounded-xl border border-lp-line bg-lp-card/70 p-6 backdrop-blur-sm sm:p-8"
           >
             {status === "success" ? (
               <div

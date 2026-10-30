@@ -178,7 +178,7 @@ export default function GymReview() {
             type="button"
             onClick={prev}
             aria-label="Previous review"
-            className="hidden size-10 shrink-0 items-center justify-center rounded-full border border-white/20 text-lp-ink transition-all duration-300 hover:border-lp-gold/70 hover:bg-lp-gold/[0.08] hover:text-lp-gold-highlight hover:shadow-[0_0_22px_-8px_rgba(245,179,35,0.8)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lp-gold-highlight active:scale-95 sm:flex"
+            className="hidden size-10 shrink-0 items-center justify-center rounded-full border border-lp-line text-lp-ink transition-all duration-300 hover:border-lp-gold/70 hover:bg-lp-gold/[0.08] hover:text-lp-gold-highlight hover:shadow-[0_0_22px_-8px_rgba(245,179,35,0.8)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lp-gold-highlight active:scale-95 sm:flex"
           >
             <ChevronLeft className="size-5" aria-hidden />
           </button>
@@ -201,7 +201,7 @@ export default function GymReview() {
                   className="shrink-0 px-2"
                   style={{ flexBasis: `${100 / visible}%` }}
                 >
-                  <article className="group h-full rounded-xl border border-white/[0.07] bg-white/[0.025] p-5 backdrop-blur-sm transition-all duration-300 hover:border-lp-gold/35 hover:bg-lp-gold/[0.035] hover:shadow-[0_20px_44px_-30px_rgba(245,179,35,0.55)]">
+                  <article className="group h-full rounded-xl border border-lp-line bg-lp-card/70 p-5 backdrop-blur-sm transition-all duration-300 hover:border-lp-gold/35 hover:bg-lp-gold/[0.035] hover:shadow-[0_20px_44px_-30px_rgba(245,179,35,0.55)]">
                     <div className="flex gap-1" aria-label="5 out of 5 stars">
                       {Array.from({ length: 5 }).map((_, s) => (
                         <Star
@@ -237,7 +237,7 @@ export default function GymReview() {
             type="button"
             onClick={next}
             aria-label="Next review"
-            className="hidden size-10 shrink-0 items-center justify-center rounded-full border border-white/20 text-lp-ink transition-all duration-300 hover:border-lp-gold/70 hover:bg-lp-gold/[0.08] hover:text-lp-gold-highlight hover:shadow-[0_0_22px_-8px_rgba(245,179,35,0.8)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lp-gold-highlight active:scale-95 sm:flex"
+            className="hidden size-10 shrink-0 items-center justify-center rounded-full border border-lp-line text-lp-ink transition-all duration-300 hover:border-lp-gold/70 hover:bg-lp-gold/[0.08] hover:text-lp-gold-highlight hover:shadow-[0_0_22px_-8px_rgba(245,179,35,0.8)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lp-gold-highlight active:scale-95 sm:flex"
           >
             <ChevronRight className="size-5" aria-hidden />
           </button>
@@ -255,7 +255,7 @@ export default function GymReview() {
               className={`h-1.5 rounded-full transition-all duration-300 ${
                 i === activeDot
                   ? "w-6 bg-lp-gold shadow-[0_0_10px_rgba(245,179,35,0.75)]"
-                  : "w-1.5 bg-white/25 hover:bg-lp-gold/50"
+                  : "w-1.5 bg-lp-muted/40 hover:bg-lp-gold/50"
               }`}
             />
           ))}

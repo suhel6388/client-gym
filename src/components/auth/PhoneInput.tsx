@@ -57,7 +57,7 @@ export function PhoneInput({ label, id, onValueChange, error, required }: PhoneI
       </label>
       <div
         className={cn(
-          "flex h-10 w-full overflow-hidden rounded-lg border border-auth-line bg-[#0b0b0b] transition-colors focus-within:border-auth-gold/60 focus-within:ring-2 focus-within:ring-auth-gold/15",
+          "flex h-10 w-full overflow-hidden rounded-lg border border-auth-line bg-auth-input transition-colors focus-within:border-auth-gold/60 focus-within:ring-2 focus-within:ring-auth-gold/15",
           error && "border-danger/60",
         )}
       >
@@ -67,7 +67,7 @@ export function PhoneInput({ label, id, onValueChange, error, required }: PhoneI
           className="h-full w-[7.75rem] shrink-0 border-r border-auth-line bg-transparent px-2.5 text-[13px] text-auth-muted outline-none"
         >
           {COUNTRIES.map((country) => (
-            <option key={`${country.code}-${country.dial}`} value={country.dial} className="bg-[#111111] text-auth-ink">
+            <option key={`${country.code}-${country.dial}`} value={country.dial} className="bg-auth-card text-auth-ink">
               {country.label}
             </option>
           ))}

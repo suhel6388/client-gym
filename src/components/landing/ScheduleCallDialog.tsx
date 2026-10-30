@@ -39,13 +39,13 @@ const CTA_CLASSES =
   "group inline-flex h-[52px] w-full items-center justify-center gap-6 rounded-xl border border-lp-gold/35 bg-black/10 px-6 text-[13.5px] font-semibold text-lp-ink transition-all duration-300 hover:border-lp-gold/65 hover:bg-lp-gold/[0.065] hover:text-lp-gold-highlight focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lp-gold-highlight sm:w-auto";
 
 const FIELD_CLASSES =
-  "h-10 rounded-xl border-[#2B2B2B] bg-[#101010] text-[13px] text-white placeholder:text-[#6B6B70] focus:border-[#D4AF37] focus:ring-2 focus:ring-[rgba(212,175,55,0.18)]";
+  "h-10 rounded-xl border-line bg-card text-[13px] text-ink placeholder:text-faint focus:border-gold focus:ring-2 focus:ring-gold/15";
 
 const TEXTAREA_CLASSES =
-  "min-h-[76px] resize-none rounded-xl border-[#2B2B2B] bg-[#101010] text-[13px] text-white placeholder:text-[#6B6B70] focus:border-[#D4AF37] focus:ring-2 focus:ring-[rgba(212,175,55,0.18)]";
+  "min-h-[76px] resize-none rounded-xl border-line bg-card text-[13px] text-ink placeholder:text-faint focus:border-gold focus:ring-2 focus:ring-gold/15";
 
 const PRIMARY_BUTTON_CLASSES =
-  "inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[linear-gradient(135deg,#E8C55B_0%,#D4AF37_55%,#B8912B_100%)] px-5 text-[13px] font-bold text-[#171203] shadow-[0_10px_28px_-12px_rgba(212,175,55,0.8)] transition-all duration-200 hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D4AF37] disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:brightness-100";
+  "inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[linear-gradient(135deg,#E8C55B_0%,#D4AF37_55%,#B8912B_100%)] px-5 text-[13px] font-bold text-[#171203] shadow-[0_10px_28px_-12px_rgba(212,175,55,0.8)] transition-all duration-200 hover:brightness-110 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold disabled:cursor-not-allowed disabled:opacity-60 disabled:hover:brightness-100";
 
 type FieldErrors = Partial<
   Record<"clientName" | "mob" | "callTime" | "note", string>
@@ -69,7 +69,7 @@ function readNextAllowedAt(error: ApiError): Date | null {
 function FieldError({ id, message }: { id: string; message?: string }) {
   if (!message) return null;
   return (
-    <p id={id} role="alert" className="mt-1.5 text-[11.5px] text-[#FCA5A5]">
+    <p id={id} role="alert" className="mt-1.5 text-[11.5px] text-danger">
       {message}
     </p>
   );
@@ -264,16 +264,16 @@ function ScheduleCallForm({ onScheduled }: ScheduleCallFormProps) {
 
   return (
     <>
-      <div className="sticky top-0 z-20 border-b border-[#2B2B2B] bg-[#151515] px-5 pb-4 pt-5 sm:px-7 sm:pb-5 sm:pt-6">
+      <div className="sticky top-0 z-20 border-b border-line bg-elevated px-5 pb-4 pt-5 sm:px-7 sm:pb-5 sm:pt-6">
         <div className="flex items-start gap-3.5 pr-10">
-          <span className="mt-0.5 inline-flex size-10 shrink-0 items-center justify-center rounded-xl border border-[rgba(212,175,55,0.28)] bg-[rgba(212,175,55,0.09)] text-[#D4AF37] shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
+          <span className="mt-0.5 inline-flex size-10 shrink-0 items-center justify-center rounded-xl border border-gold/30 bg-gold/10 text-gold shadow-[inset_0_1px_0_rgba(255,255,255,0.04)]">
             <CalendarClock className="size-5" strokeWidth={1.7} aria-hidden />
           </span>
           <div className="min-w-0">
-            <DialogTitle className="text-[19px] font-semibold tracking-[-0.01em] text-white sm:text-xl">
+            <DialogTitle className="text-[19px] font-semibold tracking-[-0.01em] text-ink sm:text-xl">
               Schedule a Call
             </DialogTitle>
-            <DialogDescription className="mt-1 text-[12.5px] leading-5 text-[#A1A1AA] sm:text-[13px]">
+            <DialogDescription className="mt-1 text-[12.5px] leading-5 text-subtle sm:text-[13px]">
               Book a quick 30-minute walkthrough with our team.
             </DialogDescription>
           </div>
@@ -283,7 +283,7 @@ function ScheduleCallForm({ onScheduled }: ScheduleCallFormProps) {
           <button
             type="button"
             aria-label="Close schedule a call dialog"
-            className="absolute right-4 top-4 inline-flex size-8 items-center justify-center rounded-lg border border-transparent text-[#A1A1AA] transition-colors hover:border-[#2B2B2B] hover:bg-[#1D1D1D] hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D4AF37]"
+            className="absolute right-4 top-4 inline-flex size-8 items-center justify-center rounded-lg border border-transparent text-subtle transition-colors hover:border-line hover:bg-card-hover hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold"
           >
             <X className="size-4" strokeWidth={2} aria-hidden />
           </button>
@@ -301,11 +301,11 @@ function ScheduleCallForm({ onScheduled }: ScheduleCallFormProps) {
           <div className="flex items-center justify-between gap-3">
             <h3
               id="schedule-date-heading"
-              className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#A1A1AA]"
+              className="text-[11px] font-semibold uppercase tracking-[0.14em] text-subtle"
             >
               Select a date
             </h3>
-            <span className="text-[11px] font-medium text-[#71717A]">
+            <span className="text-[11px] font-medium text-faint">
               Next {dateOptions.length} days
             </span>
           </div>
@@ -325,16 +325,16 @@ function ScheduleCallForm({ onScheduled }: ScheduleCallFormProps) {
                   aria-pressed={selected}
                   aria-label={option.fullLabel}
                   className={cn(
-                    "flex min-h-[58px] flex-col items-center justify-center rounded-xl border px-1 py-2 transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D4AF37]",
+                    "flex min-h-[58px] flex-col items-center justify-center rounded-xl border px-1 py-2 transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold",
                     selected
-                      ? "border-[#D4AF37] bg-[linear-gradient(135deg,#E8C55B_0%,#D4AF37_100%)] text-[#171203] shadow-[0_10px_26px_-12px_rgba(212,175,55,0.8)]"
-                      : "border-[#2B2B2B] bg-[#101010] text-[#A1A1AA] hover:border-[rgba(212,175,55,0.45)] hover:bg-[rgba(212,175,55,0.07)] hover:text-white",
+                      ? "border-gold bg-[linear-gradient(135deg,#E8C55B_0%,#D4AF37_100%)] text-[#171203] shadow-[0_10px_26px_-12px_rgba(212,175,55,0.8)]"
+                      : "border-line bg-card text-subtle hover:border-gold/45 hover:bg-gold/10 hover:text-ink",
                   )}
                 >
                   <span
                     className={cn(
                       "text-[9.5px] font-bold uppercase tracking-[0.14em]",
-                      selected ? "text-[#574207]" : "text-[#71717A]",
+                      selected ? "text-[#574207]" : "text-faint",
                     )}
                   >
                     {option.weekday}
@@ -353,16 +353,16 @@ function ScheduleCallForm({ onScheduled }: ScheduleCallFormProps) {
           <div className="flex items-center justify-between gap-3">
             <h3
               id="schedule-time-heading"
-              className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#A1A1AA]"
+              className="text-[11px] font-semibold uppercase tracking-[0.14em] text-subtle"
             >
               Select a time
             </h3>
-            <span className="inline-flex items-center gap-1 rounded-full border border-[#2B2B2B] px-2 py-0.5 text-[10px] font-medium text-[#71717A]">
+            <span className="inline-flex items-center gap-1 rounded-full border border-line px-2 py-0.5 text-[10px] font-medium text-faint">
               <Clock3 className="size-3" strokeWidth={1.8} aria-hidden />
               30 min
             </span>
           </div>
-          <p className="mt-1 text-[11px] text-[#71717A]">
+          <p className="mt-1 text-[11px] text-faint">
             Times are shown in your local time.
           </p>
 
@@ -390,12 +390,12 @@ function ScheduleCallForm({ onScheduled }: ScheduleCallFormProps) {
                       : slot.label
                   }
                   className={cn(
-                    "h-9 rounded-lg border text-[12px] font-semibold transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#D4AF37]",
+                    "h-9 rounded-lg border text-[12px] font-semibold transition-all duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold",
                     selected
-                      ? "border-[#D4AF37] bg-[#D4AF37] text-[#171203] shadow-[0_8px_20px_-10px_rgba(212,175,55,0.8)]"
-                      : "border-[#2B2B2B] bg-[#101010] text-[#D4D4D8] hover:border-[rgba(212,175,55,0.45)] hover:bg-[rgba(212,175,55,0.07)] hover:text-white",
+                      ? "border-gold bg-gold text-[#171203] shadow-[0_8px_20px_-10px_rgba(212,175,55,0.8)]"
+                      : "border-line bg-card text-subtle hover:border-gold/45 hover:bg-gold/10 hover:text-ink",
                     slot.disabled &&
-                      "cursor-not-allowed border-[#232323] bg-[#0D0D0D] text-[#52525B] line-through hover:border-[#232323] hover:bg-[#0D0D0D] hover:text-[#52525B]",
+                      "cursor-not-allowed border-line bg-canvas text-faint line-through hover:border-line hover:bg-canvas hover:text-faint",
                   )}
                 >
                   {slot.label}
@@ -405,7 +405,7 @@ function ScheduleCallForm({ onScheduled }: ScheduleCallFormProps) {
           </div>
 
           {timeSlots.every((slot) => slot.disabled) && (
-            <p className="mt-2 text-[11.5px] text-[#A1A1AA]">
+            <p className="mt-2 text-[11.5px] text-subtle">
               No times are left for this date. Choose another day.
             </p>
           )}
@@ -419,11 +419,11 @@ function ScheduleCallForm({ onScheduled }: ScheduleCallFormProps) {
         {/* Visitor details */}
         <section
           aria-labelledby="schedule-details-heading"
-          className="mt-6 border-t border-[#2B2B2B] pt-5"
+          className="mt-6 border-t border-line pt-5"
         >
           <h3
             id="schedule-details-heading"
-            className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#A1A1AA]"
+            className="text-[11px] font-semibold uppercase tracking-[0.14em] text-subtle"
           >
             Your details
           </h3>
@@ -432,10 +432,10 @@ function ScheduleCallForm({ onScheduled }: ScheduleCallFormProps) {
             <div className="min-w-0">
               <Label
                 htmlFor="schedule-client-name"
-                className="mb-1.5 block text-[12px] font-medium text-[#A1A1AA]"
+                className="mb-1.5 block text-[12px] font-medium text-subtle"
               >
                 Full name
-                <span aria-hidden className="ml-0.5 text-[#D4AF37]">
+                <span aria-hidden className="ml-0.5 text-gold">
                   *
                 </span>
               </Label>
@@ -459,7 +459,7 @@ function ScheduleCallForm({ onScheduled }: ScheduleCallFormProps) {
                 className={cn(
                   FIELD_CLASSES,
                   errors.clientName &&
-                    "border-[rgba(248,113,113,0.65)] focus:border-[#F87171] focus:ring-[rgba(248,113,113,0.16)]",
+                    "border-danger/65 focus:border-danger focus:ring-danger/15",
                 )}
               />
               <FieldError
@@ -471,10 +471,10 @@ function ScheduleCallForm({ onScheduled }: ScheduleCallFormProps) {
             <div className="min-w-0">
               <Label
                 htmlFor="schedule-mobile"
-                className="mb-1.5 block text-[12px] font-medium text-[#A1A1AA]"
+                className="mb-1.5 block text-[12px] font-medium text-subtle"
               >
                 Mobile number
-                <span aria-hidden className="ml-0.5 text-[#D4AF37]">
+                <span aria-hidden className="ml-0.5 text-gold">
                   *
                 </span>
               </Label>
@@ -500,13 +500,13 @@ function ScheduleCallForm({ onScheduled }: ScheduleCallFormProps) {
                 className={cn(
                   FIELD_CLASSES,
                   errors.mob &&
-                    "border-[rgba(248,113,113,0.65)] focus:border-[#F87171] focus:ring-[rgba(248,113,113,0.16)]",
+                    "border-danger/65 focus:border-danger focus:ring-danger/15",
                 )}
               />
               <p
                 id="schedule-mobile-hint"
                 className={cn(
-                  "mt-1.5 text-[10.5px] text-[#71717A]",
+                  "mt-1.5 text-[10.5px] text-faint",
                   errors.mob && "sr-only",
                 )}
               >
@@ -520,27 +520,27 @@ function ScheduleCallForm({ onScheduled }: ScheduleCallFormProps) {
               row makes the exact choice visible before submission. */}
           <div className="mt-4">
             <div className="mb-1.5 flex items-center justify-between gap-3">
-              <span className="text-[12px] font-medium text-[#A1A1AA]">
+              <span className="text-[12px] font-medium text-subtle">
                 Call time
-                <span aria-hidden className="ml-0.5 text-[#D4AF37]">
+                <span aria-hidden className="ml-0.5 text-gold">
                   *
                 </span>
               </span>
-              <span className="text-[10.5px] text-[#71717A]">
+              <span className="text-[10.5px] text-faint">
                 {selectedSlot ? "Selected" : "Choose above"}
               </span>
             </div>
             <div
               aria-live="polite"
               className={cn(
-                "flex min-h-10 items-center gap-2.5 rounded-xl border border-[#2B2B2B] bg-[#101010] px-3 py-2",
-                errors.callTime && "border-[rgba(248,113,113,0.65)]",
+                "flex min-h-10 items-center gap-2.5 rounded-xl border border-line bg-card px-3 py-2",
+                errors.callTime && "border-danger/65",
               )}
             >
               <CalendarCheck2
                 className={cn(
                   "size-4 shrink-0",
-                  selectedSlot ? "text-[#D4AF37]" : "text-[#71717A]",
+                  selectedSlot ? "text-gold" : "text-faint",
                 )}
                 strokeWidth={1.8}
                 aria-hidden
@@ -548,14 +548,14 @@ function ScheduleCallForm({ onScheduled }: ScheduleCallFormProps) {
               <span
                 className={cn(
                   "text-[12.5px] font-medium",
-                  selectedSlot ? "text-white" : "text-[#71717A]",
+                  selectedSlot ? "text-ink" : "text-faint",
                 )}
               >
                 {selectedSlot
                   ? formatCallDateTime(selectedSlot.date)
                   : "Select an available date and time"}
               </span>
-              <span className="ml-auto hidden shrink-0 rounded-full border border-[rgba(212,175,55,0.22)] bg-[rgba(212,175,55,0.07)] px-2 py-0.5 text-[10px] font-medium text-[#D4AF37] sm:inline">
+              <span className="ml-auto hidden shrink-0 rounded-full border border-gold/25 bg-gold/10 px-2 py-0.5 text-[10px] font-medium text-gold sm:inline">
                 30 min
               </span>
             </div>
@@ -565,16 +565,16 @@ function ScheduleCallForm({ onScheduled }: ScheduleCallFormProps) {
             <div className="mb-1.5 flex items-center justify-between gap-3">
               <Label
                 htmlFor="schedule-note"
-                className="text-[12px] font-medium text-[#A1A1AA]"
+                className="text-[12px] font-medium text-subtle"
               >
                 Note{" "}
-                <span className="font-normal text-[#71717A]">(optional)</span>
+                <span className="font-normal text-faint">(optional)</span>
               </Label>
               <span
                 aria-live="polite"
                 className={cn(
                   "text-[10.5px] tabular-nums",
-                  note.length >= 50 ? "text-[#D4AF37]" : "text-[#71717A]",
+                  note.length >= 50 ? "text-gold" : "text-faint",
                 )}
               >
                 {note.length}/50
@@ -598,7 +598,7 @@ function ScheduleCallForm({ onScheduled }: ScheduleCallFormProps) {
               className={cn(
                 TEXTAREA_CLASSES,
                 errors.note &&
-                  "border-[rgba(248,113,113,0.65)] focus:border-[#F87171] focus:ring-[rgba(248,113,113,0.16)]",
+                  "border-danger/65 focus:border-danger focus:ring-danger/15",
               )}
             />
             <span id="schedule-note-count" className="sr-only">
@@ -607,9 +607,9 @@ function ScheduleCallForm({ onScheduled }: ScheduleCallFormProps) {
             <FieldError id="schedule-note-error" message={errors.note} />
           </div>
 
-          <p className="mt-3 flex items-start gap-1.5 text-[10.5px] leading-4 text-[#71717A]">
+          <p className="mt-3 flex items-start gap-1.5 text-[10.5px] leading-4 text-faint">
             <Lock
-              className="mt-0.5 size-3 shrink-0 text-[#D4AF37]"
+              className="mt-0.5 size-3 shrink-0 text-gold"
               strokeWidth={1.9}
               aria-hidden
             />
@@ -624,13 +624,13 @@ function ScheduleCallForm({ onScheduled }: ScheduleCallFormProps) {
             className={cn(
               "mt-4 flex gap-2.5 rounded-xl border px-3.5 py-3",
               rateLimited
-                ? "border-[rgba(212,175,55,0.35)] bg-[rgba(212,175,55,0.09)] text-[#F3D98B]"
-                : "border-[rgba(248,113,113,0.35)] bg-[rgba(248,113,113,0.08)] text-[#FCA5A5]",
+                ? "border-gold/35 bg-gold/10 text-gold"
+                : "border-danger/35 bg-danger/10 text-danger",
             )}
           >
             {rateLimited ? (
               <Clock3
-                className="mt-0.5 size-4 shrink-0 text-[#D4AF37]"
+                className="mt-0.5 size-4 shrink-0 text-gold"
                 strokeWidth={1.9}
                 aria-hidden
               />
@@ -654,8 +654,8 @@ function ScheduleCallForm({ onScheduled }: ScheduleCallFormProps) {
           </div>
         )}
 
-        <div className="sticky bottom-0 z-10 -mx-5 mt-5 flex flex-col-reverse gap-2 border-t border-[#2B2B2B] bg-[#151515] px-5 pb-4 pt-4 sm:-mx-7 sm:flex-row sm:items-center sm:justify-between sm:px-7">
-          <p className="text-[10.5px] leading-4 text-[#71717A]">
+        <div className="sticky bottom-0 z-10 -mx-5 mt-5 flex flex-col-reverse gap-2 border-t border-line bg-elevated px-5 pb-4 pt-4 sm:-mx-7 sm:flex-row sm:items-center sm:justify-between sm:px-7">
+          <p className="text-[10.5px] leading-4 text-faint">
             Our team will confirm your slot after the request is received.
           </p>
           <div className="flex items-center gap-2">
@@ -665,7 +665,7 @@ function ScheduleCallForm({ onScheduled }: ScheduleCallFormProps) {
                 variant="secondary"
                 size="md"
                 disabled={submitting}
-                className="h-10 rounded-xl border-[#2B2B2B] bg-[#101010] px-4 text-[12.5px] text-[#D4D4D8] hover:border-[#3A3A3A] hover:bg-[#1A1A1A] hover:text-white"
+                className="h-10 rounded-xl border-line bg-card px-4 text-[12.5px] text-subtle hover:border-line-strong hover:bg-card-hover hover:text-ink"
               >
                 Cancel
               </Button>

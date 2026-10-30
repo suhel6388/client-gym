@@ -58,7 +58,7 @@ const variantMeta: Record<
   info: {
     icon: Info,
     iconClass: "bg-auth-gold/12 text-auth-gold ring-auth-gold/25",
-    borderClass: "border-white/10",
+    borderClass: "border-line",
     shadowClass: "",
   },
   loading: {
@@ -230,9 +230,9 @@ export function ToastItem({ item }: ToastItemProps) {
       onKeyDown={handleKeyDown}
       onAnimationEnd={handleAnimationEnd}
       className={cn(
-        "pointer-events-auto relative w-full max-w-[380px] overflow-hidden rounded-xl border bg-[#111111] p-3.5 pr-10 text-left",
-        "shadow-[0_18px_44px_-16px_rgba(0,0,0,0.95),0_0_0_1px_rgba(255,255,255,0.02)]",
-        "ring-1 ring-inset ring-white/[0.02]",
+        "pointer-events-auto relative w-full max-w-[380px] overflow-hidden rounded-xl border bg-elevated p-3.5 pr-10 text-left",
+        "shadow-pop",
+        "ring-1 ring-inset ring-line/60",
         meta.borderClass,
         meta.shadowClass,
         item.dismissing
@@ -269,11 +269,11 @@ export function ToastItem({ item }: ToastItemProps) {
         </span>
 
         <div className="min-w-0 flex-1">
-          <p className="break-words text-pretty text-[13px] font-semibold leading-5 text-white">
+          <p className="break-words text-pretty text-[13px] font-semibold leading-5 text-ink">
             {item.title}
           </p>
           {item.description && (
-            <p className="mt-0.5 break-words text-pretty text-xs leading-relaxed text-[#a1a1aa]">
+            <p className="mt-0.5 break-words text-pretty text-xs leading-relaxed text-subtle">
               {item.description}
             </p>
           )}
@@ -304,7 +304,7 @@ export function ToastItem({ item }: ToastItemProps) {
           type="button"
           onClick={() => toast.dismiss(item.id)}
           aria-label={`Dismiss: ${item.title}`}
-          className="absolute right-1.5 top-1.5 inline-flex size-7 items-center justify-center rounded-md text-[#71717a] transition-colors hover:bg-white/[0.06] hover:text-white focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-auth-gold"
+          className="absolute right-1.5 top-1.5 inline-flex size-7 items-center justify-center rounded-md text-faint transition-colors hover:bg-card-hover hover:text-ink focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-gold"
         >
           <X className="size-3.5" strokeWidth={2} aria-hidden />
         </button>

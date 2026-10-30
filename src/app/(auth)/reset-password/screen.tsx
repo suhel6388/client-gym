@@ -207,7 +207,7 @@ function ResetPasswordScreen() {
         <div
           role="status"
           aria-live="polite"
-          className="flex items-center justify-center gap-2.5 rounded-lg border border-auth-line bg-[#0b0b0b] px-4 py-8 text-[13px] font-medium text-auth-muted"
+          className="flex items-center justify-center gap-2.5 rounded-lg border border-auth-line bg-auth-input px-4 py-8 text-[13px] font-medium text-auth-muted"
         >
           <Loader2
             className="size-4 animate-spin motion-reduce:animate-none"
@@ -278,7 +278,7 @@ function ResetPasswordScreen() {
                 }
                 aria-invalid={Boolean(errors.otp)}
                 aria-describedby={errors.otp ? "reset-otp-error" : undefined}
-                className="h-11 w-full rounded-lg border border-auth-line bg-[#0b0b0b] px-3 text-center font-mono text-lg tracking-[0.5em] text-auth-ink outline-none transition-colors placeholder:tracking-[0.5em] placeholder:text-auth-faint focus:border-auth-gold/60 focus:ring-2 focus:ring-auth-gold/15"
+                className="h-11 w-full rounded-lg border border-auth-line bg-auth-input px-3 text-center font-mono text-lg tracking-[0.5em] text-auth-ink outline-none transition-colors placeholder:tracking-[0.5em] placeholder:text-auth-faint focus:border-auth-gold/60 focus:ring-2 focus:ring-auth-gold/15"
               />
               {errors.otp && (
                 <p id="reset-otp-error" role="alert" className="mt-1.5 text-xs text-danger">

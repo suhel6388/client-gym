@@ -42,7 +42,7 @@ export function ToastProgress({
     <div
       aria-hidden
       className={cn(
-        "absolute inset-x-0 bottom-0 h-[2px] overflow-hidden bg-white/[0.06]",
+        "absolute inset-x-0 bottom-0 h-[2px] overflow-hidden bg-line/60",
         className,
       )}
     >

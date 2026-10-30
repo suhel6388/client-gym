@@ -34,8 +34,8 @@ export function DashboardAnalytics({
           action={
             <LegendChips
               items={[
-                { label: "This year", color: "#E8B84D" },
-                { label: "Last year", color: "#4B4B52" },
+                { label: "This year", color: "var(--color-gold)" },
+                { label: "Last year", color: "var(--color-faint)" },
               ]}
             />
           }
@@ -129,8 +129,8 @@ export function DashboardAnalytics({
           action={
             <LegendChips
               items={[
-                { label: "Joined", color: "#E8B84D" },
-                { label: "Left", color: "#3F3F46" },
+                { label: "Joined", color: "var(--color-gold)" },
+                { label: "Left", color: "var(--color-line-strong)" },
               ]}
             />
           }

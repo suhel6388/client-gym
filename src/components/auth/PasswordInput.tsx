@@ -23,7 +23,7 @@ export const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
           ref={ref}
           type={visible ? "text" : "password"}
           className={cn(
-            "h-10 w-full rounded-lg border border-auth-line bg-[#0b0b0b] px-3 pr-10 text-[13.5px] text-auth-ink outline-none transition-colors placeholder:text-auth-faint",
+            "h-10 w-full rounded-lg border border-auth-line bg-auth-input px-3 pr-10 text-[13.5px] text-auth-ink outline-none transition-colors placeholder:text-auth-faint",
             "focus:border-auth-gold/60 focus:ring-2 focus:ring-auth-gold/15 disabled:cursor-not-allowed disabled:opacity-50",
             className,
           )}

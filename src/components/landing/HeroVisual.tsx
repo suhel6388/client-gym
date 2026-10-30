@@ -140,7 +140,7 @@ export function HeroVisual() {
       <div
         role="img"
         aria-label="DarkGoldGym dashboard preview showing members, attendance, revenue and trainers"
-        className="relative z-10 ml-[6%] overflow-hidden rounded-2xl border border-lp-gold/45 bg-[#0B0A08]/95 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.9),0_0_60px_-18px_rgba(245,179,35,0.35)] backdrop-blur-sm xl:[transform:perspective(1800px)_rotateY(-5deg)_rotateX(1.5deg)]"
+        className="dg-dark-preview relative z-10 ml-[6%] overflow-hidden rounded-2xl border border-lp-gold/45 bg-[#0B0A08]/95 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.9),0_0_60px_-18px_rgba(245,179,35,0.35)] backdrop-blur-sm xl:[transform:perspective(1800px)_rotateY(-5deg)_rotateX(1.5deg)]"
       >
         <div className="flex">
           {/* Sidebar */}

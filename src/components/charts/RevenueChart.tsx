@@ -24,14 +24,14 @@ export function RevenueChart({ data }: { data: RevenuePoint[] }) {
         >
           <defs>
             <linearGradient id="revGold" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#E8B84D" stopOpacity={0.32} />
-              <stop offset="55%" stopColor="#E8B84D" stopOpacity={0.08} />
-              <stop offset="100%" stopColor="#E8B84D" stopOpacity={0} />
+              <stop offset="0%" stopColor="var(--color-gold)" stopOpacity={0.32} />
+              <stop offset="55%" stopColor="var(--color-gold)" stopOpacity={0.08} />
+              <stop offset="100%" stopColor="var(--color-gold)" stopOpacity={0} />
             </linearGradient>
           </defs>
 
           <CartesianGrid
-            stroke="#303034"
+            stroke="var(--color-line)"
             strokeOpacity={0.55}
             strokeDasharray="3 6"
             vertical={false}
@@ -41,39 +41,39 @@ export function RevenueChart({ data }: { data: RevenuePoint[] }) {
             dataKey="month"
             tickLine={false}
             axisLine={false}
-            tick={{ fill: "#71717A", fontSize: 11 }}
+            tick={{ fill: "var(--color-faint)", fontSize: 11 }}
             dy={8}
           />
           <YAxis
             tickLine={false}
             axisLine={false}
-            tick={{ fill: "#71717A", fontSize: 11 }}
+            tick={{ fill: "var(--color-faint)", fontSize: 11 }}
             width={56}
             tickFormatter={(value: number) => formatCompactCurrency(value)}
           />
 
           <Tooltip
             content={<ChartTooltip formatter={formatCurrency} />}
-            cursor={{ stroke: "#3F3F46", strokeWidth: 1 }}
+            cursor={{ stroke: "var(--color-line-strong)", strokeWidth: 1 }}
           />
 
           <Area
             type="monotone"
             dataKey="revenue"
             name="This year"
-            stroke="#E8B84D"
+            stroke="var(--color-gold)"
             strokeWidth={2.25}
             fill="url(#revGold)"
             dot={{
               r: 2.5,
-              fill: "#E8B84D",
-              stroke: "#0B0B0D",
+              fill: "var(--color-gold)",
+              stroke: "var(--color-canvas)",
               strokeWidth: 1.5,
             }}
             activeDot={{
               r: 5,
-              fill: "#FFC857",
-              stroke: "#0B0B0D",
+              fill: "var(--color-gold-bright)",
+              stroke: "var(--color-canvas)",
               strokeWidth: 2,
             }}
             animationDuration={700}
@@ -82,7 +82,7 @@ export function RevenueChart({ data }: { data: RevenuePoint[] }) {
             type="monotone"
             dataKey="previous"
             name="Last year"
-            stroke="#4B4B52"
+            stroke="var(--color-faint)"
             strokeWidth={1.5}
             strokeDasharray="4 4"
             strokeOpacity={0.85}

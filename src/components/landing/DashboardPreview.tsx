@@ -156,7 +156,7 @@ export function DashboardPreview() {
         className="pointer-events-none absolute -inset-x-10 inset-y-4 -z-10 rounded-[3rem] bg-[radial-gradient(ellipse_at_center,rgba(245,179,35,0.13),transparent_66%)] blur-2xl"
       />
 
-      <div aria-hidden className="dg-preview-shell relative">
+      <div aria-hidden className="dg-dark-preview dg-preview-shell relative">
         <div className="dg-preview-tilt relative rounded-[22px] border border-lp-gold/25 bg-[#0d0e0f] p-1.5 shadow-[0_45px_110px_-30px_rgba(0,0,0,0.95),0_0_70px_-28px_rgba(245,179,35,0.38)]">
           <span className="pointer-events-none absolute inset-x-14 top-0 z-10 h-px bg-gradient-to-r from-transparent via-lp-gold/55 to-transparent" />
 

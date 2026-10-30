@@ -101,7 +101,7 @@ export function LoginForm({ next, onSuccess, onUnverified }: LoginFormProps) {
             onChange={(event) => setEmail(event.target.value)}
             aria-invalid={Boolean(errors.email)}
             aria-describedby={errors.email ? "login-email-error" : undefined}
-            className="h-10 w-full rounded-lg border border-auth-line bg-[#0b0b0b] px-3 text-[13.5px] text-auth-ink outline-none transition-colors placeholder:text-auth-faint focus:border-auth-gold/60 focus:ring-2 focus:ring-auth-gold/15"
+            className="h-10 w-full rounded-lg border border-auth-line bg-auth-input px-3 text-[13.5px] text-auth-ink outline-none transition-colors placeholder:text-auth-faint focus:border-auth-gold/60 focus:ring-2 focus:ring-auth-gold/15"
           />
           {errors.email && (
             <p id="login-email-error" role="alert" className="mt-1.5 text-xs text-danger">
@@ -146,7 +146,7 @@ export function LoginForm({ next, onSuccess, onUnverified }: LoginFormProps) {
             type="checkbox"
             checked={rememberMe}
             onChange={(event) => setRememberMe(event.target.checked)}
-            className="size-4 shrink-0 rounded border-auth-line-strong bg-[#0b0b0b] accent-auth-gold"
+            className="size-4 shrink-0 rounded border-auth-line-strong bg-auth-input accent-auth-gold"
           />
           Keep me signed in
         </label>

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { AppProviders } from "@/components/providers/AppProviders";
+import { ThemeProvider } from "@/components/providers/ThemeProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -25,7 +26,10 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0B0B0D",
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#F6F6F7" },
+    { media: "(prefers-color-scheme: dark)", color: "#0B0B0D" },
+  ],
 };
 
 export default function RootLayout({
@@ -34,9 +38,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${geistMono.variable}`}>
+    <html
+      lang="en"
+      suppressHydrationWarning
+      className={`${inter.variable} ${geistMono.variable}`}
+    >
       <body className="min-h-screen bg-canvas font-sans text-ink antialiased">
-        <AppProviders>{children}</AppProviders>
+        <ThemeProvider>
+          <AppProviders>{children}</AppProviders>
+        </ThemeProvider>
       </body>
     </html>
   );

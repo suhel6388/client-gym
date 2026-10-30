@@ -188,7 +188,7 @@ export default function ForgotPasswordScreen() {
                     "flex items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-[13px] font-medium transition-colors",
                     active
                       ? "border-auth-gold/60 bg-auth-gold/[0.08] text-auth-gold"
-                      : "border-auth-line bg-[#0b0b0b] text-auth-muted hover:border-auth-line-strong hover:text-auth-ink",
+                      : "border-auth-line bg-auth-input text-auth-muted hover:border-auth-line-strong hover:text-auth-ink",
                   )}
                 >
                   <Icon className="size-4" strokeWidth={1.75} aria-hidden />
@@ -218,7 +218,7 @@ export default function ForgotPasswordScreen() {
             onChange={(event) => setEmail(event.target.value)}
             aria-invalid={Boolean(emailError)}
             aria-describedby={emailError ? "forgot-email-error" : undefined}
-            className="h-10 w-full rounded-lg border border-auth-line bg-[#0b0b0b] px-3 text-[13.5px] text-auth-ink outline-none transition-colors placeholder:text-auth-faint focus:border-auth-gold/60 focus:ring-2 focus:ring-auth-gold/15"
+            className="h-10 w-full rounded-lg border border-auth-line bg-auth-input px-3 text-[13.5px] text-auth-ink outline-none transition-colors placeholder:text-auth-faint focus:border-auth-gold/60 focus:ring-2 focus:ring-auth-gold/15"
           />
           {emailError && (
             <p id="forgot-email-error" role="alert" className="mt-1.5 text-xs text-danger">

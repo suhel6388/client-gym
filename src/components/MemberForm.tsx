@@ -424,7 +424,7 @@ export function MemberForm({
               type="checkbox"
               checked={values.collectPayment}
               onChange={(event) => update("collectPayment", event.target.checked)}
-              className="size-3.5 rounded border-line bg-card accent-[#e8b84d]"
+              className="size-3.5 rounded border-line bg-card accent-gold"
             />
             Collect payment now
           </label>

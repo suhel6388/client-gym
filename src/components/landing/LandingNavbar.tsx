@@ -11,6 +11,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState, type MouseEvent } from "react";
 import DarkGoldLogoHorizontal from "../../../public/logo_hr";
+import { ToggleTheme } from "@/components/lightswind/toggle-theme";
 import { cn } from "@/lib/cn";
 import { LANDING_NAV } from "./navigation";
 
@@ -214,7 +215,7 @@ export function LandingNavbar() {
     >
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(8,9,9,0.96),rgba(8,9,9,0.82))] backdrop-blur-xl"
+        className="pointer-events-none absolute inset-0 bg-lp-nav/90 backdrop-blur-xl"
       />
       <span
         aria-hidden
@@ -241,7 +242,7 @@ export function LandingNavbar() {
             aria-label="DarkGoldGym home"
             className="flex min-w-0 shrink-0 items-center rounded-md transition-opacity duration-300 hover:opacity-90"
           >
-            <DarkGoldLogoHorizontal className="h-8 w-auto text-white sm:h-9 lg:h-9 xl:h-10" />
+            <DarkGoldLogoHorizontal className="h-8 w-auto text-lp-ink sm:h-9 lg:h-9 xl:h-10" />
           </Link>
         </motion.div>
 
@@ -359,7 +360,7 @@ export function LandingNavbar() {
                                 : { opacity: 0, y: -8, scale: 0.98 }
                             }
                             transition={{ duration: 0.18, ease: EASE }}
-                            className="relative overflow-hidden rounded-xl border border-lp-gold/20 bg-[#0c0d0e]/98 p-2 shadow-[0_28px_60px_-18px_rgba(0,0,0,0.9),0_0_40px_-24px_rgba(245,179,35,0.55)] backdrop-blur-xl"
+                            className="relative overflow-hidden rounded-xl border border-lp-gold/20 bg-lp-card/98 p-2 shadow-[0_28px_60px_-18px_rgba(0,0,0,0.9),0_0_40px_-24px_rgba(245,179,35,0.55)] backdrop-blur-xl"
                           >
                             <span
                               aria-hidden
@@ -422,9 +423,10 @@ export function LandingNavbar() {
           }}
           className="flex items-center gap-2 justify-self-end sm:gap-2.5"
         >
+          <ToggleTheme animationType="swipe-down" />
           <Link
             href="/login"
-            className="hidden h-10 items-center justify-center whitespace-nowrap rounded-lg border border-white/[0.14] bg-white/[0.02] px-4 text-[12.5px] font-semibold text-lp-ink transition-all duration-300 hover:border-lp-gold/45 hover:bg-lp-gold/[0.06] hover:text-lp-gold-highlight hover:shadow-[0_0_22px_-10px_rgba(245,179,35,0.75)] md:inline-flex"
+            className="hidden h-10 items-center justify-center whitespace-nowrap rounded-lg border border-lp-line bg-lp-ink/[0.02] px-4 text-[12.5px] font-semibold text-lp-ink transition-all duration-300 hover:border-lp-gold/45 hover:bg-lp-gold/[0.06] hover:text-lp-gold-highlight hover:shadow-[0_0_22px_-10px_rgba(245,179,35,0.75)] md:inline-flex"
           >
             Log In
           </Link>
@@ -443,7 +445,7 @@ export function LandingNavbar() {
             aria-expanded={mobileOpen}
             aria-controls="landing-mobile-menu"
             onClick={() => setMobileOpen((open) => !open)}
-            className="inline-flex size-10 items-center justify-center rounded-lg border border-white/[0.1] bg-white/[0.03] text-lp-ink transition-all duration-300 hover:border-lp-gold/40 hover:bg-lp-gold/[0.06] hover:text-lp-gold-highlight hover:shadow-[0_0_22px_-10px_rgba(245,179,35,0.75)] focus-visible:border-lp-gold active:scale-95 xl:hidden"
+            className="inline-flex size-10 items-center justify-center rounded-lg border border-lp-line bg-lp-card text-lp-ink transition-all duration-300 hover:border-lp-gold/40 hover:bg-lp-gold/[0.06] hover:text-lp-gold-highlight hover:shadow-[0_0_22px_-10px_rgba(245,179,35,0.75)] focus-visible:border-lp-gold active:scale-95 xl:hidden"
           >
             {mobileOpen ? (
               <X aria-hidden className="size-4.5" strokeWidth={1.9} />
@@ -503,7 +505,7 @@ export function LandingNavbar() {
                             "flex items-center justify-between rounded-lg border px-3 py-3 text-[14px] font-medium transition-all duration-300",
                             isActive
                               ? "border-lp-gold/25 bg-lp-gold/[0.08] text-lp-gold-highlight shadow-[inset_0_0_20px_-10px_rgba(245,179,35,0.7)]"
-                              : "border-transparent text-lp-muted hover:border-lp-gold/15 hover:bg-white/[0.04] hover:text-lp-ink active:bg-lp-gold/[0.06]",
+                              : "border-transparent text-lp-muted hover:border-lp-gold/15 hover:bg-lp-gold/[0.06] hover:text-lp-ink active:bg-lp-gold/[0.06]",
                           )}
                         >
                           <span className="inline-flex items-center gap-2.5">
@@ -536,7 +538,7 @@ export function LandingNavbar() {
                   <Link
                     href="/login"
                     onClick={() => setMobileOpen(false)}
-                    className="inline-flex h-11 items-center justify-center rounded-lg border border-white/[0.14] bg-white/[0.02] text-[13px] font-semibold text-lp-ink transition-all duration-300 hover:border-lp-gold/45 hover:bg-lp-gold/[0.06] hover:text-lp-gold-highlight"
+                    className="inline-flex h-11 items-center justify-center rounded-lg border border-lp-line bg-lp-ink/[0.02] text-[13px] font-semibold text-lp-ink transition-all duration-300 hover:border-lp-gold/45 hover:bg-lp-gold/[0.06] hover:text-lp-gold-highlight"
                   >
                     Log In
                   </Link>

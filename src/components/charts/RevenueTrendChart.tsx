@@ -39,14 +39,14 @@ export function RevenueTrendChart({
         <ComposedChart data={data} margin={{ top: 8, right: 6, bottom: 0, left: 4 }}>
           <defs>
             <linearGradient id="revenueGold" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#E8B84D" stopOpacity={0.32} />
-              <stop offset="55%" stopColor="#E8B84D" stopOpacity={0.08} />
-              <stop offset="100%" stopColor="#E8B84D" stopOpacity={0} />
+              <stop offset="0%" stopColor="var(--color-gold)" stopOpacity={0.32} />
+              <stop offset="55%" stopColor="var(--color-gold)" stopOpacity={0.08} />
+              <stop offset="100%" stopColor="var(--color-gold)" stopOpacity={0} />
             </linearGradient>
           </defs>
 
           <CartesianGrid
-            stroke="#303034"
+            stroke="var(--color-line)"
             strokeOpacity={0.55}
             strokeDasharray="3 6"
             vertical={false}
@@ -56,7 +56,7 @@ export function RevenueTrendChart({
             dataKey="label"
             tickLine={false}
             axisLine={false}
-            tick={{ fill: "#71717A", fontSize: 11 }}
+            tick={{ fill: "var(--color-faint)", fontSize: 11 }}
             dy={8}
             interval="preserveStartEnd"
             minTickGap={16}
@@ -64,28 +64,28 @@ export function RevenueTrendChart({
           <YAxis
             tickLine={false}
             axisLine={false}
-            tick={{ fill: "#71717A", fontSize: 11 }}
+            tick={{ fill: "var(--color-faint)", fontSize: 11 }}
             width={62}
             tickFormatter={(value: number) => formatCompactCurrencyInr(value)}
           />
 
           <Tooltip
             content={<ChartTooltip formatter={formatCurrencyInr} />}
-            cursor={{ stroke: "#3F3F46", strokeWidth: 1 }}
+            cursor={{ stroke: "var(--color-line-strong)", strokeWidth: 1 }}
           />
 
           <Area
             type="monotone"
             dataKey="amount"
             name={`${SERIES_NAME[granularity]} collections`}
-            stroke="#E8B84D"
+            stroke="var(--color-gold)"
             strokeWidth={2.25}
             fill="url(#revenueGold)"
             dot={false}
             activeDot={{
               r: 5,
-              fill: "#FFC857",
-              stroke: "#0B0B0D",
+              fill: "var(--color-gold-bright)",
+              stroke: "var(--color-canvas)",
               strokeWidth: 2,
             }}
             animationDuration={700}

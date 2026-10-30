@@ -220,7 +220,7 @@ export function OtpVerificationForm({
               onPaste={(event) => handlePaste(index, event)}
               onFocus={(event) => event.target.select()}
               className={cn(
-                "h-12 w-full min-w-0 rounded-lg border bg-[#0b0b0b] text-center text-lg font-semibold tabular-nums text-auth-ink outline-none transition-colors",
+                "h-12 w-full min-w-0 rounded-lg border bg-auth-input text-center text-lg font-semibold tabular-nums text-auth-ink outline-none transition-colors",
                 "focus:border-auth-gold/70 focus:ring-2 focus:ring-auth-gold/15",
                 error ? "border-danger/60" : "border-auth-line",
                 disabled && "opacity-60",

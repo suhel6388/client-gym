@@ -19,6 +19,7 @@ import {
 import { useSession } from "@/components/auth/SessionProvider";
 import { Avatar } from "@/components/ui/Avatar";
 import { Button } from "@/components/ui/Button";
+import { ToggleTheme } from "@/components/lightswind/toggle-theme";
 import { cn } from "@/lib/cn";
 import { SUPER_ADMIN_PATH } from "@/lib/api";
 import { platformInitials } from "@/lib/super-admin-view";
@@ -227,6 +228,7 @@ export function SuperAdminShell({ children }: { children: ReactNode }) {
           </div>
 
           <div className="ml-auto flex items-center gap-2">
+            <ToggleTheme animationType="swipe-down" />
             <span className="hidden items-center gap-1.5 rounded-full bg-gold/12 px-2.5 py-1 text-[11px] font-semibold text-gold ring-1 ring-inset ring-gold/25 sm:inline-flex">
               <ShieldCheck className="size-3" strokeWidth={2} aria-hidden />
               Super admin

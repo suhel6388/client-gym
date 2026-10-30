@@ -187,7 +187,7 @@ export default function GymPricing() {
               className={`relative flex flex-col rounded-xl border p-6 backdrop-blur-sm transition-colors duration-300 ${
                 plan.popular
                   ? "border-lp-gold/65 bg-lp-gold/[0.055] shadow-[0_0_46px_-16px_rgba(245,179,35,0.55)]"
-                  : "border-white/[0.07] bg-white/[0.025] hover:border-lp-gold/35 hover:bg-lp-gold/[0.035]"
+                  : "border-lp-line bg-lp-card/70 hover:border-lp-gold/35 hover:bg-lp-gold/[0.035]"
               }`}
             >
               {plan.popular && (

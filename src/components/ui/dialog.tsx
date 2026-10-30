@@ -44,7 +44,7 @@ export const DialogContent = forwardRef<
       <DialogPrimitive.Content
         ref={ref}
         className={cn(
-          "dg-dialog-content scroll-thin z-50 w-[calc(100vw-1.5rem)] max-w-[680px] overflow-y-auto rounded-2xl border border-[rgba(212,175,55,0.28)] bg-[#151515] text-white shadow-[0_32px_90px_-24px_rgba(0,0,0,0.95),0_0_70px_-20px_rgba(212,175,55,0.32)] outline-none",
+          "dg-dialog-content scroll-thin z-50 w-[calc(100vw-1.5rem)] max-w-[680px] overflow-y-auto rounded-2xl border border-gold/30 bg-elevated text-ink shadow-pop outline-none",
           className,
         )}
         {...props}
@@ -62,7 +62,7 @@ export const DialogTitle = forwardRef<
   return (
     <DialogPrimitive.Title
       ref={ref}
-      className={cn("text-lg font-semibold text-white", className)}
+      className={cn("text-lg font-semibold text-ink", className)}
       {...props}
     />
   );
@@ -75,7 +75,7 @@ export const DialogDescription = forwardRef<
   return (
     <DialogPrimitive.Description
       ref={ref}
-      className={cn("text-[13px] leading-5 text-[#A1A1AA]", className)}
+      className={cn("text-[13px] leading-5 text-subtle", className)}
       {...props}
     />
   );

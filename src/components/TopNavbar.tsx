@@ -27,6 +27,7 @@ import { useClickOutside } from "@/hooks/use-click-outside";
 import { Avatar } from "./ui/Avatar";
 import { Button } from "./ui/Button";
 import { KBarSearchButton, KBarSearchButtonMobile } from "./KBarSearchButton";
+import { ToggleTheme } from "./lightswind/toggle-theme";
 import { useSession } from "./auth/SessionProvider";
 
 function initialsFrom(name: string): string {
@@ -120,6 +121,9 @@ export function TopNavbar({
         {/* Search */}
         <KBarSearchButton />
         <KBarSearchButtonMobile />
+
+        {/* Global theme switch (Lightswind swipe-down) */}
+        <ToggleTheme animationType="swipe-down" />
 
         {/* Quick actions */}
         <Button

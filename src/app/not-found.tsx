@@ -1,9 +1,13 @@
 import { ArrowLeft, Dumbbell } from "lucide-react";
 import Link from "next/link";
+import { ToggleTheme } from "@/components/lightswind/toggle-theme";
 
 export default function NotFound() {
   return (
-    <div className="mx-auto flex min-h-[70vh] w-full max-w-[1600px] flex-col items-center justify-center px-6 py-16 text-center">
+    <div className="relative mx-auto flex min-h-[70vh] w-full max-w-[1600px] flex-col items-center justify-center px-6 py-16 text-center">
+      <div className="absolute right-4 top-4 z-50">
+        <ToggleTheme animationType="swipe-down" />
+      </div>
       <span className="gold-surface inline-flex size-16 items-center justify-center rounded-2xl text-[#1A1503] shadow-gold">
         <Dumbbell className="size-7" strokeWidth={2} aria-hidden />
       </span>

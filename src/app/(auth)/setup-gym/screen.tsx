@@ -155,7 +155,7 @@ export default function SetupGymScreen() {
           {formError && <AuthErrorMessage message={formError} />}
 
           {user && (
-            <p className="rounded-lg border border-auth-line bg-[#0b0b0b] px-3.5 py-2.5 text-xs text-auth-muted">
+            <p className="rounded-lg border border-auth-line bg-auth-input px-3.5 py-2.5 text-xs text-auth-muted">
               Signed in as <span className="font-semibold text-auth-ink">{user.email}</span>
             </p>
           )}
@@ -174,7 +174,7 @@ export default function SetupGymScreen() {
               onChange={(event) => setGymName(event.target.value)}
               aria-invalid={Boolean(nameError)}
               aria-describedby={nameError ? "setup-gym-name-error" : undefined}
-              className="h-10 w-full rounded-lg border border-auth-line bg-[#0b0b0b] px-3 text-[13.5px] text-auth-ink outline-none transition-colors placeholder:text-auth-faint focus:border-auth-gold/60 focus:ring-2 focus:ring-auth-gold/15"
+              className="h-10 w-full rounded-lg border border-auth-line bg-auth-input px-3 text-[13.5px] text-auth-ink outline-none transition-colors placeholder:text-auth-faint focus:border-auth-gold/60 focus:ring-2 focus:ring-auth-gold/15"
             />
             {nameError && (
               <p id="setup-gym-name-error" role="alert" className="mt-1.5 text-xs text-danger">
@@ -195,7 +195,7 @@ export default function SetupGymScreen() {
               placeholder="+91 98765 43210"
               value={phone}
               onChange={(event) => setPhone(event.target.value)}
-              className="h-10 w-full rounded-lg border border-auth-line bg-[#0b0b0b] px-3 text-[13.5px] text-auth-ink outline-none transition-colors placeholder:text-auth-faint focus:border-auth-gold/60 focus:ring-2 focus:ring-auth-gold/15"
+              className="h-10 w-full rounded-lg border border-auth-line bg-auth-input px-3 text-[13.5px] text-auth-ink outline-none transition-colors placeholder:text-auth-faint focus:border-auth-gold/60 focus:ring-2 focus:ring-auth-gold/15"
             />
           </div>
 
@@ -210,7 +210,7 @@ export default function SetupGymScreen() {
               placeholder="12 Strength Street, Mumbai"
               value={address}
               onChange={(event) => setAddress(event.target.value)}
-              className="h-10 w-full rounded-lg border border-auth-line bg-[#0b0b0b] px-3 text-[13.5px] text-auth-ink outline-none transition-colors placeholder:text-auth-faint focus:border-auth-gold/60 focus:ring-2 focus:ring-auth-gold/15"
+              className="h-10 w-full rounded-lg border border-auth-line bg-auth-input px-3 text-[13.5px] text-auth-ink outline-none transition-colors placeholder:text-auth-faint focus:border-auth-gold/60 focus:ring-2 focus:ring-auth-gold/15"
             />
           </div>
 

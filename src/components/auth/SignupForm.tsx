@@ -157,7 +157,7 @@ export function SignupForm({ onSignupSuccess }: SignupFormProps) {
   
 
   const fieldClass = (invalid?: string) =>
-    `h-10 w-full rounded-lg border bg-[#0b0b0b] px-3 text-[13.5px] text-auth-ink outline-none transition-colors placeholder:text-auth-faint focus:ring-2 ${
+    `h-10 w-full rounded-lg border bg-auth-input px-3 text-[13.5px] text-auth-ink outline-none transition-colors placeholder:text-auth-faint focus:ring-2 ${
       invalid
         ? "border-danger/60 focus:border-danger focus:ring-danger/15"
         : "border-auth-line focus:border-auth-gold/60 focus:ring-auth-gold/15"
@@ -336,7 +336,7 @@ export function SignupForm({ onSignupSuccess }: SignupFormProps) {
               onChange={(event) => setAcceptedTerms(event.target.checked)}
               aria-invalid={Boolean(errors.terms)}
               aria-describedby={errors.terms ? "signup-terms-error" : undefined}
-              className="mt-0.5 size-4 shrink-0 rounded border-auth-line-strong bg-[#0b0b0b] accent-auth-gold"
+              className="mt-0.5 size-4 shrink-0 rounded border-auth-line-strong bg-auth-input accent-auth-gold"
             />
             <span>
               I agree to the{" "}

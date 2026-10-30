@@ -156,7 +156,7 @@ export default function GymFeatures() {
           />
 
           <div className="relative z-10 flex h-full min-h-[420px] flex-col justify-end p-6 sm:min-h-[480px] sm:p-8 lg:min-h-full">
-            <p className="inline-flex w-fit items-center gap-2 rounded-full border border-lp-gold/25 bg-black/35 px-3.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-lp-gold-highlight backdrop-blur-sm">
+            <p className="inline-flex w-fit items-center gap-2 rounded-full border border-lp-gold/25 bg-lp-canvas/60 px-3.5 py-1.5 text-[10px] font-semibold uppercase tracking-[0.18em] text-lp-gold-highlight backdrop-blur-sm">
               <span
                 aria-hidden
                 className="size-1.5 rounded-full bg-lp-gold shadow-[0_0_10px_rgba(245,179,35,0.9)]"
@@ -183,7 +183,7 @@ export default function GymFeatures() {
               variants={card}
               whileHover={prefersReduced ? undefined : { y: -4 }}
               transition={{ type: "spring", stiffness: 300, damping: 22 }}
-              className="group relative flex flex-col overflow-hidden rounded-xl border border-white/[0.07] bg-white/[0.025] p-5 backdrop-blur-sm transition-all duration-300 hover:border-lp-gold/35 hover:bg-lp-gold/[0.045] hover:shadow-[0_20px_44px_-30px_rgba(245,179,35,0.55)]"
+              className="group relative flex flex-col overflow-hidden rounded-xl border border-lp-line bg-lp-card/70 p-5 backdrop-blur-sm transition-all duration-300 hover:border-lp-gold/35 hover:bg-lp-gold/[0.045] hover:shadow-[0_20px_44px_-30px_rgba(245,179,35,0.55)]"
             >
               <span
                 aria-hidden

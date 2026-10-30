@@ -495,7 +495,7 @@ export function CreateGymOwnerDialog({
             )}
           </div>
 
-          <div className="sticky bottom-0 flex flex-col-reverse gap-2 border-t border-line/70 bg-[#151515]/95 px-5 py-4 backdrop-blur sm:flex-row sm:items-center sm:justify-between">
+          <div className="sticky bottom-0 flex flex-col-reverse gap-2 border-t border-line/70 bg-elevated/95 px-5 py-4 backdrop-blur sm:flex-row sm:items-center sm:justify-between">
             <p className="text-[10.5px] text-faint">
               Creates a real PostgreSQL gym + owner and writes a
               GYM_CREATED audit entry.

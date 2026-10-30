@@ -9,7 +9,7 @@ import { cn } from "@/lib/cn";
  */
 export function MiniSparkline({
   data,
-  color = "#E8B84D",
+  color = "var(--color-gold)",
   className,
 }: {
   data: number[];

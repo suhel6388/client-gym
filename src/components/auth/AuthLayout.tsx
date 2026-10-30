@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { ArrowLeft, ShieldCheck } from "lucide-react";
+import { ToggleTheme } from "@/components/lightswind/toggle-theme";
 
 /**
- * Full-viewport dark-and-gold backdrop for the auth screens: near-black
- * (#080808) with a subtle abstract texture, the card centred, and a small
- * trust footer. Fully responsive — the card simply centres on any width.
+ * Full-viewport theme-aware backdrop for the auth screens: light cream in light
+ * mode, near-black (#080808) with gold accents in dark mode, a subtle abstract
+ * texture, the card centred, and a small trust footer. Fully responsive — the
+ * card simply centres on any width.
  *
  * The "Back to Home" link is rendered once here so every auth screen (login,
  * signup, forgot/reset password, verification) can return to the landing page.
@@ -23,6 +25,13 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
         />
         Back to Home
       </Link>
+
+      <div className="absolute right-4 top-4 z-20 sm:right-6 sm:top-6">
+        <ToggleTheme
+          animationType="swipe-down"
+          className="border border-auth-line bg-auth-card/80 text-auth-muted backdrop-blur hover:border-auth-gold/40 hover:bg-auth-card hover:text-auth-gold"
+        />
+      </div>
 
       <main className="relative z-10 flex w-full flex-col items-center">{children}</main>
 

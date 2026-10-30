@@ -130,7 +130,7 @@ export function ScheduleCallEditDialog({
       }}
     >
       <DialogContent className="max-w-[600px]">
-        <div className="sticky top-0 z-10 flex items-start gap-3 border-b border-line/60 bg-[#151515] px-5 pb-4 pt-5 sm:px-6">
+        <div className="sticky top-0 z-10 flex items-start gap-3 border-b border-line/60 bg-elevated px-5 pb-4 pt-5 sm:px-6">
           <span className="mt-0.5 inline-flex size-10 shrink-0 items-center justify-center rounded-xl bg-gold/12 text-gold ring-1 ring-inset ring-gold/20">
             <Pencil className="size-5" strokeWidth={1.75} aria-hidden />
           </span>

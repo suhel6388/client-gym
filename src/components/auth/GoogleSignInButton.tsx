@@ -86,8 +86,8 @@ export function GoogleSignInButton({
         disabled={pending}
         aria-busy={pending}
         className={cn(
-          "flex h-10 w-full items-center justify-center gap-2.5 rounded-lg border border-auth-line-strong bg-white/3 px-4 text-[13.5px] font-semibold text-auth-ink transition-colors",
-          "hover:border-auth-gold/40 hover:bg-white/6 disabled:cursor-not-allowed disabled:opacity-60",
+          "flex h-10 w-full items-center justify-center gap-2.5 rounded-lg border border-auth-line-strong bg-auth-ink/5 px-4 text-[13.5px] font-semibold text-auth-ink transition-colors",
+          "hover:border-auth-gold/40 hover:bg-auth-ink/10 disabled:cursor-not-allowed disabled:opacity-60",
           className,
         )}
       >
