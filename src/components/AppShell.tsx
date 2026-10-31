@@ -30,7 +30,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           onToggleCollapse={() => setCollapsed((value) => !value)}
           collapsed={collapsed}
         />
-        <main className="flex-1">{children}</main>
+        <main className="min-w-0 flex-1">{children}</main>
       </div>
     </div>
   );

@@ -227,7 +227,7 @@ export function ReportDetailsTable({
         </div>
       ) : (
         <>
-          <div className="mt-5 overflow-x-auto rounded-xl border border-line/80">
+          <div className="mt-5 hidden overflow-x-auto rounded-xl border border-line/80 lg:block">
             {tab === "revenue" && (
               <RevenueGrid
                 rows={pageRows as PaymentRow[]}
@@ -253,6 +253,123 @@ export function ReportDetailsTable({
               />
             )}
           </div>
+
+          <ul className="mt-5 space-y-3 lg:hidden">
+            {tab === "revenue" &&
+              (pageRows as PaymentRow[]).map((row) => (
+                <li
+                  key={row.id}
+                  className="rounded-xl border border-line bg-card/60 p-4"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex min-w-0 items-center gap-2.5">
+                      <Avatar initials={row.memberInitials} className="size-9 text-[10px]" />
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-ink">
+                          {row.memberName}
+                        </p>
+                        <p className="truncate font-mono text-[11px] text-faint">
+                          {row.receiptNumber}
+                        </p>
+                      </div>
+                    </div>
+                    <Badge tone={paymentStatusTone(row.status)} dot>
+                      {paymentStatusLabel(row.status)}
+                    </Badge>
+                  </div>
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <Badge tone="gold">
+                      {formatCurrencyInr(paiseToAmount(row.amountPaise))}
+                    </Badge>
+                    <Badge tone={paymentModeTone(row.paymentMode)}>
+                      {row.modeLabel}
+                    </Badge>
+                    <span className="text-[11px] text-faint">
+                      {formatShortDate(row.dateKey)}
+                    </span>
+                  </div>
+                </li>
+              ))}
+
+            {tab === "expenses" &&
+              (pageRows as ExpenseRow[]).map((row) => (
+                <li
+                  key={row.id}
+                  className="rounded-xl border border-line bg-card/60 p-4"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-medium text-ink">{row.title}</p>
+                      <p className="mt-0.5 text-[11px] text-faint">#{row.id}</p>
+                    </div>
+                    <span className="shrink-0 text-sm font-semibold tabular-nums text-ink">
+                      {formatCurrencyInr(paiseToAmount(row.amountPaise))}
+                    </span>
+                  </div>
+                  <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-line/50 pt-3 text-xs">
+                    <ExpenseCategoryBadge category={row.category} />
+                    <span className="text-faint">{formatShortDate(row.dateKey)}</span>
+                    {row.notes && (
+                      <span className="w-full truncate text-[11px] text-subtle">
+                        {row.notes}
+                      </span>
+                    )}
+                  </div>
+                </li>
+              ))}
+
+            {tab === "memberships" &&
+              (pageRows as SubscriptionRow[]).map((row) => (
+                <li
+                  key={row.id}
+                  className="rounded-xl border border-line bg-card/60 p-4"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex min-w-0 items-center gap-2.5">
+                      <Avatar initials={row.memberInitials} className="size-9 text-[10px]" />
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-ink">
+                          {row.memberName}
+                        </p>
+                        <p className="truncate font-mono text-[11px] text-faint">
+                          {row.memberCode}
+                        </p>
+                      </div>
+                    </div>
+                    <Badge tone={subscriptionTone(row.status)} dot>
+                      {row.status}
+                    </Badge>
+                  </div>
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <Badge tone="gold">{row.planName}</Badge>
+                    <Badge tone={paymentTone(paymentStatusFor(row))}>
+                      {paymentStatusFor(row)}
+                    </Badge>
+                  </div>
+                  <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 border-t border-line/50 pt-3 text-xs">
+                    <div className="flex items-center justify-between gap-2">
+                      <dt className="text-faint">Balance</dt>
+                      <dd className="font-semibold tabular-nums text-ink">
+                        {formatCurrencyInr(paiseToAmount(row.balancePaise))}
+                      </dd>
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <dt className="text-faint">Ends</dt>
+                      <dd className="text-subtle">
+                        {formatShortDate(row.endDate.slice(0, 10))}
+                      </dd>
+                    </div>
+                    <div className="col-span-2 flex items-center justify-between gap-2">
+                      <dt className="text-faint">Paid</dt>
+                      <dd className="tabular-nums text-subtle">
+                        {formatCurrencyInr(paiseToAmount(row.paidPaise))} of{" "}
+                        {formatCurrencyInr(paiseToAmount(row.feePaise))}
+                      </dd>
+                    </div>
+                  </dl>
+                </li>
+              ))}
+          </ul>
 
           <div className="no-print mt-4 flex flex-col-reverse items-center justify-between gap-3 sm:flex-row">
             <p className="text-xs text-faint">

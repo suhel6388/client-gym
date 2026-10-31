@@ -82,7 +82,7 @@ export function TopNavbar({
 
   return (
     <header id="top-navbar" className="sticky top-0 z-30 border-b border-line bg-nav/95 backdrop-blur supports-[backdrop-filter]:bg-nav/85">
-      <div className="flex h-16 items-center gap-2 px-4 sm:gap-3 sm:px-6">
+      <div className="flex h-14 items-center gap-1.5 px-3 sm:h-16 sm:gap-3 sm:px-6">
         {/* Mobile: open drawer */}
         <button
           type="button"
@@ -113,7 +113,7 @@ export function TopNavbar({
           <ChevronRight className="size-3.5 shrink-0 text-faint" aria-hidden />
           <span className="truncate text-xs font-medium text-ink">{title}</span>
         </nav>
-        <h1 className="truncate text-sm font-semibold text-ink sm:hidden">{title}</h1>
+        <h1 className="min-w-0 truncate text-sm font-semibold text-ink sm:hidden">{title}</h1>
 
         {/* Spacer keeps the right cluster pinned */}
         <div className="flex-1" />
@@ -122,8 +122,11 @@ export function TopNavbar({
         <KBarSearchButton />
         <KBarSearchButtonMobile />
 
-        {/* Global theme switch (Lightswind swipe-down) */}
-        <ToggleTheme animationType="swipe-down" />
+        {/* Global theme switch (Lightswind swipe-down). Phones use the one in
+            the navigation drawer so the top bar keeps room for actions. */}
+        <div className="hidden sm:block">
+          <ToggleTheme animationType="swipe-down" />
+        </div>
 
         {/* Quick actions */}
         <Button
@@ -131,7 +134,6 @@ export function TopNavbar({
           size="icon"
           aria-label="Add member"
           title="Add member"
-          className="hidden sm:inline-flex"
           onClick={openCreateMember}
         >
           <Plus className="size-4.5" strokeWidth={2.25} aria-hidden />
@@ -157,7 +159,7 @@ export function TopNavbar({
           </button>
 
           {notifOpen && (
-            <div className="absolute right-0 top-12 z-40 w-80 animate-pop overflow-hidden rounded-xl border border-line-strong bg-elevated shadow-pop">
+            <div className="absolute right-0 top-11 z-40 w-[min(20rem,calc(100vw-1.5rem))] animate-pop overflow-hidden rounded-xl border border-line-strong bg-elevated shadow-pop">
               <div className="flex items-center justify-between border-b border-line/60 px-4 py-3">
                 <p className="text-[13px] font-semibold text-ink">Notifications</p>
                 <span className="rounded-full bg-gold/12 px-2 py-0.5 text-[10px] font-semibold tabular-nums text-gold ring-1 ring-inset ring-gold/20">
@@ -244,7 +246,7 @@ export function TopNavbar({
           {profileOpen && (
             <div
               role="menu"
-              className="absolute right-0 top-12 z-40 w-56 animate-pop overflow-hidden rounded-xl border border-line-strong bg-elevated py-1.5 shadow-pop"
+              className="absolute right-0 top-11 z-40 w-[min(14rem,calc(100vw-1.5rem))] animate-pop overflow-hidden rounded-xl border border-line-strong bg-elevated py-1.5 shadow-pop"
             >
               <div className="border-b border-line/60 px-4 py-3">
                 <p className="text-[13px] font-semibold text-ink">{displayName}</p>

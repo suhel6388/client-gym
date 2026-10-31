@@ -34,7 +34,7 @@ export function RevenueTrendChart({
   }));
 
   return (
-    <div className="h-[280px] w-full">
+    <div className="h-[230px] w-full sm:h-[280px]">
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart data={data} margin={{ top: 8, right: 6, bottom: 0, left: 4 }}>
           <defs>

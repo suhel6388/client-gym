@@ -35,7 +35,7 @@ export function RecentPaymentsTable({
       ]}
       bodyClassName="pt-4"
     >
-      <div className="-mx-5 overflow-x-auto scroll-thin px-5">
+      <div className="-mx-5 hidden overflow-x-auto scroll-thin px-5 sm:block">
         <table className="w-full min-w-[680px] text-left">
           <thead>
             <tr className="border-b border-line text-[11px] font-semibold uppercase tracking-[0.08em] text-faint">
@@ -123,6 +123,55 @@ export function RecentPaymentsTable({
           </tbody>
         </table>
       </div>
+
+      <ul className="space-y-2.5 sm:hidden">
+        {loading ? (
+          Array.from({ length: 4 }).map((_, index) => (
+            <li
+              key={`mobile-skeleton-${index}`}
+              className="h-16 animate-pulse rounded-lg bg-card-hover/50"
+            />
+          ))
+        ) : rows.length === 0 ? (
+          <li className="py-8 text-center text-sm text-faint">
+            No payments recorded yet.
+          </li>
+        ) : (
+          rows.map((payment, index) => (
+            <li
+              key={payment.id}
+              className="rounded-lg border border-line/70 bg-card/50 p-3"
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div className="flex min-w-0 items-center gap-2.5">
+                  <Avatar
+                    initials={payment.initials}
+                    index={index}
+                    className="size-8 text-[10px]"
+                  />
+                  <div className="min-w-0">
+                    <p className="truncate text-[13px] font-medium text-ink">
+                      {payment.member}
+                    </p>
+                    <p className="truncate text-[11px] text-faint">
+                      {payment.id} · {payment.plan}
+                    </p>
+                  </div>
+                </div>
+                <Badge tone={payment.tone} dot>
+                  {payment.status}
+                </Badge>
+              </div>
+              <div className="mt-2.5 flex items-center justify-between gap-2 border-t border-line/50 pt-2.5 text-xs">
+                <span className="text-faint">{payment.method}</span>
+                <span className="font-semibold tabular-nums text-ink">
+                  {formatCurrency(payment.amount)}
+                </span>
+              </div>
+            </li>
+          ))
+        )}
+      </ul>
     </DashboardCard>
   );
 }

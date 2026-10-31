@@ -90,7 +90,10 @@ export function PlanComparisonTable({
 
   return (
     <div>
-      <div className="mt-5 overflow-x-auto rounded-xl border border-line/80">
+      <p className="mt-4 text-[11px] text-faint lg:hidden">
+        Swipe sideways to compare every plan.
+      </p>
+      <div className="mt-2 overflow-x-auto rounded-xl border border-line/80 lg:mt-5">
         <table className="w-full min-w-[640px] divide-y divide-line/60">
           <thead>
             <tr className="bg-card-hover/40">

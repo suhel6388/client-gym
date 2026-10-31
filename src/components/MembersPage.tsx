@@ -411,7 +411,7 @@ export function MembersPage() {
           </div>
 
           {/* Table */}
-          <div className="mt-5 overflow-x-auto rounded-xl border border-line/80">
+          <div className="mt-5 hidden overflow-x-auto rounded-xl border border-line/80 lg:block">
             <table className="w-full min-w-[920px] divide-y divide-line/60">
               <thead>
                 <tr className="bg-card-hover/40">
@@ -515,6 +515,96 @@ export function MembersPage() {
               </tbody>
             </table>
           </div>
+
+          {/* Mobile / tablet cards: every column is visible without sideways
+              scrolling, and each row keeps its full action set. */}
+          <ul className="mt-5 space-y-3 lg:hidden">
+            {status === "loading" &&
+              Array.from({ length: 4 }).map((_, index) => (
+                <li
+                  key={`member-skeleton-${index}`}
+                  className="h-40 animate-pulse rounded-xl border border-line bg-card-hover/30"
+                />
+              ))}
+
+            {status === "ready" &&
+              pageRows.map((row) => (
+                <li
+                  key={row.id}
+                  className="rounded-xl border border-line bg-card/60 p-4"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex min-w-0 items-center gap-3">
+                      <Avatar
+                        initials={getInitials(row.name)}
+                        index={row.id.charCodeAt(row.id.length - 1) % 4}
+                        className="size-9"
+                      />
+                      <div className="min-w-0">
+                        <p className="truncate text-sm font-medium text-ink">{row.name}</p>
+                        <p className="truncate font-mono text-[11px] text-faint">
+                          {row.code}
+                        </p>
+                      </div>
+                    </div>
+                    <Badge tone={statusTone(row.status)} dot>
+                      {row.status}
+                    </Badge>
+                  </div>
+
+                  <div className="mt-3 flex flex-wrap items-center gap-2">
+                    <Badge tone="gold">{row.plan}</Badge>
+                    <span className="text-[11px] text-faint">
+                      Joined {formatShortDate(row.joined.slice(0, 10))}
+                    </span>
+                  </div>
+
+                  <div className="mt-3 space-y-1.5 border-t border-line/50 pt-3 text-xs">
+                    <div className="flex items-center gap-2 text-subtle">
+                      <Mail className="size-3.5 shrink-0" strokeWidth={1.75} aria-hidden />
+                      <span className="truncate">{row.email || "No email"}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-subtle">
+                      <Phone className="size-3.5 shrink-0" strokeWidth={1.75} aria-hidden />
+                      <a href={`tel:${row.phone}`} className="truncate hover:text-gold">
+                        {row.phone}
+                      </a>
+                    </div>
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-faint">Next due</span>
+                      <span className="tabular-nums text-subtle">
+                        {row.nextDue ? formatShortDate(row.nextDue.slice(0, 10)) : "—"}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-line/50 pt-3">
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => setViewMember(row.raw)}
+                      aria-label={`View ${row.name}`}
+                      className="flex-1"
+                    >
+                      <Eye className="size-3.5" strokeWidth={1.75} aria-hidden />
+                      View
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => openEditMember(row.raw)}
+                      aria-label={`Edit ${row.name}`}
+                      className="flex-1"
+                    >
+                      <Pencil className="size-3.5" strokeWidth={1.75} aria-hidden />
+                      Edit
+                    </Button>
+                    <WhatsAppReminderAction row={row} template={whatsappTemplate} />
+                    <RowActionMenu onArchive={() => setArchiveTarget(row.raw)} />
+                  </div>
+                </li>
+              ))}
+          </ul>
 
           {/* Error state */}
           {status === "error" && (

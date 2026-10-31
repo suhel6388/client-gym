@@ -15,7 +15,7 @@ import { ChartTooltip } from "./ChartTooltip";
 
 export function MembershipGrowthChart({ data }: { data: GrowthPoint[] }) {
   return (
-    <div className="h-[260px] w-full">
+    <div className="h-[220px] w-full sm:h-[260px]">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart
           data={data}

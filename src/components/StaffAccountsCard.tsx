@@ -222,8 +222,9 @@ export function StaffAccountsCard({ delay = 0 }: { delay?: number }) {
           )}
 
           {status === "ready" && staffCount > 0 && (
-            <div className="overflow-x-auto rounded-xl border border-line/80">
-              <table className="w-full min-w-[640px] divide-y divide-line/60">
+            <>
+              <div className="hidden overflow-x-auto rounded-xl border border-line/80 lg:block">
+                <table className="w-full min-w-[640px] divide-y divide-line/60">
                 <thead>
                   <tr className="bg-card-hover/40">
                     {["Staff member", "Phone", "Role", "Added"].map((label) => (
@@ -295,7 +296,60 @@ export function StaffAccountsCard({ delay = 0 }: { delay?: number }) {
                   ))}
                 </tbody>
               </table>
-            </div>
+              </div>
+
+              <ul className="space-y-3 lg:hidden">
+                {staff.map((member, index) => (
+                  <li
+                    key={member.id}
+                    className="rounded-xl border border-line bg-card/60 p-4"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex min-w-0 items-center gap-3">
+                        <Avatar
+                          initials={initialsFrom(member.name)}
+                          index={index}
+                          className="size-9 text-[10px]"
+                        />
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium text-ink">
+                            {member.name}
+                          </p>
+                          <p className="truncate text-xs text-faint">{member.email}</p>
+                        </div>
+                      </div>
+                      <Badge tone="gold" dot>
+                        Receptionist
+                      </Badge>
+                    </div>
+
+                    <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 border-t border-line/50 pt-3 text-xs">
+                      <div className="col-span-2 flex items-center justify-between gap-2">
+                        <dt className="text-faint">Phone</dt>
+                        <dd className="truncate text-subtle">{member.phone || "—"}</dd>
+                      </div>
+                      <div className="col-span-2 flex items-center justify-between gap-2">
+                        <dt className="text-faint">Added</dt>
+                        <dd className="text-subtle">{formatStaffAdded(member.createdAt)}</dd>
+                      </div>
+                    </dl>
+
+                    <div className="mt-3 border-t border-line/50 pt-3">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        className="w-full text-danger hover:bg-danger/10 hover:text-danger"
+                        aria-label={`Remove ${member.name}`}
+                        onClick={() => setDeleteTarget(member)}
+                      >
+                        <Trash2 className="size-3.5" strokeWidth={1.75} aria-hidden />
+                        Remove access
+                      </Button>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </>
           )}
         </div>
       </DashboardCard>

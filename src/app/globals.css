@@ -292,6 +292,22 @@
     text-rendering: optimizeLegibility;
   }
 
+  /* Keep wide content from pushing the whole page sideways on phones. */
+  #app-content {
+    min-width: 0;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  /* iOS zooms the viewport when a focused field is below 16px. Keep the
+     desktop typography, but use a finger-friendly size on small screens. */
+  @media (max-width: 767px) {
+    input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
+    select,
+    textarea {
+      font-size: 16px;
+    }
+  }
+
   ::selection {
     background-color: var(--selection-bg);
     color: var(--selection-ink);

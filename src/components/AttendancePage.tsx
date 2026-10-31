@@ -357,10 +357,10 @@ export function AttendancePage() {
 
       {/* Controls */}
       <div
-        className="animate-fade-up mt-6 flex flex-wrap items-end gap-3"
+        className="animate-fade-up mt-6 grid grid-cols-2 items-end gap-3 sm:flex sm:flex-wrap"
         style={{ animationDelay: "120ms" }}
       >
-        <div className="w-40">
+        <div className="col-span-2 w-full sm:col-span-1 sm:w-40">
           <Label htmlFor="att-period">Attendance period</Label>
           <Select
             id="att-period"
@@ -384,7 +384,7 @@ export function AttendancePage() {
 
         {period === "custom" ? (
           <>
-            <div className="w-40">
+            <div className="col-span-1 w-full sm:w-40">
               <Label htmlFor="att-from">From</Label>
               <Input
                 id="att-from"
@@ -395,7 +395,7 @@ export function AttendancePage() {
                 onChange={(event) => setCustomFrom(event.target.value)}
               />
             </div>
-            <div className="w-40">
+            <div className="col-span-1 w-full sm:w-40">
               <Label htmlFor="att-to">To</Label>
               <Input
                 id="att-to"
@@ -409,7 +409,7 @@ export function AttendancePage() {
             </div>
           </>
         ) : (
-          <div className="w-40">
+          <div className="col-span-2 w-full sm:col-span-1 sm:w-40">
             <Label htmlFor="att-date">Date</Label>
             <Input
               id="att-date"
@@ -427,7 +427,7 @@ export function AttendancePage() {
           size="md"
           onClick={() => load("refresh")}
           disabled={refreshing || status === "loading"}
-          className="ml-auto"
+          className="col-span-2 w-full sm:col-span-1 sm:ml-auto sm:w-auto"
         >
           <RefreshCw
             className={cn("size-4", refreshing && "animate-spin")}

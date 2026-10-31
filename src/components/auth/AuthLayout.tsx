@@ -13,7 +13,7 @@ import { ToggleTheme } from "@/components/lightswind/toggle-theme";
  */
 export function AuthLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="auth-backdrop relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 py-10 sm:px-6">
+    <div className="auth-backdrop relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 pb-10 pt-20 sm:px-6 sm:py-12">
       <Link
         href="/"
         className="group absolute left-4 top-4 z-20 inline-flex items-center gap-2 rounded-lg border border-auth-line bg-auth-card/70 px-3 py-2 text-xs font-medium text-auth-muted backdrop-blur transition-colors hover:border-auth-gold/40 hover:text-auth-gold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-auth-gold/40 sm:left-6 sm:top-6 sm:text-[13px]"

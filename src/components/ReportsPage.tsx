@@ -340,10 +340,10 @@ export function ReportsPage() {
 
       {/* Filters */}
       <div
-        className="no-print animate-fade-up mt-6 flex flex-wrap items-end gap-3"
+        className="no-print animate-fade-up mt-6 grid grid-cols-2 items-end gap-3 sm:flex sm:flex-wrap"
         style={{ animationDelay: "120ms" }}
       >
-        <div className="w-44">
+        <div className="col-span-2 w-full sm:col-span-1 sm:w-44">
           <Label htmlFor="report-range">Date range</Label>
           <Select
             id="report-range"
@@ -361,7 +361,7 @@ export function ReportsPage() {
 
         {range === "custom" && (
           <>
-            <div className="w-40">
+            <div className="col-span-1 w-full sm:w-40">
               <Label htmlFor="report-from">From</Label>
               <Input
                 id="report-from"
@@ -372,7 +372,7 @@ export function ReportsPage() {
                 onChange={(event) => setCustomFrom(event.target.value)}
               />
             </div>
-            <div className="w-40">
+            <div className="col-span-1 w-full sm:w-40">
               <Label htmlFor="report-to">To</Label>
               <Input
                 id="report-to"
@@ -386,7 +386,7 @@ export function ReportsPage() {
           </>
         )}
 
-        <span className="inline-flex h-9 items-center text-xs text-faint">
+        <span className="col-span-2 inline-flex h-9 items-center text-xs text-faint sm:col-span-1">
           {windowText}
         </span>
       </div>

@@ -569,7 +569,8 @@ export function PlatformGymDetailView({ gymId }: { gymId: string }) {
             </p>
           </div>
         ) : (
-          <div className="overflow-x-auto">
+          <>
+            <div className="hidden overflow-x-auto lg:block">
             <table className="w-full min-w-[760px] divide-y divide-line/50">
               <thead>
                 <tr className="bg-card-hover/30">
@@ -616,6 +617,43 @@ export function PlatformGymDetailView({ gymId }: { gymId: string }) {
               </tbody>
             </table>
           </div>
+
+          <ul className="divide-y divide-line/40 lg:hidden">
+            {detail.payments.map((payment) => (
+              <li key={payment.id} className="px-4 py-3.5">
+                <div className="flex items-start justify-between gap-3">
+                  <div className="min-w-0">
+                    <p className="text-[13px] font-semibold tabular-nums text-ink">
+                      {formatPaise(payment.amountPaise)}
+                    </p>
+                    <p className="mt-0.5 text-[11px] text-faint">
+                      {formatPlatformDate(payment.createdAt)}
+                    </p>
+                  </div>
+                  <Badge tone={paymentTone(payment.status)} dot>
+                    {payment.status}
+                  </Badge>
+                </div>
+                <dl className="mt-2 space-y-1 border-t border-line/40 pt-2 text-[11.5px]">
+                  <div className="flex items-center justify-between gap-2">
+                    <dt className="text-faint">Provider</dt>
+                    <dd className="text-subtle">{payment.provider}</dd>
+                  </div>
+                  <div className="flex items-start justify-between gap-2">
+                    <dt className="shrink-0 text-faint">Reference</dt>
+                    <dd className="min-w-0 truncate text-right font-mono text-[10.5px] text-subtle">
+                      {payment.paymentId ?? payment.orderId ?? "—"}
+                    </dd>
+                  </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <dt className="text-faint">Verified</dt>
+                    <dd className="text-subtle">{formatPlatformDate(payment.verifiedAt)}</dd>
+                  </div>
+                </dl>
+              </li>
+            ))}
+          </ul>
+          </>
         )}
       </section>
 

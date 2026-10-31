@@ -4,12 +4,15 @@ import {
   ChevronLeft,
   PanelLeftClose,
   PanelLeftOpen,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useRef } from "react";
 import { navGroups } from "@/lib/nav";
 import { cn } from "@/lib/cn";
 import { useSession } from "./auth/SessionProvider";
+import { ToggleTheme } from "./lightswind/toggle-theme";
 import DarkGoldLogo from "../../public/logo";
 import DarkGoldLogoHorizontal from "../../public/logo_hr";
 
@@ -28,6 +31,32 @@ export function Sidebar({
 }: SidebarProps) {
   const pathname = usePathname();
   const { user } = useSession();
+
+  // Keep the latest close handler in a ref so the navigation effect only runs
+  // on a real path change. Depending on the inline callback would also fire
+  // when `mobileOpen` flips to true and instantly close the drawer again.
+  const closeMobileRef = useRef(onCloseMobile);
+  closeMobileRef.current = onCloseMobile;
+
+  // Close the mobile drawer after navigating, and keep the page behind it
+  // locked while it is open so a touch-scroll never moves the background.
+  useEffect(() => {
+    closeMobileRef.current();
+  }, [pathname]);
+
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") closeMobileRef.current();
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [mobileOpen, onCloseMobile]);
 
   // Role-scoped navigation. The backend still enforces every endpoint; this
   // only keeps owner-only tools out of the staff sidebar.
@@ -59,7 +88,7 @@ export function Sidebar({
       <aside
         id="app-sidebar"
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-line bg-panel transition-[width,transform] duration-300",
+          "fixed inset-y-0 left-0 z-50 flex w-[min(18rem,86vw)] flex-col border-r border-line bg-panel transition-[width,transform] duration-300 lg:w-64",
           collapsed ? "lg:w-20" : "lg:w-64",
           mobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
         )}
@@ -67,7 +96,7 @@ export function Sidebar({
         {/* Brand */}
         <div
           className={cn(
-            "flex h-16 shrink-0 items-center gap-3 border-b border-line/60 px-5",
+            "flex h-16 shrink-0 items-center gap-3 border-b border-line/60 px-4 sm:px-5",
             collapsed && "lg:justify-center lg:px-0",
           )}
         >
@@ -80,7 +109,7 @@ export function Sidebar({
           />
           {/* Expanded: full horizontal logo */}
           <DarkGoldLogoHorizontal
-            className={cn("h-10 w-auto", collapsed && "lg:hidden")}
+            className={cn("h-9 w-auto min-w-0 max-w-full lg:h-10", collapsed && "lg:hidden")}
           />
           <div
             className={cn(
@@ -95,6 +124,14 @@ export function Sidebar({
               Gym CRM
             </p> */}
           </div>
+          <button
+            type="button"
+            onClick={onCloseMobile}
+            aria-label="Close navigation"
+            className="ml-auto inline-flex size-9 shrink-0 items-center justify-center rounded-lg text-subtle transition-colors hover:bg-card hover:text-ink lg:hidden"
+          >
+            <X className="size-4.5" strokeWidth={2} aria-hidden />
+          </button>
         </div>
 
         {/* Navigation */}
@@ -116,6 +153,7 @@ export function Sidebar({
                         <Link
                           href={item.href}
                           title={item.label}
+                          onClick={onCloseMobile}
                           aria-current={active ? "page" : undefined}
                           className={cn(
                             "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium transition-colors duration-150",
@@ -193,12 +231,15 @@ export function Sidebar({
           </div>
         </div> */}
 
-        {/* Collapse toggle (desktop only) */}
-        <div className="hidden shrink-0 border-t border-line/60 p-3 lg:block">
+        {/* Collapse toggle (desktop only) + theme switch on phones */}
+        <div className="flex shrink-0 items-center gap-2 border-t border-line/60 p-3">
+          <div className="lg:hidden">
+            <ToggleTheme animationType="swipe-down" />
+          </div>
           <button
             type="button"
             onClick={onToggleCollapse}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[12px] font-medium text-faint transition-colors hover:bg-card hover:text-ink"
+            className="hidden w-full items-center gap-3 rounded-lg px-3 py-2 text-[12px] font-medium text-faint transition-colors hover:bg-card hover:text-ink lg:flex"
             aria-expanded={!collapsed}
           >
             {collapsed ? (

@@ -386,7 +386,7 @@ export function PlatformDashboard() {
               <ChevronRight className="size-3.5" strokeWidth={2} aria-hidden />
             </Link>
           </div>
-          <div className="overflow-x-auto">
+          <div className="hidden overflow-x-auto lg:block">
             <table className="w-full min-w-[620px] divide-y divide-line/50">
               <thead>
                 <tr className="bg-card-hover/30">
@@ -462,6 +462,54 @@ export function PlatformDashboard() {
               </tbody>
             </table>
           </div>
+
+          {/* Mobile / tablet: one card per gym, no sideways scroll */}
+          <ul className="divide-y divide-line/40 lg:hidden">
+            {loading ? (
+              Array.from({ length: 5 }).map((_, index) => (
+                <li key={`gym-skeleton-${index}`} className="px-4 py-3">
+                  <div className="h-12 animate-pulse rounded-md bg-card-hover" />
+                </li>
+              ))
+            ) : stats && stats.recentGyms.length > 0 ? (
+              stats.recentGyms.map((gym) => {
+                const meta = platformStatusMeta(gym.effectiveStatus);
+                return (
+                  <li key={gym.id} className="px-4 py-3.5">
+                    <div className="flex items-start justify-between gap-3">
+                      <Link
+                        href={`${GYMS_PATH}/details?gymId=${encodeURIComponent(gym.id)}`}
+                        className="min-w-0 flex-1"
+                      >
+                        <p className="truncate text-[13px] font-medium text-ink hover:text-gold">
+                          {gym.name}
+                        </p>
+                        <p className="truncate font-mono text-[10px] text-faint">{gym.id}</p>
+                      </Link>
+                      <Badge tone={meta.tone} dot>
+                        {meta.label}
+                      </Badge>
+                    </div>
+                    <div className="mt-2 flex items-center justify-between gap-2 text-[11.5px]">
+                      <span className="min-w-0 truncate text-faint">
+                        {gym.owner?.name ?? "No owner"}
+                        {gym.owner?.email ? ` · ${gym.owner.email}` : ""}
+                      </span>
+                      <span className="shrink-0 text-subtle">
+                        {gym.subscription?.plan?.name ??
+                          gym.subscription?.planNameSnapshot ??
+                          "No plan"}
+                      </span>
+                    </div>
+                  </li>
+                );
+              })
+            ) : (
+              <li className="px-4 py-10 text-center text-sm text-subtle">
+                No gyms registered yet.
+              </li>
+            )}
+          </ul>
         </section>
 
         <section className="rounded-2xl border border-line bg-card/60">

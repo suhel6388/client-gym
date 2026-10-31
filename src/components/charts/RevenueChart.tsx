@@ -16,7 +16,7 @@ import { ChartTooltip } from "./ChartTooltip";
 
 export function RevenueChart({ data }: { data: RevenuePoint[] }) {
   return (
-    <div className="h-[280px] w-full">
+    <div className="h-[230px] w-full sm:h-[280px]">
       <ResponsiveContainer width="100%" height="100%">
         <ComposedChart
           data={data}

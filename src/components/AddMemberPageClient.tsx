@@ -116,7 +116,7 @@ export function AddMemberPageClient() {
         </div>
       </div>
 
-      <div className="mt-6 rounded-card border border-line bg-card p-6 shadow-card animate-fade-up">
+      <div className="mt-6 rounded-card border border-line bg-card p-4 shadow-card animate-fade-up sm:p-6">
         {plansError && (
           <div className="mb-5 rounded-lg border border-warning/40 bg-warning/10 px-3.5 py-2.5 text-xs font-medium text-warning">
             {plansError} A membership plan is required, so retry once plans load.

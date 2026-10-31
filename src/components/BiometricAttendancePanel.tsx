@@ -239,8 +239,9 @@ export function BiometricAttendancePanel({
             </p>
           </div>
         ) : (
-          <div className="mt-5 overflow-x-auto rounded-xl border border-line/80">
-            <table className="w-full min-w-[720px] divide-y divide-line/60">
+          <>
+            <div className="mt-5 hidden overflow-x-auto rounded-xl border border-line/80 lg:block">
+              <table className="w-full min-w-[720px] divide-y divide-line/60">
               <thead>
                 <tr className="bg-card-hover/40">
                   {["Member", "Finger", "Template ID", "Enrolled", "Status"].map((label) => (
@@ -312,7 +313,79 @@ export function BiometricAttendancePanel({
                 Showing {visibleEnrollments.length} of {enrollments.length} members.
               </p>
             )}
-          </div>
+            </div>
+
+            <ul className="mt-5 space-y-3 lg:hidden">
+              {visibleEnrollments.map((enrollment) => {
+                const member = memberById.get(enrollment.memberId);
+                return (
+                  <li
+                    key={enrollment.id}
+                    className="rounded-xl border border-line bg-card/60 p-4"
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex min-w-0 items-center gap-3">
+                        <Avatar
+                          initials={getInitials(member?.name ?? "?")}
+                          className="size-9 text-[10px]"
+                        />
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium text-ink">
+                            {member?.name ?? "Unknown member"}
+                          </p>
+                          <p className="truncate font-mono text-[11px] text-faint">
+                            {member?.memberCode ?? "—"}
+                          </p>
+                        </div>
+                      </div>
+                      <Badge tone={ENROLLMENT_TONES[enrollment.status]} dot>
+                        {ENROLLMENT_LABELS[enrollment.status]}
+                      </Badge>
+                    </div>
+
+                    <dl className="mt-3 grid grid-cols-2 gap-x-4 gap-y-2 border-t border-line/50 pt-3 text-xs">
+                      <div className="flex items-center justify-between gap-2">
+                        <dt className="text-faint">Finger</dt>
+                        <dd className="text-subtle">{enrollment.finger}</dd>
+                      </div>
+                      <div className="flex items-center justify-between gap-2">
+                        <dt className="text-faint">Enrolled</dt>
+                        <dd className="text-subtle">
+                          {enrollment.status === "NOT_ENROLLED"
+                            ? "—"
+                            : enrollment.enrolledAt.slice(0, 10)}
+                        </dd>
+                      </div>
+                      <div className="col-span-2 flex items-center justify-between gap-2">
+                        <dt className="text-faint">Template ID</dt>
+                        <dd className="truncate font-mono text-[11px] text-subtle">
+                          {enrollment.templateId || "—"}
+                        </dd>
+                      </div>
+                    </dl>
+
+                    <div className="mt-3 border-t border-line/50 pt-3">
+                      <Button
+                        variant="secondary"
+                        size="sm"
+                        disabled
+                        className="w-full"
+                        title="Requires a connected device"
+                        aria-label="Re-enroll fingerprint (unavailable)"
+                      >
+                        Re-enroll
+                      </Button>
+                    </div>
+                  </li>
+                );
+              })}
+              {enrollments.length > visibleEnrollments.length && (
+                <li className="text-center text-[11px] text-faint">
+                  Showing {visibleEnrollments.length} of {enrollments.length} members.
+                </li>
+              )}
+            </ul>
+          </>
         )}
       </section>
     </div>

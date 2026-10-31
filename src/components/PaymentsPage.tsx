@@ -282,10 +282,10 @@ export function PaymentsPage() {
 
       {/* Period controls */}
       <div
-        className="animate-fade-up mt-6 flex flex-wrap items-end gap-3"
+        className="animate-fade-up mt-6 grid grid-cols-2 items-end gap-3 sm:flex sm:flex-wrap"
         style={{ animationDelay: "120ms" }}
       >
-        <div className="w-40">
+        <div className="col-span-2 w-full sm:col-span-1 sm:w-40">
           <Label htmlFor="pay-period">Period</Label>
           <Select
             id="pay-period"
@@ -307,7 +307,7 @@ export function PaymentsPage() {
 
         {period === "custom" ? (
           <>
-            <div className="w-40">
+            <div className="col-span-1 w-full sm:w-40">
               <Label htmlFor="pay-from">From</Label>
               <Input
                 id="pay-from"
@@ -318,7 +318,7 @@ export function PaymentsPage() {
                 onChange={(event) => setCustomFrom(event.target.value)}
               />
             </div>
-            <div className="w-40">
+            <div className="col-span-1 w-full sm:w-40">
               <Label htmlFor="pay-to">To</Label>
               <Input
                 id="pay-to"
@@ -332,7 +332,7 @@ export function PaymentsPage() {
             </div>
           </>
         ) : period !== "all" ? (
-          <div className="w-40">
+          <div className="col-span-2 w-full sm:col-span-1 sm:w-40">
             <Label htmlFor="pay-anchor">Date</Label>
             <Input
               id="pay-anchor"
@@ -345,7 +345,7 @@ export function PaymentsPage() {
           </div>
         ) : null}
 
-        <span className="inline-flex h-9 items-center gap-1.5 text-xs text-faint">
+        <span className="col-span-2 inline-flex h-9 items-center gap-1.5 text-xs text-faint sm:col-span-1">
           <CalendarDays className="size-3.5" strokeWidth={1.75} aria-hidden />
           {windowText}
         </span>
@@ -353,7 +353,7 @@ export function PaymentsPage() {
         <Button
           variant="ghost"
           size="md"
-          className="ml-auto"
+          className="col-span-2 w-full sm:col-span-1 sm:ml-auto sm:w-auto"
           onClick={() => load("refresh")}
           disabled={refreshing || status === "loading"}
         >

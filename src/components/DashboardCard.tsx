@@ -47,12 +47,12 @@ export function DashboardCard({
     <section
       style={{ animationDelay: `${delay}ms` }}
       className={cn(
-        "animate-fade-up flex flex-col rounded-card border border-line bg-card p-5 shadow-card transition-colors duration-200 hover:border-line-strong",
+        "animate-fade-up flex flex-col rounded-card border border-line bg-card p-4 shadow-card transition-colors duration-200 hover:border-line-strong sm:p-5",
         className,
       )}
     >
-      <header className="flex items-start justify-between gap-3">
-        <div className="flex min-w-0 items-start gap-3">
+      <header className="flex flex-wrap items-start justify-between gap-3">
+        <div className="flex min-w-0 flex-1 items-start gap-3">
           {Icon && (
             <span className="mt-0.5 inline-flex size-9 shrink-0 items-center justify-center rounded-lg bg-gold/12 text-gold ring-1 ring-inset ring-gold/20">
               <Icon className="size-4.5" strokeWidth={1.75} aria-hidden />
@@ -61,12 +61,12 @@ export function DashboardCard({
           <div className="min-w-0">
             <h2 className="truncate text-sm font-semibold text-ink">{title}</h2>
             {subtitle && (
-              <p className="mt-0.5 truncate text-xs text-faint">{subtitle}</p>
+              <p className="mt-0.5 line-clamp-2 text-xs text-faint">{subtitle}</p>
             )}
           </div>
         </div>
 
-        <div className="flex shrink-0 items-center gap-1.5">
+        <div className="flex max-w-full shrink-0 flex-wrap items-center gap-1.5">
           {action}
           {menuItems && (
             <div ref={menuRef} className="relative">
