@@ -36,7 +36,7 @@ import { Label } from "../ui/Label";
 import { Textarea } from "../ui/Textarea";
 
 const CTA_CLASSES =
-  "group inline-flex h-[52px] w-full items-center justify-center gap-6 rounded-xl border border-lp-gold/35 bg-black/10 px-6 text-[13.5px] font-semibold text-lp-ink transition-all duration-300 hover:border-lp-gold/65 hover:bg-lp-gold/[0.065] hover:text-lp-gold-highlight focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lp-gold-highlight sm:w-auto";
+  "group inline-flex h-[52px] w-full items-center justify-center gap-6 whitespace-nowrap rounded-xl border border-lp-gold/35 bg-black/10 px-6 text-[13.5px] font-semibold text-lp-ink transition-all duration-300 hover:border-lp-gold/65 hover:bg-lp-gold/[0.065] hover:text-lp-gold-highlight focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-lp-gold-highlight sm:w-auto md:gap-4 md:px-5 min-[851px]:gap-6 min-[851px]:px-6";
 
 const FIELD_CLASSES =
   "h-10 rounded-xl border-line bg-card text-[13px] text-ink placeholder:text-faint focus:border-gold focus:ring-2 focus:ring-gold/15";

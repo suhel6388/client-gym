@@ -143,7 +143,7 @@ export function DashboardPreview() {
   return (
     <figure
       aria-labelledby="dashboard-preview-caption"
-      className="relative mx-auto w-full max-w-[680px] xl:mx-0 xl:max-w-none"
+      className="relative mx-auto w-full min-w-0 max-w-full"
     >
       <figcaption id="dashboard-preview-caption" className="sr-only">
         Preview of the DarkGoldGym CRM dashboard, showing member totals,

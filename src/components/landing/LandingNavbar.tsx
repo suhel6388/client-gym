@@ -17,6 +17,21 @@ import { LANDING_NAV } from "./navigation";
 
 const MENU_ID_PREFIX = "landing-nav-menu";
 
+/**
+ * Tablet navs keep the primary destinations inline and let the hamburger carry
+ * the secondary items until there is room for the full desktop row.
+ * 768–850px: Home / Features / Pricing
+ * 851–1023px: + Solutions
+ * 1024–1279px: + Resources (hamburger still available)
+ * 1280px+:     every item
+ */
+const NAV_ITEM_VISIBILITY: Record<string, string> = {
+  Solutions: "hidden min-[851px]:flex",
+  Resources: "hidden lg:flex",
+  "About Us": "hidden xl:flex",
+  "Contact Us": "hidden xl:flex",
+};
+
 const EASE: [number, number, number, number] = [0.22, 1, 0.36, 1];
 
 /** Nav links appear left to right shortly after the bar slides in. */
@@ -53,6 +68,25 @@ function menuIdFor(label: string) {
 function hashFor(href: string) {
   const index = href.indexOf("#");
   return index >= 0 ? href.slice(index + 1) : null;
+}
+
+/**
+ * The hero renders a mobile/desktop dashboard mock and a tablet dashboard
+ * preview, so a preview anchor can exist twice in the document. Always resolve
+ * the visible copy: a hidden duplicate has no client rects and would swallow
+ * `scrollIntoView`.
+ */
+function findAnchor(hash: string) {
+  const selector = `[id="${hash.replace(/["\\]/g, "\\$&")}"]`;
+  const candidates = Array.from(
+    document.querySelectorAll<HTMLElement>(selector),
+  );
+
+  return (
+    candidates.find((element) => element.getClientRects().length > 0) ??
+    candidates[0] ??
+    null
+  );
 }
 
 export function LandingNavbar() {
@@ -93,7 +127,7 @@ export function LandingNavbar() {
       // Sort by document position: the nav order and page order differ because
       // "Solutions" points inside the hero. The lowest section past the marker
       // wins.
-      const sections = NAV_SECTION_IDS.map((id) => document.getElementById(id))
+      const sections = NAV_SECTION_IDS.map((id) => findAnchor(id))
         .filter((element): element is HTMLElement => Boolean(element))
         .sort(
           (a, b) =>
@@ -181,7 +215,7 @@ export function LandingNavbar() {
     const hash = hashFor(href);
     if (!hash || pathname !== "/") return;
 
-    const target = document.getElementById(hash);
+    const target = findAnchor(hash);
     if (!target) return;
 
     event.preventDefault();
@@ -226,7 +260,7 @@ export function LandingNavbar() {
         className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-gradient-to-r from-transparent via-lp-gold/20 to-transparent"
       />
 
-      <div className="relative z-10 mx-auto grid h-[72px] max-w-[1440px] grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-5 sm:h-[76px] sm:px-8 lg:px-10 xl:h-[84px] xl:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] xl:px-12">
+      <div className="relative z-10 mx-auto grid h-[72px] max-w-[1440px] grid-cols-[minmax(0,1fr)_auto] items-center gap-3 px-5 sm:h-[76px] sm:px-8 md:grid-cols-[auto_minmax(0,1fr)_auto] md:gap-2 lg:gap-3 lg:px-10 xl:h-[84px] xl:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] xl:gap-3 xl:px-12">
         <motion.div
           initial={prefersReduced ? { opacity: 0 } : { opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}
@@ -242,13 +276,13 @@ export function LandingNavbar() {
             aria-label="DarkGoldGym home"
             className="flex min-w-0 shrink-0 items-center rounded-md transition-opacity duration-300 hover:opacity-90"
           >
-            <DarkGoldLogoHorizontal className="h-8 w-auto text-lp-ink sm:h-9 lg:h-9 xl:h-10" />
+            <DarkGoldLogoHorizontal className="h-8 w-auto text-lp-ink sm:h-9 md:h-8 lg:h-9 xl:h-10" />
           </Link>
         </motion.div>
 
         <div
           ref={navRef}
-          className="hidden h-full items-stretch justify-self-center xl:flex"
+          className="hidden h-full min-w-0 items-stretch justify-self-center md:flex xl:flex"
         >
           <motion.nav
             aria-label="Primary"
@@ -267,7 +301,10 @@ export function LandingNavbar() {
                 <motion.div
                   key={item.label}
                   variants={prefersReduced ? fadeIn : navItem}
-                  className="relative flex h-full items-center"
+                  className={cn(
+                    "relative h-full items-center",
+                    NAV_ITEM_VISIBILITY[item.label] ?? "flex",
+                  )}
                   onMouseEnter={() => {
                     if (hasMenu) setOpenMenu(item.label);
                   }}
@@ -421,18 +458,18 @@ export function LandingNavbar() {
             ease: EASE,
             delay: 0.38,
           }}
-          className="flex items-center gap-2 justify-self-end sm:gap-2.5"
+          className="flex items-center gap-2 justify-self-end sm:gap-2.5 md:gap-1.5 min-[851px]:gap-2 lg:gap-2.5"
         >
           <ToggleTheme animationType="swipe-down" />
           <Link
             href="/login"
-            className="hidden h-10 items-center justify-center whitespace-nowrap rounded-lg border border-lp-line bg-lp-ink/[0.02] px-4 text-[12.5px] font-semibold text-lp-ink transition-all duration-300 hover:border-lp-gold/45 hover:bg-lp-gold/[0.06] hover:text-lp-gold-highlight hover:shadow-[0_0_22px_-10px_rgba(245,179,35,0.75)] md:inline-flex"
+            className="hidden h-10 items-center justify-center whitespace-nowrap rounded-lg border border-lp-line bg-lp-ink/[0.02] px-4 text-[12.5px] font-semibold text-lp-ink transition-all duration-300 hover:border-lp-gold/45 hover:bg-lp-gold/[0.06] hover:text-lp-gold-highlight hover:shadow-[0_0_22px_-10px_rgba(245,179,35,0.75)] md:inline-flex md:px-3 min-[851px]:px-3.5 lg:px-4"
           >
             Log In
           </Link>
           <Link
             href="/signup"
-            className="hidden h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-[linear-gradient(135deg,#FFD15C_0%,#F5B323_55%,#EFAE14_100%)] px-4 text-[12.5px] font-bold text-[#171203] shadow-[0_8px_24px_-10px_rgba(245,179,35,0.7)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_30px_-10px_rgba(245,179,35,0.85)] sm:inline-flex"
+            className="hidden h-10 items-center justify-center gap-1.5 whitespace-nowrap rounded-lg bg-[linear-gradient(135deg,#FFD15C_0%,#F5B323_55%,#EFAE14_100%)] px-4 text-[12.5px] font-bold text-[#171203] shadow-[0_8px_24px_-10px_rgba(245,179,35,0.7)] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-[0_12px_30px_-10px_rgba(245,179,35,0.85)] sm:inline-flex md:px-3.5 min-[851px]:px-4"
           >
             Start Free Trial
             <ArrowUpRight aria-hidden className="size-3.5" strokeWidth={2.2} />

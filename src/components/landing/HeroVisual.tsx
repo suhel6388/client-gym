@@ -114,13 +114,14 @@ export function HeroVisual() {
     <div
       id="solutions"
       className={`relative mx-auto w-full max-w-[640px] scroll-mt-28 xl:max-w-none ${
-        ATHLETE_AVAILABLE ? "pt-[46%] xl:pt-[40%]" : "pt-0"
+        ATHLETE_AVAILABLE ? "pt-[46%] md:pt-0 xl:pt-[40%]" : "pt-0"
       }`}
     >
-      {/* Athlete backdrop */}
+      {/* Athlete backdrop — a soft square behind the dashboard on phones and
+          desktop, and a taller editorial portrait in the tablet hero. */}
       <div
         aria-hidden
-        className="dg-athlete-backdrop pointer-events-none absolute right-0 top-0 aspect-square w-[90%]"
+        className="dg-athlete-backdrop pointer-events-none absolute right-0 top-0 aspect-square w-[90%] md:relative md:right-auto md:top-auto md:mx-auto md:aspect-[4/5] md:w-full md:max-w-[400px] lg:max-w-[480px] xl:absolute xl:right-0 xl:top-0 xl:mx-0 xl:aspect-square xl:w-[90%] xl:max-w-none"
       >
         <div className="absolute inset-0 rounded-full bg-lp-gold/[0.08] blur-[90px]" />
         {ATHLETE_AVAILABLE && (
@@ -130,17 +131,21 @@ export function HeroVisual() {
             fill
             priority
             unoptimized
-            sizes="(min-width: 1280px) 30vw, 60vw"
-            className="object-cover object-[62%_0%]"
+            sizes="(min-width: 1280px) 30vw, (min-width: 768px) 55vw, 60vw"
+            className="object-cover object-[62%_0%] md:object-[54%_12%] xl:object-[62%_0%]"
           />
         )}
+        <div className="absolute inset-0 hidden bg-[radial-gradient(ellipse_at_50%_18%,rgba(245,179,35,0.16),transparent_62%)] md:block xl:hidden" />
+        <div className="absolute inset-x-0 bottom-0 hidden h-1/3 bg-gradient-to-t from-lp-canvas via-lp-canvas/35 to-transparent md:block xl:hidden" />
       </div>
 
       {/* Dashboard mock */}
       <div
         role="img"
         aria-label="DarkGoldGym dashboard preview showing members, attendance, revenue and trainers"
-        className="dg-dark-preview relative z-10 ml-[6%] overflow-hidden rounded-2xl border border-lp-gold/45 bg-[#0B0A08]/95 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.9),0_0_60px_-18px_rgba(245,179,35,0.35)] backdrop-blur-sm xl:[transform:perspective(1800px)_rotateY(-5deg)_rotateX(1.5deg)]"
+        className={`dg-dark-preview relative z-10 ml-[6%] overflow-hidden rounded-2xl border border-lp-gold/45 bg-[#0B0A08]/95 shadow-[0_30px_80px_-20px_rgba(0,0,0,0.9),0_0_60px_-18px_rgba(245,179,35,0.35)] backdrop-blur-sm xl:[transform:perspective(1800px)_rotateY(-5deg)_rotateX(1.5deg)] ${
+          ATHLETE_AVAILABLE ? "block md:hidden xl:block" : "block"
+        }`}
       >
         <div className="flex">
           {/* Sidebar */}

@@ -10,16 +10,16 @@ import {
 } from "lucide-react";
 
 export const HERO_COPY = {
-  badge: "#1 Gym Management CRM",
+  badge: "All-in-One Gym Management Software",
   headline: {
-    lead: "Manage. Engage.",
-    continuation: "Grow with ",
-    brand: "DarkGoldGym.",
+    lead: "Simplify Your Gym.",
+    continuation: "Grow",
+    brand: " Your Business.",
   },
   description:
     "The all-in-one gym CRM to manage members, attendance, payments, workouts, trainers and grow your fitness business effortlessly.",
   primaryCta: { label: "Start Free Trial", href: "/signup" },
-  secondaryCta: { label: "Schedule a call" },
+  secondaryCta: { label: "Schedule a Call" },
 };
 
 export type IconItem = { id: string; label: string; icon: LucideIcon };
