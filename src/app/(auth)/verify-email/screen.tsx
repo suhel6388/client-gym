@@ -17,6 +17,7 @@ import {
   readPendingSignup,
   setupGym,
 } from "@/lib/api";
+import { seedSessionUser } from "@/lib/session-cache";
 
 function VerifyEmailScreen() {
   const router = useRouter();
@@ -61,6 +62,7 @@ function VerifyEmailScreen() {
       try {
         const current = await fetchCurrentUser();
         if (!active || !current.user.gymId) return;
+        seedSessionUser(current.user);
         redirectingRef.current = true;
         router.replace(postAuthDestination(current.user));
       } catch {
@@ -101,6 +103,7 @@ function VerifyEmailScreen() {
         if (err instanceof ApiError && err.status === 409) {
           try {
             const current = await fetchCurrentUser();
+            seedSessionUser(current.user);
             router.replace(postAuthDestination(current.user));
           } catch {
             router.replace(DASHBOARD_PATH);
@@ -133,6 +136,7 @@ function VerifyEmailScreen() {
     // follow whatever the account still needs.
     try {
       const current = await fetchCurrentUser();
+      seedSessionUser(current.user);
       router.replace(postAuthDestination(current.user));
     } catch {
       redirectingRef.current = false;

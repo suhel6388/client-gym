@@ -8,6 +8,7 @@ import { GoogleSignInButton } from "./GoogleSignInButton";
 import { PasswordInput } from "./PasswordInput";
 import { AuthDivider } from "./AuthDivider";
 import { AUTH_ERRORS, loginAction } from "@/lib/auth-actions";
+import type { AuthUser } from "@/lib/api";
 
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -17,8 +18,11 @@ type FieldErrors = { email?: string; password?: string };
 type LoginFormProps = {
   /** Sanitized same-app path to return to after signing in. */
   next: string;
-  /** Called after the backend confirms credentials and sets the session. */
-  onSuccess: (next: string) => void;
+  /**
+   * Called after the backend confirms credentials and sets the session.
+   * The user comes from the login response, so no extra `/auth/me` is needed.
+   */
+  onSuccess: (next: string, user?: AuthUser | null) => void;
   /** Called when the password is right but the email is unverified (403). */
   onUnverified: (email: string, emailSent: boolean) => void;
 };
@@ -36,7 +40,7 @@ export function LoginForm({ next, onSuccess, onUnverified }: LoginFormProps) {
   // sending the user to the OTP screen.
   const { formAction, isPending } = useFormHandler(
     loginAction,
-    () => onSuccess(next),
+    (state) => onSuccess(next, state.data?.user),
     (state) => {
       if (
         state.error === AUTH_ERRORS.unverified ||

@@ -1,50 +1,51 @@
 "use client";
 
-import { Suspense, useCallback } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { AuthCard } from "@/components/auth/AuthCard";
 import { LoginForm } from "@/components/auth/LoginForm";
+import { LoaderWave } from "@/components/loaders/loaderwave";
 import { useToast } from "@/components/providers/ToastProvider";
-import {
-  ApiError,
-  fetchCurrentUser,
-  postAuthDestination,
-  safeNext,
-} from "@/lib/api";
+import { postAuthDestination, safeNext, type AuthUser } from "@/lib/api";
+import { seedSessionUser } from "@/lib/session-cache";
 
 function LoginScreen() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const toast = useToast();
   const next = safeNext(searchParams.get("next"));
+  const [redirecting, setRedirecting] = useState(false);
 
   // No session probe on mount: signed-out visitors would trigger an expected
-  // 401 on every visit to /login. The session is confirmed after credentials
-  // are submitted, and the dashboard guard checks it on protected routes.
+  // 401 on every visit to /login. The login response already carries the user,
+  // so the guarded dashboard layout can revalidate without blocking this page.
+
+  // Warm the destination route (JS + RSC payload) while the user types, so the
+  // post-login `replace` does not wait for the dashboard chunk.
+  useEffect(() => {
+    router.prefetch(next);
+  }, [next, router]);
 
   const handleSuccess = useCallback(
-    (target: string) => {
+    (target: string, user?: AuthUser | null) => {
       toast.success("Signed in", "Welcome back to DarkGoldGym.");
-      // Confirm the session cookie with /auth/me before leaving the form, then
-      // follow the same redirect rules as OTP verification and Google sign-in.
-      void (async () => {
-        try {
-          const current = await fetchCurrentUser();
-          router.replace(postAuthDestination(current.user, target));
-        } catch (error) {
-          if (error instanceof ApiError && error.status === 401) {
-            toast.error(
-              "Sign-in could not be confirmed",
-              "Your session cookie was not saved. Check the API URL and cookie settings, then try again.",
-              { dedupeKey: "login-session-missing" },
-            );
-            return;
-          }
-          // Network hiccup after a successful login: let the route guard load
-          // the session again instead of trapping the user on the form.
-          router.replace(target);
-        }
-      })();
+      setRedirecting(true);
+
+      if (!user) {
+        // Defensive: an older API response without the user payload. Let the
+        // destination guard resolve the session instead of guessing.
+        router.replace(target);
+        return;
+      }
+
+      // The login response is authoritative for routing (verified email,
+      // platform owner, missing gym). Seed the in-memory snapshot so the
+      // dashboard shell paints on the first frame; the guard's `/auth/me`
+      // revalidation continues in the background.
+      seedSessionUser(user);
+      const destination = postAuthDestination(user, target);
+      router.prefetch(destination);
+      router.replace(destination);
     },
     [router, toast],
   );
@@ -66,9 +67,25 @@ function LoginScreen() {
   );
 
   return (
-    <AuthCard heading="Welcome Back" subtitle="Sign in to manage your gym.">
-      <LoginForm next={next} onSuccess={handleSuccess} onUnverified={handleUnverified} />
-    </AuthCard>
+    <>
+      <AuthCard heading="Welcome Back" subtitle="Sign in to manage your gym.">
+        <LoginForm next={next} onSuccess={handleSuccess} onUnverified={handleUnverified} />
+      </AuthCard>
+
+      {redirecting && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-auth-canvas/85 px-4 backdrop-blur-sm"
+          aria-busy="true"
+        >
+          <LoaderWave
+            size="lg"
+            tone="auth"
+            label="Opening your dashboard…"
+            className="animate-auth-fade-up"
+          />
+        </div>
+      )}
+    </>
   );
 }
 

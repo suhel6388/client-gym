@@ -11,12 +11,21 @@ import {
   type ReactNode,
 } from "react";
 import {
+  ApiError,
   fetchCurrentUser,
   loginUrlWithNext,
   logout,
   SUPER_ADMIN_PATH,
   type AuthUser,
 } from "@/lib/api";
+import {
+  clearCachedSessionUser,
+  isSameSessionUser,
+  readCachedSessionUser,
+  seedSessionUser,
+} from "@/lib/session-cache";
+import { clearDashboardCache } from "@/lib/dashboard-cache";
+import { LoaderWave } from "@/components/loaders/loaderwave";
 
 export type SessionStatus = "loading" | "authenticated" | "unauthenticated";
 
@@ -41,32 +50,75 @@ export function useSession(): SessionContextValue {
 
 /**
  * Loads the authenticated user from the HttpOnly session cookie via
- * GET /api/v1/auth/me. Nothing about the session is stored client-side.
+ * GET /api/v1/auth/me.
+ *
+ * A successful login returns the user, so the login screen seeds the in-memory
+ * snapshot in `lib/session-cache` before navigating. This provider paints that
+ * snapshot immediately (no blocking round-trip) and revalidates `/auth/me` in
+ * the background. The snapshot is never persisted and the backend still
+ * authorizes every request, so it can only ever affect paint timing.
  */
 export function SessionProvider({ children }: { children: ReactNode }) {
-  const [status, setStatus] = useState<SessionStatus>("loading");
-  const [user, setUser] = useState<AuthUser | null>(null);
+  // Lazy initializers run on the client, so a seeded snapshot paints the shell
+  // on the first frame. On the server `readCachedSessionUser()` returns null,
+  // which keeps markup stable for a direct visit.
+  const [status, setStatus] = useState<SessionStatus>(() =>
+    readCachedSessionUser() ? "authenticated" : "loading",
+  );
+  const [user, setUser] = useState<AuthUser | null>(() => readCachedSessionUser());
   const mountedRef = useRef(true);
 
+  // Skip state updates when the snapshot describes the same account, so a
+  // revalidation that changes nothing does not re-render the whole shell.
+  const applyUser = useCallback((nextUser: AuthUser | null) => {
+    setUser((previous) =>
+      isSameSessionUser(previous, nextUser) ? previous : nextUser,
+    );
+  }, []);
+
   const load = useCallback(async (): Promise<AuthUser | null> => {
+    const fallback = readCachedSessionUser();
     try {
       const current = await fetchCurrentUser();
       if (!mountedRef.current) return current.user;
-      setUser(current.user);
+      // A different account may share this tab; never reuse its dashboard.
+      if (fallback && fallback.id !== current.user.id) clearDashboardCache();
+      seedSessionUser(current.user);
+      applyUser(current.user);
       setStatus("authenticated");
       return current.user;
-    } catch {
+    } catch (error) {
       if (!mountedRef.current) return null;
-      // 401 means signed out; network/server errors leave the guard on the
-      // login screen too, where the connection problem is reported.
-      setUser(null);
+
+      const unauthorized = error instanceof ApiError && error.status === 401;
+      if (unauthorized) {
+        clearCachedSessionUser();
+        clearDashboardCache();
+        applyUser(null);
+        setStatus("unauthenticated");
+        return null;
+      }
+
+      // Network/server hiccup: keep the optimistic session so a temporary
+      // outage does not throw the user out of the dashboard. The backend will
+      // still reject any request if the cookie is actually gone.
+      const retained = fallback ?? readCachedSessionUser();
+      if (retained) {
+        applyUser(retained);
+        setStatus("authenticated");
+        return retained;
+      }
+
+      applyUser(null);
       setStatus("unauthenticated");
       return null;
     }
-  }, []);
+  }, [applyUser]);
 
   useEffect(() => {
     mountedRef.current = true;
+    // No cache: resolve the session now. With a cache the shell is already
+    // painted and this same call only revalidates it.
     void load();
     return () => {
       mountedRef.current = false;
@@ -79,13 +131,15 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     } catch {
       // Even if the call fails, drop the local state and leave.
     }
+    clearCachedSessionUser();
+    clearDashboardCache();
     if (mountedRef.current) {
-      setUser(null);
+      applyUser(null);
       setStatus("unauthenticated");
     }
     // Full navigation so every cached client state is discarded.
     window.location.assign("/login");
-  }, []);
+  }, [applyUser]);
 
   const value = useMemo<SessionContextValue>(
     () => ({ status, user, refresh: load, signOut }),
@@ -175,12 +229,8 @@ export function AuthGuard({ children }: { children: ReactNode }) {
 export function AuthLoadingScreen({ label }: { label: string }) {
   return (
     <div className="auth-backdrop flex min-h-screen items-center justify-center px-4">
-      <div className="flex flex-col items-center gap-4" role="status" aria-live="polite">
-        <span
-          className="size-8 animate-spin rounded-full border-2 border-auth-line-strong border-t-auth-gold motion-reduce:animate-none"
-          aria-hidden
-        />
-        <p className="text-sm text-auth-muted">{label}</p>
+      <div className="animate-auth-fade-up flex flex-col items-center gap-4">
+        <LoaderWave size="lg" tone="auth" label={label} />
       </div>
     </div>
   );

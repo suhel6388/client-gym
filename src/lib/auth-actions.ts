@@ -20,6 +20,7 @@ import {
   resendOtp,
   resetPassword,
   setupGym,
+  type LoginResult,
 } from "./api";
 
 /** Friendly messages returned by the actions below. */
@@ -73,15 +74,21 @@ const normalizeEmail = (value: string) => value.trim().toLowerCase();
 // Login
 // ---------------------------------------------------------------------------
 
-/** POST /auth/login — 403 + EMAIL_NOT_VERIFIED means the OTP screen is next. */
-export const loginAction: FormAction = async (_state, formData) => {
+/**
+ * POST /auth/login — 403 + EMAIL_NOT_VERIFIED means the OTP screen is next.
+ *
+ * The response already contains the signed-in user. Returning it lets the
+ * login screen route (and seed the session snapshot) without a second
+ * `GET /auth/me` round-trip.
+ */
+export const loginAction: FormAction<LoginResult> = async (_state, formData) => {
   try {
-    await login({
+    const result = await login({
       email: normalizeEmail(field(formData, "email")),
       password: field(formData, "password"),
       rememberMe: field(formData, "rememberMe") === "true",
     });
-    return { success: true };
+    return { success: true, data: result };
   } catch (error) {
     if (error instanceof ApiError) {
       if (error.status === 403 && error.code === "EMAIL_NOT_VERIFIED") {
@@ -190,30 +197,31 @@ export const resetPasswordAction: FormAction = async (_state, formData) => {
 // ---------------------------------------------------------------------------
 
 /** POST /auth/setup-gym — creates the gym and starts the 14-day trial. */
-export const setupGymAction: FormAction = async (_state, formData) => {
-  const email = normalizeEmail(field(formData, "email"));
-  const phone = field(formData, "phone").trim();
-  const address = field(formData, "address").trim();
-  try {
-    await setupGym({
-      name: field(formData, "name").trim(),
-      email: email || undefined,
-      phone: phone || undefined,
-      address: address || undefined,
-    });
-    return { success: true };
-  } catch (error) {
-    if (error instanceof ApiError) {
-      if (error.status === 409) {
-        return { success: false, error: AUTH_ERRORS.gymExists };
+export const setupGymAction: FormAction<{ id: string; name: string; phone?: string | null }> =
+  async (_state, formData) => {
+    const email = normalizeEmail(field(formData, "email"));
+    const phone = field(formData, "phone").trim();
+    const address = field(formData, "address").trim();
+    try {
+      const gym = await setupGym({
+        name: field(formData, "name").trim(),
+        email: email || undefined,
+        phone: phone || undefined,
+        address: address || undefined,
+      });
+      return { success: true, data: gym };
+    } catch (error) {
+      if (error instanceof ApiError) {
+        if (error.status === 409) {
+          return { success: false, error: AUTH_ERRORS.gymExists };
+        }
+        if (error.status === 401) {
+          return { success: false, error: AUTH_ERRORS.sessionExpired };
+        }
+        if (error.status === 403 && error.code === "EMAIL_NOT_VERIFIED") {
+          return { success: false, error: AUTH_ERRORS.unverified };
+        }
       }
-      if (error.status === 401) {
-        return { success: false, error: AUTH_ERRORS.sessionExpired };
-      }
-      if (error.status === 403 && error.code === "EMAIL_NOT_VERIFIED") {
-        return { success: false, error: AUTH_ERRORS.unverified };
-      }
+      return { success: false, error: friendlyError(error) };
     }
-    return { success: false, error: friendlyError(error) };
-  }
-};
+  };

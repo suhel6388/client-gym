@@ -16,6 +16,7 @@ import {
   readPendingSignup,
   type AuthUser,
 } from "@/lib/api";
+import { seedSessionUser } from "@/lib/session-cache";
 import { AUTH_ERRORS, setupGymAction } from "@/lib/auth-actions";
 
 /**
@@ -41,6 +42,9 @@ export default function SetupGymScreen() {
       try {
         const current = await fetchCurrentUser();
         if (!active) return;
+        // Snapshot the confirmed session so the dashboard paints immediately
+        // when this screen redirects into it.
+        seedSessionUser(current.user);
         if (current.user.emailVerified === false) {
           router.replace(
             `/verify-email?email=${encodeURIComponent(current.user.email)}&reason=dashboard`,
@@ -88,8 +92,13 @@ export default function SetupGymScreen() {
   // what to do with the result.
   const { formAction, isPending } = useFormHandler(
     setupGymAction,
-    () => {
+    (state) => {
       clearPendingSignup();
+      // The new gym id comes back in the response, so the dashboard layout can
+      // skip the "checking your session" frame after this redirect.
+      if (user) {
+        seedSessionUser({ ...user, gymId: state.data?.id ?? user.gymId });
+      }
       router.replace(DASHBOARD_PATH);
     },
     (state) => {

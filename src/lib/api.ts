@@ -440,9 +440,27 @@ export function logout() {
   });
 }
 
-/** GET /auth/me — current user + gym context. Throws `ApiError(401)` when signed out. */
-export function fetchCurrentUser() {
-  return apiRequest<CurrentSession>("/auth/me");
+/**
+ * GET /auth/me — current user + gym context. Throws `ApiError(401)` when signed out.
+ *
+ * Concurrent callers share one request. The login screen no longer calls this
+ * before navigating; the guarded layout uses it to revalidate the optimistic
+ * session snapshot exactly once.
+ */
+let currentUserRequest: Promise<CurrentSession> | null = null;
+
+export function fetchCurrentUser(): Promise<CurrentSession> {
+  if (currentUserRequest) return currentUserRequest;
+
+  const request = apiRequest<CurrentSession>("/auth/me");
+  currentUserRequest = request;
+
+  const clear = () => {
+    if (currentUserRequest === request) currentUserRequest = null;
+  };
+  request.then(clear, clear);
+
+  return request;
 }
 
 /**

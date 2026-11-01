@@ -3,6 +3,7 @@
 import { AlertTriangle, RefreshCw } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { ApiError, fetchDashboardReport, fetchMemberJoins } from "@/lib/api";
+import { readDashboardCache, writeDashboardCache } from "@/lib/dashboard-cache";
 import { buildDashboardView, type DashboardView } from "@/lib/dashboard-view";
 import { formatCurrency, formatNumber } from "@/lib/format";
 import { listMemberships, listPayments } from "@/lib/members-api";
@@ -26,35 +27,73 @@ const KPI_PLACEHOLDERS = [
 
 export function DashboardOverview() {
   const { user } = useSession();
-  const [view, setView] = useState<DashboardView | null>(null);
-  const [status, setStatus] = useState<LoadStatus>("loading");
-  const [error, setError] = useState<string | null>(null);
+  // Gym + account key: a cached view can never leak across accounts.
+  const cacheKey = user ? `${user.gymId ?? "no-gym"}:${user.id}` : null;
 
-  const load = useCallback(async (signal?: AbortSignal) => {
-    setStatus("loading");
-    setError(null);
-    try {
-      const [report, payments, memberships, memberJoins] = await Promise.all([
-        fetchDashboardReport(signal),
-        listPayments(signal),
-        listMemberships(undefined, signal),
-        fetchMemberJoins(signal, { includePlan: true }),
-      ]);
-      if (signal?.aborted) return;
-      setView(
-        buildDashboardView({ report, payments, memberships, members: memberJoins }),
-      );
-      setStatus("ready");
-    } catch (caught) {
-      if (signal?.aborted) return;
-      setError(
-        caught instanceof ApiError
-          ? caught.message
-          : "Couldn't load the dashboard. Please try again.",
-      );
-      setStatus("error");
-    }
-  }, []);
+  // Paint a recent snapshot immediately (returning to the dashboard, or the
+  // redirect right after login). The live data still loads in the background.
+  const [state, setState] = useState<{
+    view: DashboardView | null;
+    status: LoadStatus;
+  }>(() => {
+    const cached = readDashboardCache(cacheKey);
+    return { view: cached, status: cached ? "ready" : "loading" };
+  });
+  const [error, setError] = useState<string | null>(null);
+  const { view, status } = state;
+
+  const load = useCallback(
+    async (signal?: AbortSignal) => {
+      const cached = readDashboardCache(cacheKey);
+      setError(null);
+      // With a cached view the shell stays "ready" and the fetch is a silent
+      // refresh; only a first visit shows the KPI placeholders.
+      setState((previous) => {
+        if (cached) {
+          return previous.view === cached && previous.status === "ready"
+            ? previous
+            : { view: cached, status: "ready" };
+        }
+        if (previous.view && previous.status === "ready") return previous;
+        return previous.status === "loading"
+          ? previous
+          : { view: previous.view, status: "loading" };
+      });
+
+      try {
+        const [report, payments, memberships, memberJoins] = await Promise.all([
+          fetchDashboardReport(signal),
+          listPayments(signal),
+          listMemberships(undefined, signal),
+          fetchMemberJoins(signal, { includePlan: true }),
+        ]);
+        if (signal?.aborted) return;
+        const nextView = buildDashboardView({
+          report,
+          payments,
+          memberships,
+          members: memberJoins,
+        });
+        writeDashboardCache(cacheKey, nextView);
+        setState({ view: nextView, status: "ready" });
+      } catch (caught) {
+        if (signal?.aborted) return;
+        setError(
+          caught instanceof ApiError
+            ? caught.message
+            : "Couldn't load the dashboard. Please try again.",
+        );
+        // A failed refresh keeps the last good view instead of blanking the
+        // page; only a first load with no data shows the error state.
+        setState((previous) =>
+          previous.view
+            ? { view: previous.view, status: "ready" }
+            : { view: null, status: "error" },
+        );
+      }
+    },
+    [cacheKey],
+  );
 
   useEffect(() => {
     const controller = new AbortController();
