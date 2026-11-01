@@ -611,7 +611,7 @@ For a frontend on one host and an API on another:
 3. `CLIENT_ORIGIN` on the backend must include the exact frontend origin (scheme + host + port, no path).
 4. The browser must allow third-party cookies for the API site.
 5. `NEXT_PUBLIC_API_URL` must point at the same API origin that sets the cookie.
-6. The Google OAuth redirect URI must be registered on the **API** host: `/api/auth/callback/google`.
+6. The Google OAuth redirect URI must be registered on the **API** host: `/api/auth/callback/google`. On the custom-domain deployment that is `https://darkgoldgym.duckdns.org/api/auth/callback/google`; on Render it is `https://gym-managment-system-7yiu.onrender.com/api/auth/callback/google`. Register both if both are reachable, and make sure the host in `NEXT_PUBLIC_API_URL` is one of them.
 
 ---
 
@@ -638,6 +638,7 @@ Common symptom → likely cause:
 | Login redirects to `/setup-gym` | User has no `gymId` yet |
 | Gym owner sees `/super-admin` redirect loop | Wrong role in the database; check `User.role` |
 | Google redirects to an API error page | `BETTER_AUTH_URL` or Google redirect URI is wrong |
+| Google shows “Access blocked: This app's request is invalid” (`Error 400: redirect_uri_mismatch`) | The API host the client calls is not registered on the Google OAuth client. Check “error details” for the `redirect_uri` value and add that exact URI (e.g. `https://darkgoldgym.duckdns.org/api/auth/callback/google`) |
 | Dashboard loads but every widget says “subscription expired” | Backend returns `402 SUBSCRIPTION_REQUIRED` |
 | Receptionist gets 403 on save/delete | Backend role permissions: staff can only read and create |
 | “Session expired” after being idle | 7-day session or cookie was dropped; sign in again |
