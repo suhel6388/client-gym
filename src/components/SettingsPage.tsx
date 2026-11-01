@@ -19,6 +19,7 @@ import {
   saveWhatsAppRenewalTemplate,
 } from "@/lib/whatsapp";
 import { useToast } from "./providers/ToastProvider";
+import { ReceiptSettingsCard } from "./receipts/ReceiptSettingsCard";
 import { Button } from "./ui/Button";
 import { DashboardCard } from "./DashboardCard";
 import { Label } from "./ui/Label";
@@ -118,7 +119,11 @@ export function SettingsPage() {
         </p>
       </div>
 
-      <div className="mt-6 grid gap-5 lg:mt-8 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.65fr)]">
+      <div className="mt-6 lg:mt-8">
+        <ReceiptSettingsCard />
+      </div>
+
+      <div className="mt-5 grid gap-5 lg:mt-6 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.65fr)]">
         {/* Editor */}
         <DashboardCard
           title="WhatsApp renewal reminders"

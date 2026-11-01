@@ -1264,3 +1264,68 @@ html:has(.dg-landing) {
     padding-left: 0 !important;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Receipt printing
+   ---------------------------------------------------------------------------
+   Clicking Print in the receipt modal adds `receipt-printing` to <body>. Every
+   other surface is hidden with `visibility` (which descendants can override)
+   so only the receipt sheet reaches the printer, at its natural A4 width.
+   --------------------------------------------------------------------------- */
+@page {
+  size: A4 portrait;
+  margin: 10mm;
+}
+
+.receipt-sheet {
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+@media print {
+  body.receipt-printing {
+    background: #ffffff !important;
+  }
+
+  body.receipt-printing * {
+    visibility: hidden !important;
+  }
+
+  body.receipt-printing #receipt-print-root,
+  body.receipt-printing #receipt-print-root * {
+    visibility: visible !important;
+  }
+
+  /* Radix positions the dialog with fixed + transform; printing needs the
+     receipt in normal flow or only the first viewport is printed. */
+  body.receipt-printing .dg-dialog-content {
+    position: static !important;
+    left: auto !important;
+    top: auto !important;
+    width: auto !important;
+    max-width: none !important;
+    max-height: none !important;
+    overflow: visible !important;
+    transform: none !important;
+    border: 0 !important;
+    border-radius: 0 !important;
+    background: #ffffff !important;
+    box-shadow: none !important;
+  }
+
+  body.receipt-printing .dg-dialog-content .scroll-thin {
+    overflow: visible !important;
+    max-height: none !important;
+  }
+
+  body.receipt-printing #receipt-print-root {
+    position: static !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    margin: 0 !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    break-inside: avoid;
+  }
+}

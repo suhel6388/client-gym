@@ -1,3 +1,4 @@
+
 "use client";
 
 import { Loader2, Pencil, UserPlus, X } from "lucide-react";
@@ -16,6 +17,16 @@ import {
 } from "@/lib/member-form";
 import { createMemberFromForm } from "@/lib/member-create";
 import {
+  newReceiptIdempotencyKey,
+  type ReceiptPayload,
+  type ReceiptWhatsAppBundle,
+} from "@/lib/receipt-api";
+import {
+  closeShareWindow,
+  navigateShareWindow,
+  openShareWindow,
+} from "@/lib/receipt-share";
+import {
   listPlans,
   updateMember,
   type MemberDto,
@@ -23,6 +34,7 @@ import {
 } from "@/lib/members-api";
 import { useToast } from "./providers/ToastProvider";
 import { MemberForm } from "./MemberForm";
+import { ReceiptModal } from "./receipts/ReceiptModal";
 import { Button } from "./ui/Button";
 
 const FORM_ID = "member-form";
@@ -54,6 +66,13 @@ export function AddMemberDrawer({
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [formKey, setFormKey] = useState(0);
+
+  // Receipt shown after a successful payment, independent of the form drawer.
+  const [receipt, setReceipt] = useState<ReceiptPayload | null>(null);
+  const [receiptWhatsApp, setReceiptWhatsApp] =
+    useState<ReceiptWhatsAppBundle | null>(null);
+  const [receiptNotice, setReceiptNotice] = useState<string | null>(null);
+  const [receiptOpen, setReceiptOpen] = useState(false);
 
   const initialValues = useMemo(
     () => (member ? memberToFormValues(member) : emptyMemberForm()),
@@ -121,14 +140,28 @@ export function AddMemberDrawer({
     async (values: MemberFormValues) => {
       setServerError(null);
       setSubmitting(true);
+
+      // Open the WhatsApp tab inside the submit gesture. It is navigated only
+      // after the server confirms the payment, and closed if anything fails.
+      const collecting = mode === "create" && values.collectPayment;
+      const shareWindow = collecting ? openShareWindow() : null;
+      const idempotencyKey = collecting ? newReceiptIdempotencyKey() : undefined;
+      let shareHandled = false;
+
       try {
         const result = await toast.promise(
           (async () => {
             if (mode === "edit" && member) {
               const updated = await updateMember(member.id, buildPayload(values));
-              return { member: updated, warnings: [] as string[] };
+              return {
+                member: updated,
+                warnings: [] as string[],
+                receipt: null,
+                whatsapp: null,
+                receiptError: null,
+              };
             }
-            return createMemberFromForm(values);
+            return createMemberFromForm(values, { idempotencyKey });
           })(),
           {
             loading:
@@ -143,16 +176,20 @@ export function AddMemberDrawer({
                       ? "Creating the member, membership and payment. Please wait…"
                       : "Creating the member and membership. Please wait…",
                   },
-            success: ({ member: saved }) =>
-              mode === "edit"
+            success: (savedResult) => {
+              const saved = savedResult.member;
+              return mode === "edit"
                 ? {
                     title: "Member updated",
                     description: `${saved.name}'s details were saved.`,
                   }
                 : {
                     title: "Member added",
-                    description: `${saved.name} (${saved.memberCode}) was added successfully.`,
-                  },
+                    description: savedResult.receipt
+                      ? `${saved.name} (${saved.memberCode}) was added. Receipt ${savedResult.receipt.receiptNumber} is ready.`
+                      : `${saved.name} (${saved.memberCode}) was added successfully.`,
+                  };
+            },
             error: (error) => ({
               title: "Couldn't save member",
               description:
@@ -171,6 +208,20 @@ export function AddMemberDrawer({
           );
         }
 
+        // Automatic WhatsApp share. A blocked popup never affects the payment.
+        if (shareWindow) {
+          const url = result.whatsapp?.url ?? null;
+          shareHandled = url ? navigateShareWindow(shareWindow, url) : false;
+          if (!shareHandled) closeShareWindow(shareWindow);
+        }
+
+        if (result.receipt || result.receiptError) {
+          setReceipt(result.receipt);
+          setReceiptWhatsApp(result.whatsapp);
+          setReceiptNotice(result.receiptError);
+          setReceiptOpen(true);
+        }
+
         if (mode === "edit") {
           emitMemberUpdated(result.member);
         } else {
@@ -185,6 +236,7 @@ export function AddMemberDrawer({
             : "Something went wrong while saving. Please try again.",
         );
       } finally {
+        if (shareWindow && !shareHandled) closeShareWindow(shareWindow);
         setSubmitting(false);
       }
     },
@@ -281,6 +333,15 @@ export function AddMemberDrawer({
           </Button>
         </div>
       </aside>
+
+      <ReceiptModal
+        open={receiptOpen}
+        onOpenChange={setReceiptOpen}
+        receipt={receipt}
+        whatsapp={receiptWhatsApp}
+        notice={receiptNotice}
+        celebrate
+      />
     </>
   );
 }

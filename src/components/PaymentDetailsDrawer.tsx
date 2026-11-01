@@ -4,6 +4,7 @@ import {
   CalendarDays,
   Copy,
   CreditCard,
+  FileText,
   Hash,
   UserRound,
   Wallet,
@@ -29,6 +30,7 @@ type PaymentDetailsDrawerProps = {
   onOpenChange: (open: boolean) => void;
   onCopyReceipt: (row: PaymentRow) => void;
   onViewMember: (row: PaymentRow) => void;
+  onViewReceipt: (row: PaymentRow) => void;
 };
 
 export function PaymentDetailsDrawer({
@@ -37,6 +39,7 @@ export function PaymentDetailsDrawer({
   onOpenChange,
   onCopyReceipt,
   onViewMember,
+  onViewReceipt,
 }: PaymentDetailsDrawerProps) {
   return (
     <>
@@ -163,6 +166,16 @@ export function PaymentDetailsDrawer({
           >
             <UserRound className="size-4" strokeWidth={1.75} aria-hidden />
             View member
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            size="md"
+            disabled={!row}
+            onClick={() => row && onViewReceipt(row)}
+          >
+            <FileText className="size-4" strokeWidth={1.75} aria-hidden />
+            Full receipt
           </Button>
           <Button
             type="button"

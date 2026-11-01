@@ -32,9 +32,14 @@ import {
   type PaymentsPeriod,
   type PaymentsSummary,
 } from "@/lib/payments-view";
+import {
+  fetchPaymentReceipt,
+  type ReceiptPayload,
+} from "@/lib/receipt-api";
 import { DashboardCard } from "./DashboardCard";
 import { PaymentDetailsDrawer } from "./PaymentDetailsDrawer";
 import { PaymentFormDrawer } from "./PaymentFormDrawer";
+import { ReceiptModal } from "./receipts/ReceiptModal";
 import {
   PaymentFilters,
   type PaymentMethodFilter,
@@ -88,6 +93,10 @@ export function PaymentsPage() {
     presetMemberId: null,
   });
   const [details, setDetails] = useState<PaymentRow | null>(null);
+
+  const [receipt, setReceipt] = useState<ReceiptPayload | null>(null);
+  const [receiptOpen, setReceiptOpen] = useState(false);
+  const [receiptLoading, setReceiptLoading] = useState(false);
 
   const load = useCallback(
     async (mode: "initial" | "refresh") => {
@@ -249,6 +258,26 @@ export function PaymentsPage() {
   );
 
   const viewMember = useCallback(() => router.push("/members"), [router]);
+
+  const viewReceipt = useCallback(
+    async (row: PaymentRow) => {
+      if (receiptLoading) return;
+      setReceiptLoading(true);
+      try {
+        const payload = await fetchPaymentReceipt(row.id);
+        setReceipt(payload);
+        setReceiptOpen(true);
+      } catch (caught) {
+        toast.error(
+          "Couldn't load receipt",
+          caught instanceof ApiError ? caught.message : "Please try again.",
+        );
+      } finally {
+        setReceiptLoading(false);
+      }
+    },
+    [receiptLoading, toast],
+  );
 
   const showEmpty = status === "ready" && rangedRows.length === 0;
   const showNoResults = status === "ready" && rangedRows.length > 0 && filtered.length === 0;
@@ -446,6 +475,13 @@ export function PaymentsPage() {
         onOpenChange={(open) => !open && setDetails(null)}
         onCopyReceipt={(row) => copyReceipt(row.receiptNumber)}
         onViewMember={viewMember}
+        onViewReceipt={viewReceipt}
+      />
+
+      <ReceiptModal
+        open={receiptOpen}
+        onOpenChange={setReceiptOpen}
+        receipt={receipt}
       />
     </div>
   );

@@ -1,19 +1,30 @@
 "use client";
 
 import { Loader2, Wallet, X } from "lucide-react";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { formatCurrency, formatShortDate } from "@/lib/format";
 import { PAYMENT_MODE_OPTIONS, todayIso } from "@/lib/member-form";
 import {
   amountToPaise,
-  createPayment,
   paiseToAmount,
   type PaymentModeDto,
 } from "@/lib/members-api";
+import {
+  createPaymentWithReceipt,
+  newReceiptIdempotencyKey,
+  type ReceiptPayload,
+  type ReceiptWhatsAppBundle,
+} from "@/lib/receipt-api";
+import {
+  closeShareWindow,
+  navigateShareWindow,
+  openShareWindow,
+} from "@/lib/receipt-share";
 import type { SubscriptionRow } from "@/lib/membership-view";
 import { useToast } from "./providers/ToastProvider";
+import { ReceiptModal } from "./receipts/ReceiptModal";
 import { Button } from "./ui/Button";
 import { Input } from "./ui/Input";
 import { Label } from "./ui/Label";
@@ -58,6 +69,13 @@ export function RecordPaymentDrawer({
   const [serverError, setServerError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
 
+  const [receipt, setReceipt] = useState<ReceiptPayload | null>(null);
+  const [receiptWhatsApp, setReceiptWhatsApp] =
+    useState<ReceiptWhatsAppBundle | null>(null);
+  const [receiptNotice, setReceiptNotice] = useState<string | null>(null);
+  const [receiptOpen, setReceiptOpen] = useState(false);
+  const idempotencyKeyRef = useRef<string | null>(null);
+
   useEffect(() => {
     if (!open || !row) return;
     setAmount(row.balancePaise > 0 ? String(paiseToAmount(row.balancePaise)) : "");
@@ -67,6 +85,7 @@ export function RecordPaymentDrawer({
     setErrors({});
     setServerError(null);
     setSubmitting(false);
+    idempotencyKeyRef.current = null;
   }, [open, row]);
 
   useEffect(() => {
@@ -103,25 +122,38 @@ export function RecordPaymentDrawer({
 
       setServerError(null);
       setSubmitting(true);
+
+      // Pre-open the share tab during the submit gesture; it is navigated only
+      // after the server confirms the payment.
+      const shareWindow = openShareWindow();
+      const idempotencyKey =
+        idempotencyKeyRef.current ?? newReceiptIdempotencyKey();
+      idempotencyKeyRef.current = idempotencyKey;
+      let shareHandled = false;
+
       try {
-        await toast.promise(
-          createPayment({
+        const bundle = await toast.promise(
+          createPaymentWithReceipt({
             memberId: row.memberId,
+            membershipId: row.id,
             amount: amountToPaise(value),
             paymentMode,
             reference: reference.trim() || null,
             paymentDate,
             status: "SUCCESS",
+            idempotencyKey,
           }),
           {
             loading: {
               title: "Recording payment…",
-              description: "Saving the receipt on the server.",
+              description: "Saving the payment and issuing the receipt.",
             },
-            success: {
+            success: (result) => ({
               title: "Payment recorded",
-              description: `${formatCurrency(value)} received from ${row.memberName}.`,
-            },
+              description: result.receipt
+                ? `${formatCurrency(value)} received from ${row.memberName}. Receipt ${result.receipt.receiptNumber} is ready.`
+                : `${formatCurrency(value)} received from ${row.memberName}.`,
+            }),
             error: (caught) => ({
               title: "Couldn't record payment",
               description:
@@ -129,13 +161,27 @@ export function RecordPaymentDrawer({
             }),
           },
         );
+
+        const url = bundle.whatsapp?.url ?? null;
+        shareHandled = url ? navigateShareWindow(shareWindow, url) : false;
+        if (!shareHandled) closeShareWindow(shareWindow);
+
+        if (bundle.receipt || bundle.receiptError) {
+          setReceipt(bundle.receipt);
+          setReceiptWhatsApp(bundle.whatsapp);
+          setReceiptNotice(bundle.receiptError ?? null);
+          setReceiptOpen(true);
+        }
+
         onSaved?.();
+        idempotencyKeyRef.current = null;
         onOpenChange(false);
       } catch (caught) {
         setServerError(
           caught instanceof ApiError ? caught.message : "Please try again.",
         );
       } finally {
+        if (shareWindow && !shareHandled) closeShareWindow(shareWindow);
         setSubmitting(false);
       }
     },
@@ -334,6 +380,15 @@ export function RecordPaymentDrawer({
           </Button>
         </div>
       </aside>
+
+      <ReceiptModal
+        open={receiptOpen}
+        onOpenChange={setReceiptOpen}
+        receipt={receipt}
+        whatsapp={receiptWhatsApp}
+        notice={receiptNotice}
+        celebrate
+      />
     </>
   );
 }
