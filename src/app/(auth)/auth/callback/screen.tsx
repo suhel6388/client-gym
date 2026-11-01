@@ -22,7 +22,7 @@ function describeOauthError(code: string | null): string {
       return "Google sign-in was cancelled. You can try again or use your email instead.";
     case "state_mismatch":
     case "please_restart_the_process":
-      return "Your sign-in session expired or the browser blocked the sign-in cookie. Please try again.";
+      return "Your sign-in session expired or your account exists with same credentials.";
     case "invalid_callback":
     case "invalid_redirect_uri":
     case "invalid_callback_url":
