@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import {
   Building2,
   CalendarClock,
+  Globe,
   History,
   LayoutDashboard,
   LogOut,
@@ -56,6 +57,12 @@ const NAV_ITEMS: PlatformNavItem[] = [
     href: `${SUPER_ADMIN_PATH}/schedule-calls`,
     icon: CalendarClock,
     description: "Landing-page call enquiries",
+  },
+  {
+    label: "Site Visitors",
+    href: `${SUPER_ADMIN_PATH}/visitors`,
+    icon: Globe,
+    description: "Website traffic and visitor statistics",
   },
   {
     label: "Activity",

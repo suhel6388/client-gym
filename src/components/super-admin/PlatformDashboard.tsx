@@ -8,6 +8,8 @@ import {
   Building2,
   CalendarClock,
   ChevronRight,
+  Eye,
+  Globe,
   IndianRupee,
   RefreshCw,
   ShieldAlert,
@@ -262,6 +264,32 @@ export function PlatformDashboard() {
             />
           );
         })}
+      </div>
+
+      {/* Site Visitors Analytics Banner */}
+      <div className="mt-4 flex flex-col items-start justify-between gap-4 rounded-xl border border-gold/30 bg-gold/5 p-4 sm:flex-row sm:items-center">
+        <div className="flex items-center gap-3">
+          <span className="flex size-10 items-center justify-center rounded-lg bg-gold/15 text-gold ring-1 ring-gold/25">
+            <Globe className="size-5" />
+          </span>
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="text-sm font-semibold text-ink">Site Visitor Analytics</h2>
+              <Badge tone="gold">Super Admin Only</Badge>
+            </div>
+            <p className="mt-0.5 text-xs text-faint">
+              Monitor website traffic, unique visitors, devices, and peak hours across daily, weekly, monthly, and custom dates.
+            </p>
+          </div>
+        </div>
+        <Link
+          href={`${SUPER_ADMIN_PATH}/visitors`}
+          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-gold/40 bg-gold/15 px-3 py-1.5 text-xs font-semibold text-gold transition-colors hover:bg-gold/25"
+        >
+          <Eye className="size-3.5" />
+          View Visitor Analytics
+          <ChevronRight className="size-3.5" />
+        </Link>
       </div>
 
       <div className="mt-6 grid grid-cols-1 gap-4 xl:grid-cols-3">
