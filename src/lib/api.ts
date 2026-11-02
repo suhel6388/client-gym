@@ -133,8 +133,16 @@ export const apiClient = axios.create({
 apiClient.interceptors.request.use((config) => {
   if (typeof window !== "undefined") {
     const token = localStorage.getItem("gym_auth_token");
-    if (token && config.headers && !config.headers.Authorization) {
-      config.headers.Authorization = `Bearer ${token}`;
+    if (token) {
+      if (typeof config.headers?.set === "function") {
+        if (!config.headers.get("Authorization")) {
+          config.headers.set("Authorization", `Bearer ${token}`);
+        }
+      } else if (config.headers) {
+        if (!config.headers.Authorization) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
+      }
     }
   }
   return config;
