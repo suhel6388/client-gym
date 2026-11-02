@@ -130,6 +130,16 @@ export const apiClient = axios.create({
   timeout: 30000,
 });
 
+apiClient.interceptors.request.use((config) => {
+  if (typeof window !== "undefined") {
+    const token = localStorage.getItem("gym_auth_token");
+    if (token && config.headers && !config.headers.Authorization) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  }
+  return config;
+});
+
 const buildRequestConfig = (
   method: NonNullable<RequestOptions["method"]>,
   {
@@ -429,11 +439,24 @@ export function login(input: LoginInput) {
     // Signing in again is safe: the first attempt may have succeeded even if
     // the response was lost to a Render cold-start timeout.
     retry: 1,
+  }).then((res) => {
+    if (typeof window !== "undefined" && res) {
+      const anyRes = res as Record<string, unknown>;
+      const sessionObj = anyRes?.session as Record<string, unknown> | undefined;
+      const token = (sessionObj?.token as string) ?? (anyRes?.token as string);
+      if (token) {
+        localStorage.setItem("gym_auth_token", token);
+      }
+    }
+    return res;
   });
 }
 
 /** POST /auth/logout — clear the session cookie. */
 export function logout() {
+  if (typeof window !== "undefined") {
+    localStorage.removeItem("gym_auth_token");
+  }
   return apiRequest<unknown>("/auth/logout", {
     method: "POST",
     // Idempotent: retry so a timed-out logout still clears the cookie.
@@ -453,7 +476,17 @@ let currentUserRequest: Promise<CurrentSession> | null = null;
 export function fetchCurrentUser(): Promise<CurrentSession> {
   if (currentUserRequest) return currentUserRequest;
 
-  const request = apiRequest<CurrentSession>("/auth/me");
+  const request = apiRequest<CurrentSession>("/auth/me").then((res) => {
+    if (typeof window !== "undefined" && res) {
+      const anyRes = res as Record<string, unknown>;
+      const sessionObj = anyRes?.session as Record<string, unknown> | undefined;
+      const token = (sessionObj?.token as string) ?? (anyRes?.token as string);
+      if (token) {
+        localStorage.setItem("gym_auth_token", token);
+      }
+    }
+    return res;
+  });
   currentUserRequest = request;
 
   const clear = () => {
