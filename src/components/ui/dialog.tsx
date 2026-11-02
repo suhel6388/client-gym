@@ -26,7 +26,7 @@ export const DialogOverlay = forwardRef<
     <DialogPrimitive.Overlay
       ref={ref}
       className={cn(
-        "dg-dialog-overlay fixed inset-0 z-50 bg-black/75 backdrop-blur-[6px]",
+        "dg-dialog-overlay fixed inset-0 z-[80] bg-black/75 backdrop-blur-[6px]",
         className,
       )}
       {...props}
@@ -44,7 +44,7 @@ export const DialogContent = forwardRef<
       <DialogPrimitive.Content
         ref={ref}
         className={cn(
-          "dg-dialog-content scroll-thin z-50 w-[calc(100vw-1.5rem)] max-w-[680px] overflow-y-auto rounded-2xl border border-gold/30 bg-elevated text-ink shadow-pop outline-none",
+          "dg-dialog-content scroll-thin z-[85] w-[calc(100vw-1.5rem)] max-w-[680px] overflow-y-auto rounded-2xl border border-gold/30 bg-elevated text-ink shadow-pop outline-none",
           className,
         )}
         {...props}

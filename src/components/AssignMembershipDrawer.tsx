@@ -24,6 +24,7 @@ import {
   type ReceiptPayload,
   type ReceiptWhatsAppBundle,
 } from "@/lib/receipt-api";
+import { pushNotification } from "@/lib/notification-events";
 import type { SubscriptionRow } from "@/lib/membership-view";
 import { useToast } from "./providers/ToastProvider";
 import { ReceiptModal } from "./receipts/ReceiptModal";
@@ -282,6 +283,12 @@ export function AssignMembershipDrawer({
           setReceiptNotice(bundle.receiptError ?? null);
           setReceiptOpen(true);
         }
+
+        pushNotification(
+          "membership_assigned",
+          renewal ? "Membership renewed" : "Membership assigned",
+          `${selectedMember?.name ?? "Member"} assigned to ${selectedPlan?.name ?? "plan"}.`,
+        );
 
         idempotencyKeyRef.current = null;
         onSaved?.();

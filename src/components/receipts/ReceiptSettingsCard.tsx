@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ApiError } from "@/lib/api";
+import { cn } from "@/lib/cn";
 import {
   fetchReceiptSettings,
   saveReceiptSettings,
@@ -270,6 +271,43 @@ export function ReceiptSettingsCard() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState<"logo" | "signature" | null>(null);
+
+  // Appearance & text customizations
+  const [receiptScale, setReceiptScale] = useState<"compact" | "standard" | "large">("standard");
+  const [receiptTitle, setReceiptTitle] = useState("Payment Receipt");
+  const [receiptCategory, setReceiptCategory] = useState("Membership payment");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedScale = localStorage.getItem("gym_receipt_scale") as "compact" | "standard" | "large" | null;
+      if (savedScale) setReceiptScale(savedScale);
+      const savedTitle = localStorage.getItem("gym_receipt_title");
+      if (savedTitle) setReceiptTitle(savedTitle);
+      const savedCategory = localStorage.getItem("gym_receipt_category");
+      if (savedCategory) setReceiptCategory(savedCategory);
+    }
+  }, []);
+
+  const handleScaleChange = (scale: "compact" | "standard" | "large") => {
+    setReceiptScale(scale);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("gym_receipt_scale", scale);
+    }
+  };
+
+  const handleTitleChange = (val: string) => {
+    setReceiptTitle(val);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("gym_receipt_title", val);
+    }
+  };
+
+  const handleCategoryChange = (val: string) => {
+    setReceiptCategory(val);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("gym_receipt_category", val);
+    }
+  };
 
   const logoInput = useRef<HTMLInputElement>(null);
   const signatureInput = useRef<HTMLInputElement>(null);
@@ -674,6 +712,60 @@ export function ReceiptSettingsCard() {
             </p>
           </div>
 
+          {/* Receipt Appearance, Size & Custom Text */}
+          <div className="rounded-xl border border-line bg-card-hover/20 p-4 space-y-4">
+            <div>
+              <p className="text-[12px] font-semibold text-ink">Receipt Size & Sizing</p>
+              <p className="mt-0.5 text-[11px] text-faint">Adjust the scale and display size of your printed/exported receipts.</p>
+              <div className="mt-2.5 flex items-center gap-2">
+                {(
+                  [
+                    { key: "compact", label: "Compact (85%)" },
+                    { key: "standard", label: "Standard (100%)" },
+                    { key: "large", label: "Large (115%)" },
+                  ] as const
+                ).map(({ key, label }) => (
+                  <button
+                    key={key}
+                    type="button"
+                    onClick={() => handleScaleChange(key)}
+                    className={cn(
+                      "flex-1 rounded-lg border px-3 py-1.5 text-xs font-medium transition-colors",
+                      receiptScale === key
+                        ? "border-gold bg-gold/15 text-gold font-semibold"
+                        : "border-line bg-card text-subtle hover:bg-card-hover hover:text-ink",
+                    )}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid gap-3 pt-2 border-t border-line/40 sm:grid-cols-2">
+              <div>
+                <Label htmlFor="receipt-custom-title">Receipt header title</Label>
+                <Input
+                  id="receipt-custom-title"
+                  className="mt-1"
+                  value={receiptTitle}
+                  onChange={(e) => handleTitleChange(e.target.value)}
+                  placeholder="Payment Receipt"
+                />
+              </div>
+              <div>
+                <Label htmlFor="receipt-custom-cat">Category text</Label>
+                <Input
+                  id="receipt-custom-cat"
+                  className="mt-1"
+                  value={receiptCategory}
+                  onChange={(e) => handleCategoryChange(e.target.value)}
+                  placeholder="Membership payment"
+                />
+              </div>
+            </div>
+          </div>
+
           <div className="flex items-start justify-between gap-4 rounded-xl border border-line bg-card-hover/25 px-4 py-3">
             <div className="flex items-start gap-3">
               <span className="mt-0.5 inline-flex size-8 shrink-0 items-center justify-center rounded-lg bg-gold/12 text-gold ring-1 ring-inset ring-gold/20">
@@ -749,7 +841,14 @@ export function ReceiptSettingsCard() {
             </span>
           </div>
           <div className="rounded-xl border border-line/60 bg-canvas/60 p-2.5">
-            <ReceiptPreview receipt={preview} flat className="max-h-[720px]" />
+            <ReceiptPreview
+              receipt={preview}
+              flat
+              className="max-h-[720px]"
+              scale={receiptScale}
+              customTitle={receiptTitle}
+              customCategory={receiptCategory}
+            />
           </div>
         </div>
       </div>

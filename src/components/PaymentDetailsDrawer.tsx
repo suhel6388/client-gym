@@ -99,8 +99,8 @@ export function PaymentDetailsDrawer({
             </div>
 
             {/* Member */}
-            <div className="mt-5 flex items-center gap-3 rounded-xl border border-line bg-card-hover/20 p-4">
-              <Avatar initials={row.memberInitials} className="size-11" />
+            <div className="mt-5 flex items-center justify-between gap-3 rounded-xl border border-line bg-card-hover/20 p-4">
+              <Avatar initials={row.memberInitials} className="size-11 shrink-0" />
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold text-ink">{row.memberName}</p>
                 <p className="truncate font-mono text-[11px] text-faint">{row.memberCode}</p>
@@ -108,6 +108,7 @@ export function PaymentDetailsDrawer({
               <Button
                 variant="ghost"
                 size="sm"
+                className="shrink-0"
                 onClick={() => onViewMember(row)}
                 aria-label={`View ${row.memberName}`}
               >
@@ -156,35 +157,35 @@ export function PaymentDetailsDrawer({
           </div>
         )}
 
-        <div className="flex shrink-0 flex-col-reverse gap-2 border-t border-line/60 px-6 py-4 sm:flex-row sm:justify-end">
+        <div className="flex shrink-0 flex-wrap items-center justify-end gap-2 border-t border-line/60 px-5 py-3.5">
           <Button
             type="button"
             variant="secondary"
-            size="md"
+            size="sm"
             disabled={!row}
             onClick={() => row && onViewMember(row)}
           >
-            <UserRound className="size-4" strokeWidth={1.75} aria-hidden />
+            <UserRound className="size-3.5" strokeWidth={1.75} aria-hidden />
             View member
           </Button>
           <Button
             type="button"
             variant="secondary"
-            size="md"
+            size="sm"
             disabled={!row}
             onClick={() => row && onViewReceipt(row)}
           >
-            <FileText className="size-4" strokeWidth={1.75} aria-hidden />
+            <FileText className="size-3.5" strokeWidth={1.75} aria-hidden />
             Full receipt
           </Button>
           <Button
             type="button"
             variant="primary"
-            size="md"
+            size="sm"
             disabled={!row}
             onClick={() => row && onCopyReceipt(row)}
           >
-            <Copy className="size-4" strokeWidth={2} aria-hidden />
+            <Copy className="size-3.5" strokeWidth={2} aria-hidden />
             Copy receipt no.
           </Button>
         </div>

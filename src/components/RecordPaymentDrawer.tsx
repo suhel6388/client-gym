@@ -1,6 +1,6 @@
 "use client";
 
-import { Loader2, Wallet, X } from "lucide-react";
+import { Loader2, MessageCircle, Wallet, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
@@ -17,6 +17,8 @@ import {
   type ReceiptPayload,
   type ReceiptWhatsAppBundle,
 } from "@/lib/receipt-api";
+import { openExternal, preferredWhatsAppUrl } from "@/lib/receipt-share";
+import { pushNotification } from "@/lib/notification-events";
 import type { SubscriptionRow } from "@/lib/membership-view";
 import { useToast } from "./providers/ToastProvider";
 import { ReceiptModal } from "./receipts/ReceiptModal";
@@ -60,6 +62,7 @@ export function RecordPaymentDrawer({
   const [paymentMode, setPaymentMode] = useState<PaymentModeDto>("CASH");
   const [paymentDate, setPaymentDate] = useState(todayIso());
   const [reference, setReference] = useState("");
+  const [autoWhatsApp, setAutoWhatsApp] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [serverError, setServerError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -153,6 +156,21 @@ export function RecordPaymentDrawer({
             }),
           },
         );
+
+        pushNotification(
+          "payment_recorded",
+          "Payment recorded",
+          `${formatCurrency(value)} received from ${row.memberName}. Receipt ${bundle.receipt?.receiptNumber ?? "issued"}.`,
+        );
+
+        if (autoWhatsApp && (bundle.whatsapp?.url || bundle.receipt)) {
+          const waUrl = preferredWhatsAppUrl(bundle.receipt, bundle.whatsapp?.url);
+          if (waUrl) {
+            setTimeout(() => {
+              openExternal(waUrl);
+            }, 100);
+          }
+        }
 
         if (bundle.receipt || bundle.receiptError) {
           setReceipt(bundle.receipt);
@@ -327,6 +345,27 @@ export function RecordPaymentDrawer({
                 onChange={(event) => setReference(event.target.value)}
                 placeholder="Receipt / transaction reference"
               />
+            </div>
+
+            {/* Auto-redirect WhatsApp Option */}
+            <div className="rounded-xl border border-line bg-card-hover/30 p-3.5">
+              <label className="flex cursor-pointer items-start gap-3">
+                <input
+                  type="checkbox"
+                  checked={autoWhatsApp}
+                  onChange={(e) => setAutoWhatsApp(e.target.checked)}
+                  className="mt-0.5 size-4 rounded border-line-strong text-gold accent-gold focus:ring-gold"
+                />
+                <div className="min-w-0 flex-1 select-none text-xs">
+                  <span className="flex items-center gap-1.5 font-medium text-ink">
+                    <MessageCircle className="size-3.5 text-[#25D366]" strokeWidth={2} aria-hidden />
+                    Auto-generate receipt & redirect to WhatsApp
+                  </span>
+                  <p className="mt-0.5 text-[11px] text-faint">
+                    Sends the auto-generated receipt link directly to the member on WhatsApp.
+                  </p>
+                </div>
+              </label>
             </div>
           </div>
 

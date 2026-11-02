@@ -30,6 +30,7 @@ import {
   openCreateMember,
   openEditMember,
 } from "@/lib/events";
+import { pushNotification } from "@/lib/notification-events";
 import { formatShortDate } from "@/lib/format";
 import {
   archiveMember,
@@ -269,6 +270,11 @@ export function MembersPage() {
         });
         setArchiveTarget(null);
         setViewMember((current) => (current?.id === target.id ? null : current));
+        pushNotification(
+          "member_archived",
+          "Member archived",
+          `${target.name} (${target.memberCode}) was removed from the roster.`,
+        );
         emitMemberArchived(target.id);
       } catch {
         // The toast already explains the failure; keep the dialog open to retry.

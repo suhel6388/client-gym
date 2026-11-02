@@ -16,6 +16,7 @@ import { formatCurrencyInr, formatLongDate, formatNumber } from "@/lib/format";
 import { todayKey } from "@/lib/date-window";
 import { paiseToAmount } from "@/lib/members-api";
 import { deleteExpense, listExpenses, type ExpenseDto } from "@/lib/api";
+import { pushNotification } from "@/lib/notification-events";
 import {
   EXPENSE_CATEGORIES,
   EXPENSE_PERIODS,
@@ -290,6 +291,11 @@ export function ExpensesPage() {
             caught instanceof ApiError ? caught.message : "Please try again.",
         }),
       });
+      pushNotification(
+        "expense_deleted",
+        "Expense deleted",
+        `"${deleteTarget.title}" was removed from the books.`,
+      );
       setDeleteTarget(null);
       setDetails(null);
       await load("refresh");

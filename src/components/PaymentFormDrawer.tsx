@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, CreditCard, Loader2, Search, Wallet, X } from "lucide-react";
+import { Check, CreditCard, Loader2, MessageCircle, Receipt, Search, Wallet, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
@@ -19,6 +19,8 @@ import {
   type ReceiptPayload,
   type ReceiptWhatsAppBundle,
 } from "@/lib/receipt-api";
+import { openExternal, preferredWhatsAppUrl } from "@/lib/receipt-share";
+import { pushNotification } from "@/lib/notification-events";
 import { statusTone } from "@/lib/member-ui";
 import { useToast } from "./providers/ToastProvider";
 import { ReceiptModal } from "./receipts/ReceiptModal";
@@ -54,6 +56,7 @@ export function PaymentFormDrawer({
   const [paymentMode, setPaymentMode] = useState<PaymentModeDto>("CASH");
   const [paymentDate, setPaymentDate] = useState(todayIso());
   const [reference, setReference] = useState("");
+  const [autoWhatsApp, setAutoWhatsApp] = useState(true);
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [serverError, setServerError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -106,10 +109,10 @@ export function PaymentFormDrawer({
     const list = !term
       ? members
       : members.filter((member) =>
-          `${member.name} ${member.memberCode} ${member.phone}`
-            .toLowerCase()
-            .includes(term),
-        );
+        `${member.name} ${member.memberCode} ${member.phone}`
+          .toLowerCase()
+          .includes(term),
+      );
     return list.slice(0, 8);
   }, [members, memberQuery]);
 
@@ -160,12 +163,10 @@ export function PaymentFormDrawer({
             success: (result) => ({
               title: "Payment recorded",
               description: result.receipt
-                ? `${formatCurrency(value)} received from ${
-                    selectedMember?.name ?? "member"
-                  }. Receipt ${result.receipt.receiptNumber} is ready.`
-                : `${formatCurrency(value)} received from ${
-                    selectedMember?.name ?? "member"
-                  }.`,
+                ? `${formatCurrency(value)} received from ${selectedMember?.name ?? "member"
+                }. Receipt ${result.receipt.receiptNumber} is ready.`
+                : `${formatCurrency(value)} received from ${selectedMember?.name ?? "member"
+                }.`,
             }),
             error: (caught) => ({
               title: "Couldn't record payment",
@@ -174,6 +175,21 @@ export function PaymentFormDrawer({
             }),
           },
         );
+
+        pushNotification(
+          "payment_recorded",
+          "Payment recorded",
+          `${formatCurrency(value)} collected from ${selectedMember?.name ?? "member"}. Receipt ${bundle.receipt?.receiptNumber ?? "issued"}.`,
+        );
+
+        if (autoWhatsApp && (bundle.whatsapp?.url || bundle.receipt)) {
+          const waUrl = preferredWhatsAppUrl(bundle.receipt, bundle.whatsapp?.url);
+          if (waUrl) {
+            setTimeout(() => {
+              openExternal(waUrl);
+            }, 100);
+          }
+        }
 
         if (bundle.receipt || bundle.receiptError) {
           setReceipt(bundle.receipt);
@@ -451,6 +467,27 @@ export function PaymentFormDrawer({
               <CreditCard className="size-3.5 text-faint" strokeWidth={1.75} aria-hidden />
               Success
             </span>
+          </div>
+
+          {/* Auto Receipt & WhatsApp Option */}
+          <div className="mt-5 rounded-xl border border-line bg-card-hover/30 p-3.5">
+            <label className="flex cursor-pointer items-start gap-3">
+              <input
+                type="checkbox"
+                checked={autoWhatsApp}
+                onChange={(e) => setAutoWhatsApp(e.target.checked)}
+                className="mt-0.5 size-4 rounded border-line-strong text-gold accent-gold focus:ring-gold"
+              />
+              <div className="min-w-0 flex-1 select-none text-xs">
+                <span className="flex items-center gap-1.5 font-medium text-ink">
+                  <MessageCircle className="size-3.5 text-[#25D366]" strokeWidth={2} aria-hidden />
+                  Auto-generate receipt & redirect to WhatsApp
+                </span>
+                <p className="mt-0.5 text-[11px] text-faint">
+                  Automatically generates receipt and opens WhatsApp chat with receipt link for the member.
+                </p>
+              </div>
+            </label>
           </div>
 
           <p className="mt-4 text-[11px] leading-relaxed text-faint">

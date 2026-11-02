@@ -82,6 +82,12 @@ type ReceiptPreviewProps = {
   flat?: boolean;
   /** Marks this sheet as the print target (only one may exist at a time). */
   printable?: boolean;
+  /** Scale / size adjustment */
+  scale?: "compact" | "standard" | "large";
+  /** Optional custom title, e.g. "Official Fee Receipt" */
+  customTitle?: string;
+  /** Optional custom category text, e.g. "Membership payment" */
+  customCategory?: string;
 };
 
 /**
@@ -94,7 +100,16 @@ export function ReceiptPreview({
   className,
   flat,
   printable = false,
+  scale = "standard",
+  customTitle,
+  customCategory,
 }: ReceiptPreviewProps) {
+  const [activeScale, setActiveScale] = useState(scale);
+
+  useEffect(() => {
+    setActiveScale(scale);
+  }, [scale]);
+
   const hasDiscount = receipt.fees.discountPaise > 0;
   const hasPrior = receipt.fees.priorPaidPaise > 0;
   const hasBalance = receipt.fees.balancePaise > 0;
@@ -106,13 +121,20 @@ export function ReceiptPreview({
     [receipt.gym.phone, receipt.gym.email, receipt.gym.website],
   );
 
+  const scaleClasses = {
+    compact: "max-w-[620px] text-[90%]",
+    standard: "max-w-[760px] text-[100%]",
+    large: "max-w-[860px] text-[110%]",
+  }[activeScale];
+
   return (
     <div className={cn("w-full overflow-x-auto", className)}>
       <article
         id={printable ? "receipt-print-root" : undefined}
         aria-label={`Payment receipt ${receipt.receiptNumber}`}
         className={cn(
-          "receipt-sheet mx-auto w-full min-w-[560px] max-w-[760px] overflow-hidden bg-[#fcf8ee] text-[#1b1a17]",
+          "receipt-sheet mx-auto w-full min-w-[540px] overflow-hidden bg-[#fcf8ee] text-[#1b1a17] transition-all",
+          scaleClasses,
           flat ? "rounded-lg" : "rounded-xl shadow-[0_24px_60px_-24px_rgba(0,0,0,0.55)]",
         )}
       >
@@ -166,10 +188,10 @@ export function ReceiptPreview({
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
               <p className="text-[9.5px] font-bold uppercase tracking-[0.28em] text-[#977327]">
-                Membership payment
+                {customCategory || "Membership payment"}
               </p>
               <h3 className="mt-1 font-serif text-[28px] leading-none font-semibold tracking-tight text-[#171512]">
-                Payment Receipt
+                {customTitle || "Payment Receipt"}
               </h3>
             </div>
             <div className="text-right">

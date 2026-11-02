@@ -70,7 +70,21 @@ export function ReceiptModal({
   );
   const [pdfError, setPdfError] = useState<string | null>(null);
   const [pdfReload, setPdfReload] = useState(0);
+  const [modalScale, setModalScale] = useState<"compact" | "standard" | "large">("standard");
+  const [modalTitle, setModalTitle] = useState<string | undefined>(undefined);
+  const [modalCategory, setModalCategory] = useState<string | undefined>(undefined);
   const pdfUrlRef = useRef<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedScale = localStorage.getItem("gym_receipt_scale") as "compact" | "standard" | "large" | null;
+      if (savedScale) setModalScale(savedScale);
+      const savedTitle = localStorage.getItem("gym_receipt_title");
+      if (savedTitle) setModalTitle(savedTitle);
+      const savedCategory = localStorage.getItem("gym_receipt_category");
+      if (savedCategory) setModalCategory(savedCategory);
+    }
+  }, [open]);
 
   const paymentId = receipt?.id ?? null;
 
@@ -335,7 +349,13 @@ export function ReceiptModal({
 
         <div className="scroll-thin min-h-0 flex-1 overflow-y-auto px-3 py-4 sm:px-5">
           {view === "design" ? (
-            <ReceiptPreview receipt={receipt} printable />
+            <ReceiptPreview
+              receipt={receipt}
+              printable
+              scale={modalScale}
+              customTitle={modalTitle}
+              customCategory={modalCategory}
+            />
           ) : (
             <div className="mx-auto w-full max-w-[900px]">
               {pdfState === "loading" && (

@@ -315,15 +315,22 @@ export function PaymentsTable({
               </div>
             </dl>
 
-            <div className="mt-3 flex items-center justify-between gap-2 border-t border-line/50 pt-3">
-              <Button variant="secondary" size="sm" onClick={() => onView(row)}>
+            <div className="relative z-10 mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-line/50 pt-3">
+              <Button
+                variant="secondary"
+                size="sm"
+                className="shrink-0"
+                onClick={() => onView(row)}
+              >
                 <Eye className="size-3.5" strokeWidth={1.75} aria-hidden />
                 View receipt
               </Button>
-              <ActionMenu
-                label={`Actions for ${row.receiptNumber}`}
-                items={actionItems(row, handlers)}
-              />
+              <div className="shrink-0">
+                <ActionMenu
+                  label={`Actions for ${row.receiptNumber}`}
+                  items={actionItems(row, handlers)}
+                />
+              </div>
             </div>
           </li>
         ))}

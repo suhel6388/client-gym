@@ -2,6 +2,9 @@
 
 import {
   Bell,
+  BellOff,
+  Check,
+  CheckCheck,
   CheckCircle2,
   ChevronDown,
   ChevronRight,
@@ -14,16 +17,33 @@ import {
   PanelLeftOpen,
   Plus,
   Settings,
+  Trash2,
   TriangleAlert,
   User,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
-import { useRef, useState } from "react";
-import { notifications } from "@/lib/data";
+import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { openCreateMember } from "@/lib/events";
 import { resolveNavLabel } from "@/lib/nav";
 import { cn } from "@/lib/cn";
 import { useClickOutside } from "@/hooks/use-click-outside";
+import {
+  clearNotifications,
+  getNotifications,
+  getUnreadCount,
+  markAllAsRead,
+  markAsRead,
+  notificationMeta,
+  subscribeNotifications,
+  type NotificationItem,
+} from "@/lib/notification-events";
+import {
+  isSoundEnabled,
+  preloadNotificationSound,
+  setSoundEnabled,
+} from "@/lib/notification-sound";
 import { Avatar } from "./ui/Avatar";
 import { Button } from "./ui/Button";
 import { KBarSearchButton, KBarSearchButtonMobile } from "./KBarSearchButton";
@@ -37,17 +57,16 @@ function initialsFrom(name: string): string {
   return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
 }
 
-const notificationIcon = {
-  success: CheckCircle2,
-  warning: TriangleAlert,
-  danger: CircleAlert,
-} as const;
-
-const notificationTone = {
-  success: "text-success",
-  warning: "text-warning",
-  danger: "text-danger",
-} as const;
+function timeAgo(ts: number): string {
+  const seconds = Math.floor((Date.now() - ts) / 1000);
+  if (seconds < 60) return "Just now";
+  const minutes = Math.floor(seconds / 60);
+  if (minutes < 60) return `${minutes}m ago`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `${hours}h ago`;
+  const days = Math.floor(hours / 24);
+  return `${days}d ago`;
+}
 
 type TopNavbarProps = {
   onOpenMobile: () => void;
@@ -73,12 +92,35 @@ export function TopNavbar({
 
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [soundOn, setSoundOn] = useState(true);
 
   const notifRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
 
   useClickOutside(notifRef, () => setNotifOpen(false));
   useClickOutside(profileRef, () => setProfileOpen(false));
+
+  const notifItems = useSyncExternalStore(
+    subscribeNotifications,
+    getNotifications,
+    () => [] as NotificationItem[],
+  );
+  const unreadCount = useSyncExternalStore(
+    subscribeNotifications,
+    getUnreadCount,
+    () => 0,
+  );
+
+  useEffect(() => {
+    setSoundOn(isSoundEnabled());
+    preloadNotificationSound();
+  }, []);
+
+  const toggleSound = useCallback(() => {
+    const next = !soundOn;
+    setSoundOn(next);
+    setSoundEnabled(next);
+  }, [soundOn]);
 
   return (
     <header id="top-navbar" className="sticky top-0 z-30 border-b border-line bg-nav/95 backdrop-blur supports-[backdrop-filter]:bg-nav/85">
@@ -143,7 +185,7 @@ export function TopNavbar({
         <div ref={notifRef} className="relative">
           <button
             type="button"
-            aria-label={`Notifications (${notifications.length} unread)`}
+            aria-label={`Notifications (${unreadCount} unread)`}
             aria-expanded={notifOpen}
             onClick={() => setNotifOpen((open) => !open)}
             className={cn(
@@ -152,59 +194,118 @@ export function TopNavbar({
             )}
           >
             <Bell className="size-4.5" strokeWidth={1.75} aria-hidden />
-            <span
-              aria-hidden
-              className="absolute right-2 top-2 size-2 rounded-full bg-danger ring-2 ring-nav"
-            />
+            {unreadCount > 0 && (
+              <span
+                className="absolute -right-1 -top-1 flex size-[18px] items-center justify-center rounded-full bg-gold text-[9px] font-bold text-black ring-2 ring-nav"
+              >
+                {unreadCount > 9 ? "9+" : unreadCount}
+              </span>
+            )}
           </button>
 
           {notifOpen && (
-            <div className="absolute right-0 top-11 z-40 w-[min(20rem,calc(100vw-1.5rem))] animate-pop overflow-hidden rounded-xl border border-line-strong bg-elevated shadow-pop">
+            <div className="absolute right-0 top-11 z-40 w-[min(24rem,calc(100vw-1.5rem))] animate-pop overflow-hidden rounded-xl border border-line-strong bg-elevated shadow-pop">
               <div className="flex items-center justify-between border-b border-line/60 px-4 py-3">
-                <p className="text-[13px] font-semibold text-ink">Notifications</p>
-                <span className="rounded-full bg-gold/12 px-2 py-0.5 text-[10px] font-semibold tabular-nums text-gold ring-1 ring-inset ring-gold/20">
-                  {notifications.length} new
-                </span>
+                <div className="flex items-center gap-2">
+                  <p className="text-[13px] font-semibold text-ink">Notifications</p>
+                  {unreadCount > 0 && (
+                    <span className="rounded-full bg-gold/15 px-2 py-0.5 text-[10px] font-bold tabular-nums text-gold ring-1 ring-inset ring-gold/20">
+                      {unreadCount} new
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={toggleSound}
+                    aria-label={soundOn ? "Notification sound enabled" : "Notification sound muted"}
+                    title={soundOn ? "Sound enabled (Click to mute)" : "Sound muted (Click to enable)"}
+                    className="inline-flex size-7 items-center justify-center rounded-md text-faint transition-colors hover:bg-card-hover hover:text-ink"
+                  >
+                    {soundOn ? (
+                      <Volume2 className="size-3.5 text-gold" strokeWidth={1.75} aria-hidden />
+                    ) : (
+                      <VolumeX className="size-3.5" strokeWidth={1.75} aria-hidden />
+                    )}
+                  </button>
+                  {unreadCount > 0 && (
+                    <button
+                      type="button"
+                      onClick={markAllAsRead}
+                      title="Mark all as read"
+                      className="inline-flex size-7 items-center justify-center rounded-md text-faint transition-colors hover:bg-card-hover hover:text-ink"
+                    >
+                      <CheckCheck className="size-3.5" strokeWidth={1.75} aria-hidden />
+                    </button>
+                  )}
+                  {notifItems.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={clearNotifications}
+                      title="Clear notifications"
+                      className="inline-flex size-7 items-center justify-center rounded-md text-faint transition-colors hover:bg-card-hover hover:text-danger"
+                    >
+                      <Trash2 className="size-3.5" strokeWidth={1.75} aria-hidden />
+                    </button>
+                  )}
+                </div>
               </div>
-              <ul className="scroll-thin max-h-80 overflow-y-auto">
-                {notifications.map((item) => {
-                  const Icon = notificationIcon[item.tone];
-                  return (
-                    <li key={item.id}>
-                      <button
-                        type="button"
-                        className="flex w-full gap-3 px-4 py-3 text-left transition-colors hover:bg-card-hover"
-                      >
-                        <span
-                          className={cn(
-                            "mt-0.5 inline-flex size-8 shrink-0 items-center justify-center rounded-lg bg-card ring-1 ring-inset ring-line",
-                            notificationTone[item.tone],
-                          )}
-                        >
-                          <Icon className="size-4" strokeWidth={1.75} aria-hidden />
-                        </span>
-                        <span className="min-w-0 flex-1">
-                          <span className="block truncate text-[13px] font-medium text-ink">
-                            {item.title}
-                          </span>
-                          <span className="mt-0.5 block truncate text-xs text-subtle">
-                            {item.body}
-                          </span>
-                          <span className="mt-1 block text-[11px] tabular-nums text-faint">
-                            {item.time}
-                          </span>
-                        </span>
-                      </button>
-                    </li>
-                  );
-                })}
-              </ul>
-              <button
-                type="button"
-                className="block w-full border-t border-line/60 px-4 py-2.5 text-center text-xs font-medium text-gold transition-colors hover:bg-card-hover"
-              >
-                View all notifications
-              </button>
+
+              <div className="scroll-thin max-h-80 overflow-y-auto">
+                {notifItems.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-10 text-center">
+                    <BellOff className="size-7 text-faint/50" strokeWidth={1.5} aria-hidden />
+                    <p className="mt-2 text-xs font-medium text-subtle">No notifications yet</p>
+                    <p className="mt-0.5 text-[11px] text-faint">
+                      Transactions will show here in real time.
+                    </p>
+                  </div>
+                ) : (
+                  <ul className="divide-y divide-line/40">
+                    {notifItems.map((item) => {
+                      const meta = notificationMeta(item.type);
+                      return (
+                        <li key={item.id}>
+                          <button
+                            type="button"
+                            onClick={() => markAsRead(item.id)}
+                            className={cn(
+                              "flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-card-hover",
+                              !item.read && "bg-gold/[0.04]",
+                            )}
+                          >
+                            <span
+                              className={cn(
+                                "mt-0.5 inline-flex size-7 shrink-0 items-center justify-center rounded-lg text-[9px] font-bold uppercase tracking-wider",
+                                meta.bgColor,
+                                meta.color,
+                              )}
+                            >
+                              {meta.label.slice(0, 3)}
+                            </span>
+                            <span className="min-w-0 flex-1">
+                              <span className="flex items-center justify-between gap-1">
+                                <span className="block truncate text-[13px] font-medium text-ink">
+                                  {item.title}
+                                </span>
+                                {!item.read && (
+                                  <span className="size-1.5 shrink-0 rounded-full bg-gold" />
+                                )}
+                              </span>
+                              <span className="mt-0.5 block text-xs leading-relaxed text-subtle">
+                                {item.description}
+                              </span>
+                              <span className="mt-1 block text-[10.5px] tabular-nums text-faint">
+                                {timeAgo(item.timestamp)}
+                              </span>
+                            </span>
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
+              </div>
             </div>
           )}
         </div>

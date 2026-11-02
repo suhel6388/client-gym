@@ -9,6 +9,7 @@ import {
   emitMemberCreated,
   emitMemberUpdated,
 } from "@/lib/events";
+import { pushNotification } from "@/lib/notification-events";
 import {
   emptyMemberForm,
   memberToFormValues,
@@ -208,8 +209,20 @@ export function AddMemberDrawer({
         }
 
         if (mode === "edit") {
+          pushNotification(
+            "member_updated",
+            "Member updated",
+            `${result.member.name}'s details were updated.`,
+          );
           emitMemberUpdated(result.member);
         } else {
+          pushNotification(
+            "member_added",
+            "Member added",
+            result.receipt
+              ? `${result.member.name} (${result.member.memberCode}) was added with receipt ${result.receipt.receiptNumber}.`
+              : `${result.member.name} (${result.member.memberCode}) was added successfully.`,
+          );
           emitMemberCreated(result.member);
         }
         onSaved?.(result.member);

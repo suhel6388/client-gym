@@ -13,6 +13,7 @@ import {
   updateExpense,
   type ExpenseInput,
 } from "@/lib/api";
+import { pushNotification } from "@/lib/notification-events";
 import { useToast } from "./providers/ToastProvider";
 import { Button } from "./ui/Button";
 import { Input } from "./ui/Input";
@@ -139,6 +140,18 @@ export function ExpenseFormDrawer({
                 caught instanceof ApiError ? caught.message : "Please try again.",
             }),
           });
+          pushNotification(
+            "expense_added",
+            "Expense added",
+            `"${input.title}" (${formatCurrencyInr(amountValue)}) was recorded in ${input.category}.`,
+          );
+        }
+        if (isEditing) {
+          pushNotification(
+            "expense_updated",
+            "Expense updated",
+            `"${input.title}" (${formatCurrencyInr(amountValue)}) was updated.`,
+          );
         }
         onSaved();
         onOpenChange(false);

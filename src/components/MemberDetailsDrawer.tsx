@@ -4,20 +4,37 @@ import {
   Archive,
   CalendarDays,
   CreditCard,
+  Hash,
+  Loader2,
   Mail,
   MapPin,
   MessageCircle,
   Pencil,
   Phone,
+  Receipt,
   ShieldAlert,
+  Wallet,
   X,
 } from "lucide-react";
-import type { ReactNode } from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useWhatsAppRenewalTemplate } from "@/hooks/use-whatsapp-template";
 import { cn } from "@/lib/cn";
-import { formatCurrency, formatLongDate } from "@/lib/format";
-import { getInitials, paiseToAmount, toMemberRow, type MemberDto } from "@/lib/members-api";
+import { formatCurrency, formatLongDate, formatShortDate } from "@/lib/format";
+import {
+  getInitials,
+  listPayments,
+  paiseToAmount,
+  toMemberRow,
+  type MemberDto,
+  type PaymentDto,
+} from "@/lib/members-api";
 import { statusTone } from "@/lib/member-ui";
+import {
+  paymentModeLabel,
+  paymentModeTone,
+  paymentStatusLabel,
+  paymentStatusTone,
+} from "@/lib/payments-view";
 import { buildWhatsAppRenewalUrl } from "@/lib/whatsapp";
 import { Avatar } from "./ui/Avatar";
 import { Badge } from "./ui/Badge";
@@ -75,16 +92,54 @@ export function MemberDetailsDrawer({
   const reminderUrl =
     row?.status === "Expired" && row.nextDue
       ? buildWhatsAppRenewalUrl(
-          {
-            name: row.name,
-            phone: row.phone,
-            expiryDate: row.nextDue,
-            planName: row.plan,
-            memberCode: row.code,
-          },
-          whatsappTemplate,
-        )
+        {
+          name: row.name,
+          phone: row.phone,
+          expiryDate: row.nextDue,
+          planName: row.plan,
+          memberCode: row.code,
+        },
+        whatsappTemplate,
+      )
       : null;
+
+  // Payment history state
+  const [payments, setPayments] = useState<PaymentDto[]>([]);
+  const [paymentsLoading, setPaymentsLoading] = useState(false);
+  const [paymentsError, setPaymentsError] = useState<string | null>(null);
+
+  const loadPayments = useCallback(async (memberId: string) => {
+    setPaymentsLoading(true);
+    setPaymentsError(null);
+    try {
+      const all = await listPayments();
+      const memberPayments = all
+        .filter((p) => p.memberId === memberId)
+        .sort(
+          (a, b) =>
+            new Date(b.paymentDate ?? b.paidAt).getTime() -
+            new Date(a.paymentDate ?? a.paidAt).getTime(),
+        );
+      setPayments(memberPayments);
+    } catch {
+      setPaymentsError("Couldn't load payment history.");
+    } finally {
+      setPaymentsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (open && member) {
+      loadPayments(member.id);
+    } else {
+      setPayments([]);
+      setPaymentsError(null);
+    }
+  }, [open, member, loadPayments]);
+
+  const totalCollectedPaise = payments
+    .filter((p) => (p.status ?? "SUCCESS").toUpperCase() === "SUCCESS")
+    .reduce((sum, p) => sum + (p.amount || 0), 0);
 
   return (
     <>
@@ -124,7 +179,7 @@ export function MemberDetailsDrawer({
           <div className="scroll-thin flex-1 overflow-y-auto px-6 py-6">
             {/* Identity */}
             <div className="flex items-center gap-4">
-              <Avatar initials={getInitials(member.name)} className="size-14 text-base" />
+              <Avatar initials={getInitials(member.name)} className="size-14 text-base shrink-0" />
               <div className="min-w-0">
                 <p className="truncate text-lg font-semibold text-ink">{member.name}</p>
                 <div className="mt-1 flex items-center gap-2">
@@ -149,7 +204,7 @@ export function MemberDetailsDrawer({
                 </div>
                 <div className="text-right">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-faint">
-                    Paid
+                    Fee
                   </p>
                   <p className="mt-1 text-sm font-bold tabular-nums text-gold">
                     {formatCurrency(paiseToAmount(feePaise))}
@@ -169,6 +224,96 @@ export function MemberDetailsDrawer({
                     {membership ? formatLongDate(membership.endDate.slice(0, 10)) : "—"}
                   </p>
                 </div>
+              </div>
+            </div>
+
+            {/* Payment History Section */}
+            <div className="mt-6">
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex size-6 items-center justify-center rounded-lg bg-gold/10 text-gold ring-1 ring-inset ring-gold/20">
+                    <Receipt className="size-3.5" strokeWidth={1.75} aria-hidden />
+                  </span>
+                  <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-faint">
+                    Payment History
+                  </h3>
+                </div>
+                {payments.length > 0 && (
+                  <span className="text-[11px] font-semibold tabular-nums text-gold">
+                    Total: {formatCurrency(paiseToAmount(totalCollectedPaise))}
+                  </span>
+                )}
+              </div>
+
+              <div className="mt-3">
+                {paymentsLoading ? (
+                  <div className="flex items-center justify-center gap-2 rounded-xl border border-line/60 bg-card-hover/20 py-6 text-center">
+                    <Loader2 className="size-4 animate-spin text-gold" strokeWidth={2} aria-hidden />
+                    <span className="text-xs text-subtle">Loading payment history…</span>
+                  </div>
+                ) : paymentsError ? (
+                  <div className="rounded-xl border border-danger/30 bg-danger/5 p-3.5 text-center">
+                    <p className="text-xs text-danger">{paymentsError}</p>
+                    <button
+                      type="button"
+                      onClick={() => member && loadPayments(member.id)}
+                      className="mt-2 text-xs font-medium text-gold transition-colors hover:text-gold-bright"
+                    >
+                      Try again
+                    </button>
+                  </div>
+                ) : payments.length === 0 ? (
+                  <div className="rounded-xl border border-line/60 bg-card-hover/20 p-5 text-center">
+                    <Wallet className="mx-auto size-7 text-faint/50" strokeWidth={1.5} aria-hidden />
+                    <p className="mt-2 text-xs font-medium text-subtle">No payment records found</p>
+                    <p className="mt-0.5 text-[11px] text-faint">
+                      Payments recorded for this member will appear here.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-2.5">
+                    {payments.map((p) => {
+                      const at = p.paymentDate ?? p.paidAt;
+                      const dateKey = at ? new Date(at).toISOString().slice(0, 10) : "";
+                      return (
+                        <div
+                          key={p.id}
+                          className="rounded-xl border border-line/70 bg-card-hover/30 p-3 transition-colors hover:bg-card-hover/60"
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <p className="text-sm font-bold tabular-nums text-ink">
+                                {formatCurrency(paiseToAmount(p.amount))}
+                              </p>
+                              <p className="mt-0.5 font-mono text-[11px] text-gold">
+                                {p.receiptNumber || "RCPT-Pending"}
+                              </p>
+                            </div>
+                            <div className="flex flex-col items-end gap-1">
+                              <Badge tone={paymentStatusTone(p.status ?? "SUCCESS")} dot>
+                                {paymentStatusLabel(p.status ?? "SUCCESS")}
+                              </Badge>
+                              <span className="text-[11px] text-faint">
+                                {dateKey ? formatShortDate(dateKey) : "—"}
+                              </span>
+                            </div>
+                          </div>
+
+                          <div className="mt-2.5 flex items-center justify-between gap-2 border-t border-line/50 pt-2 text-[11px]">
+                            <Badge tone={paymentModeTone(p.paymentMode)}>
+                              {paymentModeLabel(p.paymentMode)}
+                            </Badge>
+                            {p.reference && (
+                              <span className="truncate font-mono text-faint" title={p.reference}>
+                                Ref: {p.reference}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </div>
             </div>
 
