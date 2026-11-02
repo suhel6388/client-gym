@@ -320,6 +320,8 @@ export function PlanFormDrawer({
                       setField("durationUnit", event.target.value as DurationUnit)
                     }
                   >
+                    <option value="months">Daily</option>
+                    <option value="years">Weekly</option>
                     <option value="months">Months</option>
                     <option value="years">Years</option>
                   </Select>
