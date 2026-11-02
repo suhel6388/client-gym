@@ -23,6 +23,17 @@ type SidebarProps = {
   onCloseMobile: () => void;
 };
 
+function isItemActive(pathname: string | null, href: string): boolean {
+  if (!pathname) return false;
+  const cleanPath = pathname.length > 1 && pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
+  const cleanHref = href.length > 1 && href.endsWith("/") ? href.slice(0, -1) : href;
+
+  if (cleanHref === "/dashboard") {
+    return cleanPath === "/dashboard" || cleanPath === "/";
+  }
+  return cleanPath === cleanHref || cleanPath.startsWith(`${cleanHref}/`);
+}
+
 export function Sidebar({
   collapsed,
   onToggleCollapse,
@@ -146,7 +157,7 @@ export function Sidebar({
                 )}
                 <ul className="space-y-1">
                   {group.items.map((item) => {
-                    const active = pathname === item.href;
+                    const active = isItemActive(pathname, item.href);
                     const Icon = item.icon;
                     return (
                       <li key={item.label}>
@@ -156,23 +167,30 @@ export function Sidebar({
                           onClick={onCloseMobile}
                           aria-current={active ? "page" : undefined}
                           className={cn(
-                            "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium transition-colors duration-150",
+                            "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-all duration-150",
                             active
-                              ? "bg-gold/10 text-gold"
+                              ? "bg-gradient-to-r from-gold/20 via-gold/12 to-gold/5 text-gold font-semibold shadow-sm ring-1 ring-gold/30 dark:ring-gold/35"
                               : "text-subtle hover:bg-card hover:text-ink",
-                            collapsed && "lg:justify-center lg:px-0",
+                            collapsed && "lg:justify-center lg:px-0 lg:py-2.5 lg:w-11 lg:h-11 lg:mx-auto",
+                            collapsed && active && "lg:bg-gold/20 lg:ring-1 lg:ring-gold/40 lg:text-gold lg:shadow-md",
                           )}
                         >
                           <span
                             aria-hidden
                             className={cn(
-                              "absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r-full bg-gold transition-opacity duration-150",
-                              active ? "opacity-100" : "opacity-0",
+                              "absolute left-0 top-1/2 -translate-y-1/2 h-6 w-1 rounded-r-md bg-gold transition-all duration-200 shadow-[0_0_8px_rgba(212,175,55,0.7)]",
+                              active ? "opacity-100 scale-100" : "opacity-0 scale-75",
+                              collapsed && "lg:hidden",
                             )}
                           />
                           <Icon
-                            className="size-4.5 shrink-0"
-                            strokeWidth={1.75}
+                            className={cn(
+                              "size-4.5 shrink-0 transition-colors",
+                              active
+                                ? "text-gold drop-shadow-[0_0_6px_rgba(212,175,55,0.4)]"
+                                : "text-subtle group-hover:text-ink",
+                            )}
+                            strokeWidth={active ? 2.25 : 1.75}
                             aria-hidden
                           />
                           <span

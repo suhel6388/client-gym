@@ -20,6 +20,7 @@ import { Label } from "@/components/ui/Label";
 import { Textarea } from "@/components/ui/Textarea";
 import { SUPER_ADMIN_PATH } from "@/lib/api";
 import { cn } from "@/lib/cn";
+import { AiAssistantSettingsCard } from "./AiAssistantSettingsCard";
 import {
   DEFAULT_SCHEDULE_CALL_TEMPLATE,
   MAX_SCHEDULE_CALL_TEMPLATE_LENGTH,
@@ -137,6 +138,11 @@ export function PlatformSettingsPage() {
           <CalendarClock className="size-4" strokeWidth={1.75} aria-hidden />
           Schedule calls
         </Link>
+      </div>
+
+      {/* Super Admin AI Assistant Controls */}
+      <div className="mt-6">
+        <AiAssistantSettingsCard />
       </div>
 
       <div className="mt-6 grid gap-5 xl:grid-cols-[minmax(0,1.35fr)_minmax(320px,0.65fr)]">

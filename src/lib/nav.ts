@@ -1,10 +1,12 @@
 import {
+  Bot,
   CalendarCheck,
   ChartColumn,
   CreditCard,
   Dumbbell,
   LayoutDashboard,
   Settings,
+  Sparkles,
   UserCog,
   Users,
   Wallet,
@@ -32,6 +34,13 @@ export const navGroups: NavGroup[] = [
     title: "Overview",
     items: [
       { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+      {
+        label: "AI Gym Assistant",
+        href: "/ai-assistant",
+        icon: Sparkles,
+        badge: "AI",
+        badgeTone: "gold",
+      },
       { label: "Members", href: "/members", icon: Users, badge: "2.8k" },
       { label: "Memberships", href: "/memberships", icon: CreditCard },
       { label: "Attendance", href: "/attendance", icon: CalendarCheck },

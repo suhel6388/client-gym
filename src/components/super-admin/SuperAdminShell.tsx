@@ -163,20 +163,29 @@ export function SuperAdminShell({ children }: { children: ReactNode }) {
                     onClick={() => setMobileOpen(false)}
                     aria-current={active ? "page" : undefined}
                     className={cn(
-                      "group relative flex items-center gap-3 rounded-lg px-3 py-2.5 text-[13px] font-medium transition-colors duration-150",
+                      "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-[13px] font-medium transition-all duration-150",
                       active
-                        ? "bg-gold/10 text-gold"
+                        ? "bg-gradient-to-r from-gold/20 via-gold/12 to-gold/5 text-gold font-semibold shadow-sm ring-1 ring-gold/30 dark:ring-gold/35"
                         : "text-subtle hover:bg-card hover:text-ink",
                     )}
                   >
                     <span
                       aria-hidden
                       className={cn(
-                        "absolute left-0 top-1/2 h-5 w-0.5 -translate-y-1/2 rounded-r-full bg-gold transition-opacity duration-150",
-                        active ? "opacity-100" : "opacity-0",
+                        "absolute left-0 top-1/2 h-6 w-1 -translate-y-1/2 rounded-r-md bg-gold transition-all duration-200 shadow-[0_0_8px_rgba(212,175,55,0.7)]",
+                        active ? "opacity-100 scale-100" : "opacity-0 scale-75",
                       )}
                     />
-                    <Icon className="size-4.5 shrink-0" strokeWidth={1.75} aria-hidden />
+                    <Icon
+                      className={cn(
+                        "size-4.5 shrink-0 transition-colors",
+                        active
+                          ? "text-gold drop-shadow-[0_0_6px_rgba(212,175,55,0.4)]"
+                          : "text-subtle group-hover:text-ink",
+                      )}
+                      strokeWidth={active ? 2.25 : 1.75}
+                      aria-hidden
+                    />
                     <span className="flex-1 truncate">{item.label}</span>
                   </Link>
                 </li>
