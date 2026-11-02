@@ -17,11 +17,6 @@ import {
   type ReceiptPayload,
   type ReceiptWhatsAppBundle,
 } from "@/lib/receipt-api";
-import {
-  closeShareWindow,
-  navigateShareWindow,
-  openShareWindow,
-} from "@/lib/receipt-share";
 import type { SubscriptionRow } from "@/lib/membership-view";
 import { useToast } from "./providers/ToastProvider";
 import { ReceiptModal } from "./receipts/ReceiptModal";
@@ -123,13 +118,10 @@ export function RecordPaymentDrawer({
       setServerError(null);
       setSubmitting(true);
 
-      // Pre-open the share tab during the submit gesture; it is navigated only
-      // after the server confirms the payment.
-      const shareWindow = openShareWindow();
+      // Keep the same key across retries so a timeout cannot double-charge.
       const idempotencyKey =
         idempotencyKeyRef.current ?? newReceiptIdempotencyKey();
       idempotencyKeyRef.current = idempotencyKey;
-      let shareHandled = false;
 
       try {
         const bundle = await toast.promise(
@@ -162,10 +154,6 @@ export function RecordPaymentDrawer({
           },
         );
 
-        const url = bundle.whatsapp?.url ?? null;
-        shareHandled = url ? navigateShareWindow(shareWindow, url) : false;
-        if (!shareHandled) closeShareWindow(shareWindow);
-
         if (bundle.receipt || bundle.receiptError) {
           setReceipt(bundle.receipt);
           setReceiptWhatsApp(bundle.whatsapp);
@@ -181,7 +169,6 @@ export function RecordPaymentDrawer({
           caught instanceof ApiError ? caught.message : "Please try again.",
         );
       } finally {
-        if (shareWindow && !shareHandled) closeShareWindow(shareWindow);
         setSubmitting(false);
       }
     },

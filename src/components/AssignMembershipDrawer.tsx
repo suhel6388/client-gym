@@ -1,7 +1,7 @@
 "use client";
 
 import { CalendarPlus, Check, Loader2, Repeat, Search, X } from "lucide-react";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
 import { formatCurrency } from "@/lib/format";
@@ -13,14 +13,20 @@ import {
   addMonths,
   amountToPaise,
   createMembership,
-  createPayment,
   paiseToAmount,
   type MemberDto,
   type PaymentModeDto,
   type PlanDto,
 } from "@/lib/members-api";
+import {
+  createPaymentWithReceipt,
+  newReceiptIdempotencyKey,
+  type ReceiptPayload,
+  type ReceiptWhatsAppBundle,
+} from "@/lib/receipt-api";
 import type { SubscriptionRow } from "@/lib/membership-view";
 import { useToast } from "./providers/ToastProvider";
+import { ReceiptModal } from "./receipts/ReceiptModal";
 import { Avatar } from "./ui/Avatar";
 import { Button } from "./ui/Button";
 import { Input } from "./ui/Input";
@@ -77,6 +83,13 @@ export function AssignMembershipDrawer({
   const [serverError, setServerError] = useState<string | null>(null);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  const [receipt, setReceipt] = useState<ReceiptPayload | null>(null);
+  const [receiptWhatsApp, setReceiptWhatsApp] =
+    useState<ReceiptWhatsAppBundle | null>(null);
+  const [receiptNotice, setReceiptNotice] = useState<string | null>(null);
+  const [receiptOpen, setReceiptOpen] = useState(false);
+  const idempotencyKeyRef = useRef<string | null>(null);
+
   // Reset the form each time the drawer opens.
   useEffect(() => {
     if (!open) return;
@@ -106,6 +119,7 @@ export function AssignMembershipDrawer({
     setSubmitting(false);
     setServerError(null);
     setErrors({});
+    idempotencyKeyRef.current = null;
   }, [open, renewal, plans, initialPlanId]);
 
   useEffect(() => {
@@ -189,23 +203,44 @@ export function AssignMembershipDrawer({
       setServerError(null);
       setSubmitting(true);
       try {
-        await toast.promise(
+        const { bundle, paymentError } = await toast.promise(
           (async () => {
-            await createMembership({
+            const membership = await createMembership({
               memberId,
               planId,
               startDate,
               discountPaise: Math.max(0, Math.round((Number(discount) || 0) * 100)),
             });
-            if (collectPayment) {
-              await createPayment({
+            if (!collectPayment) return { bundle: null, paymentError: null };
+
+            // The receipt-aware endpoint records the payment, its allocation
+            // and the immutable receipt snapshot in one transaction.
+            const idempotencyKey =
+              idempotencyKeyRef.current ?? newReceiptIdempotencyKey();
+            idempotencyKeyRef.current = idempotencyKey;
+            try {
+              const receiptBundle = await createPaymentWithReceipt({
                 memberId,
+                membershipId: membership.id,
                 amount: amountToPaise(Number(amount) || 0),
                 paymentMode,
                 reference: reference.trim() || null,
                 paymentDate,
                 status: "SUCCESS",
+                idempotencyKey,
               });
+              return { bundle: receiptBundle, paymentError: null };
+            } catch (paymentFailure) {
+              // The membership is already saved. Surface the payment problem
+              // without making the user repeat (and duplicate) the membership.
+              idempotencyKeyRef.current = null;
+              return {
+                bundle: null,
+                paymentError:
+                  paymentFailure instanceof ApiError
+                    ? paymentFailure.message
+                    : "The payment could not be recorded.",
+              };
             }
           })(),
           {
@@ -215,12 +250,16 @@ export function AssignMembershipDrawer({
                 ? "Saving the subscription and payment."
                 : "Saving the subscription.",
             },
-            success: {
+            success: (result) => ({
               title: renewal ? "Membership renewed" : "Membership assigned",
-              description: selectedMember
-                ? `${selectedMember.name}'s subscription is active.`
-                : "The subscription is active.",
-            },
+              description: result.bundle?.receipt
+                ? `${selectedMember?.name ?? "Member"}'s subscription is active. Receipt ${result.bundle.receipt.receiptNumber} is ready.`
+                : result.paymentError
+                  ? "The subscription is active, but the payment was not recorded."
+                  : selectedMember
+                    ? `${selectedMember.name}'s subscription is active.`
+                    : "The subscription is active.",
+            }),
             error: (caught) => ({
               title: "Couldn't save membership",
               description:
@@ -230,6 +269,21 @@ export function AssignMembershipDrawer({
             }),
           },
         );
+
+        if (paymentError) {
+          toast.warning("Membership saved, payment failed", paymentError, {
+            persistent: true,
+          });
+        }
+
+        if (bundle?.receipt || bundle?.receiptError) {
+          setReceipt(bundle.receipt);
+          setReceiptWhatsApp(bundle.whatsapp);
+          setReceiptNotice(bundle.receiptError ?? null);
+          setReceiptOpen(true);
+        }
+
+        idempotencyKeyRef.current = null;
         onSaved?.();
         onOpenChange(false);
       } catch (caught) {
@@ -662,6 +716,15 @@ export function AssignMembershipDrawer({
           </Button>
         </div>
       </aside>
+
+      <ReceiptModal
+        open={receiptOpen}
+        onOpenChange={setReceiptOpen}
+        receipt={receipt}
+        whatsapp={receiptWhatsApp}
+        notice={receiptNotice}
+        celebrate
+      />
     </>
   );
 }

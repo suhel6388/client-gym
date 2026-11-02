@@ -11,7 +11,12 @@ import {
   type MemberFormValues,
 } from "@/lib/member-form";
 import { listPlans, type PlanDto } from "@/lib/members-api";
+import type {
+  ReceiptPayload,
+  ReceiptWhatsAppBundle,
+} from "@/lib/receipt-api";
 import { MemberForm } from "./MemberForm";
+import { ReceiptModal } from "./receipts/ReceiptModal";
 import { useToast } from "./providers/ToastProvider";
 import { Button } from "./ui/Button";
 
@@ -26,6 +31,11 @@ export function AddMemberPageClient() {
   const [plansError, setPlansError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  const [receipt, setReceipt] = useState<ReceiptPayload | null>(null);
+  const [receiptWhatsApp, setReceiptWhatsApp] =
+    useState<ReceiptWhatsAppBundle | null>(null);
+  const [receiptNotice, setReceiptNotice] = useState<string | null>(null);
+  const [receiptOpen, setReceiptOpen] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -80,7 +90,18 @@ export function AddMemberPageClient() {
         }
 
         emitMemberCreated(result.member);
-        router.push("/members");
+
+        // When a payment was collected, keep the page open so the receipt can
+        // be previewed, downloaded or sent on WhatsApp. Navigation happens when
+        // the receipt dialog closes.
+        if (result.receipt || result.receiptError) {
+          setReceipt(result.receipt);
+          setReceiptWhatsApp(result.whatsapp);
+          setReceiptNotice(result.receiptError);
+          setReceiptOpen(true);
+        } else {
+          router.push("/members");
+        }
       } catch (caught) {
         setServerError(
           caught instanceof ApiError
@@ -95,7 +116,8 @@ export function AddMemberPageClient() {
   );
 
   return (
-    <div className="mx-auto w-full max-w-[900px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+    <>
+      <div className="mx-auto w-full max-w-[900px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
       <div className="flex items-center gap-3 animate-fade-up">
         <Button
           variant="ghost"
@@ -155,5 +177,18 @@ export function AddMemberPageClient() {
         </div>
       </div>
     </div>
+
+      <ReceiptModal
+        open={receiptOpen}
+        onOpenChange={(open) => {
+          setReceiptOpen(open);
+          if (!open) router.push("/members");
+        }}
+        receipt={receipt}
+        whatsapp={receiptWhatsApp}
+        notice={receiptNotice}
+        celebrate
+      />
+    </>
   );
 }

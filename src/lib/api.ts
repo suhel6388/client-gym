@@ -28,6 +28,7 @@ import axios, {
 
 // const DEFAULT_API_BASE_URL = "https://gym-managment-system-7yiu.onrender.com";
  const DEFAULT_API_BASE_URL = "https://darkgoldgym.duckdns.org"
+//  const DEFAULT_API_BASE_URL = "http://localhost:5000"
 
 
 /**

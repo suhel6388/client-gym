@@ -22,11 +22,6 @@ import {
   type ReceiptWhatsAppBundle,
 } from "@/lib/receipt-api";
 import {
-  closeShareWindow,
-  navigateShareWindow,
-  openShareWindow,
-} from "@/lib/receipt-share";
-import {
   listPlans,
   updateMember,
   type MemberDto,
@@ -141,12 +136,9 @@ export function AddMemberDrawer({
       setServerError(null);
       setSubmitting(true);
 
-      // Open the WhatsApp tab inside the submit gesture. It is navigated only
-      // after the server confirms the payment, and closed if anything fails.
+      // One key per submission keeps a retry from creating a second payment.
       const collecting = mode === "create" && values.collectPayment;
-      const shareWindow = collecting ? openShareWindow() : null;
       const idempotencyKey = collecting ? newReceiptIdempotencyKey() : undefined;
-      let shareHandled = false;
 
       try {
         const result = await toast.promise(
@@ -208,13 +200,6 @@ export function AddMemberDrawer({
           );
         }
 
-        // Automatic WhatsApp share. A blocked popup never affects the payment.
-        if (shareWindow) {
-          const url = result.whatsapp?.url ?? null;
-          shareHandled = url ? navigateShareWindow(shareWindow, url) : false;
-          if (!shareHandled) closeShareWindow(shareWindow);
-        }
-
         if (result.receipt || result.receiptError) {
           setReceipt(result.receipt);
           setReceiptWhatsApp(result.whatsapp);
@@ -236,7 +221,6 @@ export function AddMemberDrawer({
             : "Something went wrong while saving. Please try again.",
         );
       } finally {
-        if (shareWindow && !shareHandled) closeShareWindow(shareWindow);
         setSubmitting(false);
       }
     },

@@ -287,6 +287,8 @@ export function sendReceiptViaWhatsAppCloud(paymentId: string) {
   return apiRequest<{
     sent: boolean;
     provider: string;
+    /** "media" sends the uploaded PDF; "link" falls back to the signed URL. */
+    delivery?: "media" | "link";
     messageId?: string;
     phone: string | null;
     cloudAvailable: boolean;
