@@ -1,24 +1,4 @@
-/**
- * Single API layer for the Gym CRM client.
- *
- * Every HTTP request in the app is defined here and executed through Axios.
- * Feature modules (view models, demo data, form actions) import the request
- * functions from this file instead of creating their own clients.
- *
- * Conventions taken from `backend/API.md`:
- * - Base URL: `NEXT_PUBLIC_API_URL`, defaulting to the deployed Render API.
- *   Every request — in development and production — goes directly to that
- *   absolute URL. Localhost values are ignored so the app never calls a local
- *   API.
- * - Auth is a Better Auth HttpOnly session cookie, so every request uses
- *   `withCredentials: true`. No token is ever stored in JavaScript.
- * - Successful responses wrap their payload in `{ data: ... }`; `apiRequest`
- *   unwraps that envelope automatically.
- * - Errors are normalized into `ApiError` (status, code, details, payload).
- * - Transient timeouts (for example a sleeping Render instance) are retried
- *   once for GET requests and idempotent auth calls. Mutations are never
- *   retried automatically, so a retry cannot duplicate a member/payment.
- */
+
 
 import axios, {
   AxiosError,
@@ -27,17 +7,10 @@ import axios, {
 } from "axios";
 
 // const DEFAULT_API_BASE_URL = "https://gym-managment-system-7yiu.onrender.com";
- const DEFAULT_API_BASE_URL = "https://darkgoldgym.duckdns.org"
-//  const DEFAULT_API_BASE_URL = "http://localhost:5000"
+//  const DEFAULT_API_BASE_URL = "https://darkgoldgym.duckdns.org"
+ const DEFAULT_API_BASE_URL = "http://localhost:5000"
 
 
-/**
- * The base URL used by every API request.
- *
- * `NEXT_PUBLIC_API_URL` (defaulting to the deployed Render API) is used in
- * every environment, so development and production hit the same backend.
- * An explicit localhost value is rejected so the app never calls a local API.
- */
 const envBase = (process.env.NEXT_PUBLIC_API_URL ?? "").trim();
 const isLocalBase =
   /(?:^https?:\/\/)?(?:localhost|127\.0\.0\.1|0\.0\.0\.0)(?::\d+)?(?:\/|$)/i.test(
