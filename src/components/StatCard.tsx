@@ -85,7 +85,7 @@ export function StatCard({
             <p className="mt-2 text-xs text-faint">{kpi.helper}</p>
 
             <div className="mt-auto pt-4">
-              <MiniSparkline data={kpi.spark} />
+              {/* <MiniSparkline data={kpi.spark} /> */}
             </div>
           </>
         )}

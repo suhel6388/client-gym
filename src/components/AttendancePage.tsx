@@ -317,11 +317,11 @@ export function AttendancePage() {
             <h1 className="text-[26px] font-bold leading-tight tracking-tight text-ink">
               Attendance Management
             </h1>
-            {ATTENDANCE_DATA_SOURCE === "demo" && (
+            {/* {ATTENDANCE_DATA_SOURCE === "demo" && (
               <span className="rounded-full bg-gold/12 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.12em] text-gold ring-1 ring-inset ring-gold/25">
                 Demo data
               </span>
-            )}
+            )} */}
           </div>
           <p className="mt-1.5 text-sm text-subtle">
             Track gym visits, manage check-ins, and monitor member attendance.

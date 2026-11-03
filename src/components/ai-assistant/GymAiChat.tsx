@@ -722,7 +722,7 @@ export function GymAiChat() {
   const canSubmit = !loading && quota.canAsk && inputText.trim().length > 0;
 
   return (
-    <div className="relative flex h-[calc(100vh-8.5rem)] flex-col overflow-hidden rounded-2xl border border-line bg-canvas/60 shadow-lg">
+    <div className="relative flex h-[calc(100vh-8.5rem)] flex-col overflow-hidden rounded-2xl border border-line bg-canvas/60 shadow-lg ">
       {/* ---------- Top bar: quiet, Claude-like ---------- */}
       <header className="flex shrink-0 items-center justify-between gap-3 px-4 py-3 sm:px-5">
         <div className="flex items-center gap-2.5">
@@ -742,7 +742,7 @@ export function GymAiChat() {
             {quota.remaining}/{quota.limit} left today
           </Badge>
           <div className="flex items-center rounded-lg border border-line bg-canvas/60 p-1">
-            <ToggleTheme animationType="swipe-down" />
+            {/* <ToggleTheme animationType="swipe-down" /> */}
           </div>
           <button
             type="button"
