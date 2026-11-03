@@ -3,8 +3,12 @@
  * Plays the WePlay notification sound on transaction events.
  * Includes Web Audio API synthesizer fallback if audio fails or is blocked.
  */
+"use client";
 
-const NOTIFICATION_SOUND_URL = "https://www.myinstants.com/media/sounds/noti.mp3";
+// import notificationSound from "/sounds/notification.mp3";
+
+
+const NOTIFICATION_SOUND_URL = "/sounds/notification.mp3";
 
 let audioElement: HTMLAudioElement | null = null;
 let soundEnabled = true;
