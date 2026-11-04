@@ -137,6 +137,15 @@ export function KBarProviderWrapper({ children }: { children: React.ReactNode })
         icon: <Wallet className="size-4" />,
         perform: () => router.push("/payments"),
       },
+
+        {
+        id: "expenses",
+        name: "Go to Expenses",
+        shortcut: ["e"],
+        keywords: "Go check Expense",
+        icon: <Wallet className="size-4" />,
+        perform: () => router.push("/expenses"),
+      },
       {
         id: "plans",
         name: "Go to Plans & Pricing",
@@ -153,6 +162,8 @@ export function KBarProviderWrapper({ children }: { children: React.ReactNode })
         icon: <ChartColumn className="size-4" />,
         perform: () => router.push("/reports"),
       },
+
+      
       {
         id: "settings",
         name: "Go to Settings",
