@@ -454,7 +454,6 @@ import {
   Wallet,
 } from "lucide-react";
 import { Badge } from "@/components/ui/Badge";
-import { ToggleTheme } from "@/components/lightswind/toggle-theme";
 import {
   fetchAiQuota,
   sendAiChatMessage,
@@ -732,7 +731,7 @@ export function GymAiChat() {
           <div className="leading-tight">
             <h1 className="text-sm font-semibold text-ink">Gym Assistant</h1>
             <p className="hidden text-[11px] text-faint sm:block">
-              Answers from your gym's live records
+              Answers from your gym&apos;s live records
             </p>
           </div>
         </div>
@@ -918,8 +917,8 @@ export function GymAiChat() {
             <div className="mb-2 flex items-start gap-2 rounded-xl border border-danger/30 bg-danger/10 px-3.5 py-2.5 text-xs text-danger">
               <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
               <span>
-                You've used all {quota.limit} questions for today. Ask your platform Super
-                Admin to raise your gym's limit.
+                You&apos;ve used all {quota.limit} questions for today. Ask your platform Super
+                Admin to raise your gym&apos;s limit.
               </span>
             </div>
           )}
@@ -969,7 +968,7 @@ export function GymAiChat() {
           </form>
 
           <p className="mt-2 text-center text-[11px] text-faint">
-            <kbd className="font-sans">Enter</kbd> to send · <kbd className="font-sans">Shift + Enter</kbd> for a new line. Answers use only your gym's records, so double-check important numbers.
+            <kbd className="font-sans">Enter</kbd> to send · <kbd className="font-sans">Shift + Enter</kbd> for a new line. Answers use only your gym&apos;s records, so double-check important numbers.
           </p>
         </div>
       </div>

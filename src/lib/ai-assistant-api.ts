@@ -25,7 +25,7 @@ export async function fetchAiQuota(): Promise<AiQuotaData> {
   try {
     const res = await apiRequest<AiQuotaData>("/ai-assistant/quota");
     return res;
-  } catch (err) {
+  } catch {
     // Return safe default if network/session unavailable
     return {
       gymId: "current",

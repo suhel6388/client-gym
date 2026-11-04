@@ -2,14 +2,9 @@
 
 import { useEffect, useState } from "react";
 import {
-  Bot,
-  Check,
-  HelpCircle,
   Key,
-  Layers,
   Save,
   Sparkles,
-  Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Label } from "@/components/ui/Label";

@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, CreditCard, Loader2, MessageCircle, Receipt, Search, Wallet, X } from "lucide-react";
+import { Check, CreditCard, Loader2, MessageCircle, Search, Wallet, X } from "lucide-react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ApiError } from "@/lib/api";
 import { cn } from "@/lib/cn";
@@ -211,6 +211,7 @@ export function PaymentFormDrawer({
     },
     [
       amount,
+      autoWhatsApp,
       isFuture,
       memberId,
       onOpenChange,

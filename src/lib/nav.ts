@@ -1,5 +1,4 @@
 import {
-  Bot,
   CalendarCheck,
   ChartColumn,
   CreditCard,

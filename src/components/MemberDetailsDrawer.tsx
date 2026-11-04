@@ -4,7 +4,6 @@ import {
   Archive,
   CalendarDays,
   CreditCard,
-  Hash,
   Loader2,
   Mail,
   MapPin,

@@ -168,6 +168,7 @@ export function ExpenseFormDrawer({
       amountValue,
       category,
       editing,
+      isEditing,
       expenseDate,
       notes,
       onOpenChange,

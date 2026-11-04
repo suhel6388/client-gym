@@ -15,7 +15,6 @@ import type { DashboardKpi, DashboardKpiIcon } from "@/lib/dashboard-view";
 import { cn } from "@/lib/cn";
 import { formatPercent } from "@/lib/format";
 import { DashboardCard } from "./DashboardCard";
-import { MiniSparkline } from "./charts/MiniSparkline";
 
 const iconMap: Record<DashboardKpiIcon, LucideIcon> = {
   members: Users,

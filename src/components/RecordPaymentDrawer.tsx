@@ -190,7 +190,7 @@ export function RecordPaymentDrawer({
         setSubmitting(false);
       }
     },
-    [amount, onOpenChange, onSaved, paymentDate, paymentMode, reference, row, toast],
+    [amount, autoWhatsApp, onOpenChange, onSaved, paymentDate, paymentMode, reference, row, toast],
   );
 
   return (

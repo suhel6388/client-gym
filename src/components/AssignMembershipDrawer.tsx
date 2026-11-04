@@ -316,6 +316,7 @@ export function AssignMembershipDrawer({
       reference,
       renewal,
       selectedMember,
+      selectedPlan?.name,
       startDate,
       toast,
       validate,
