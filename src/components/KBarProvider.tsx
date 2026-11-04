@@ -22,7 +22,10 @@ import {
   ChartColumn,
   Settings,
   UserPlus,
+  BotIcon,
+ 
 } from "lucide-react";
+{/* <BotMessageSquare /> */}
 
 import { openCreateMember } from "@/lib/events";
 
@@ -85,6 +88,14 @@ export function KBarProviderWrapper({ children }: { children: React.ReactNode })
         keywords: "dashboard home overview",
         icon: <LayoutDashboard className="size-4" />,
         perform: () => router.push("/dashboard"),
+      },
+       {
+        id: "ai",
+        name: "Go to Ai Assistant",
+        shortcut: ["i"],
+        keywords: "ai assistant",
+        icon: <BotIcon  className="size-4" />,
+        perform: () => router.push("/ai-assistant"),
       },
       {
         id: "members",
