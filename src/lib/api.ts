@@ -190,6 +190,19 @@ const normalizeError = (error: unknown): ApiError => {
         ? data
         : getErrorMessage(status, body);
 
+    // Global 402 handler: redirect expired users to the upgrade screen
+    if (status === 402 && typeof window !== "undefined") {
+      const currentPath = window.location.pathname;
+      if (
+        !currentPath.startsWith("/upgrade") &&
+        !currentPath.startsWith("/subscription") &&
+        !currentPath.startsWith("/login") &&
+        !currentPath.startsWith("/auth")
+      ) {
+        window.location.href = "/upgrade";
+      }
+    }
+
     return new ApiError(message, status, {
       code: body?.code,
       details: body?.details,

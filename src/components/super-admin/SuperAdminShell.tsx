@@ -6,11 +6,13 @@ import { usePathname } from "next/navigation";
 import {
   Building2,
   CalendarClock,
+  CreditCard,
   Globe,
   History,
   LayoutDashboard,
   LogOut,
   Menu,
+  Receipt,
   Settings,
   ShieldCheck,
   UsersRound,
@@ -51,6 +53,18 @@ const NAV_ITEMS: PlatformNavItem[] = [
     href: `${SUPER_ADMIN_PATH}/owners`,
     icon: UsersRound,
     description: "Gym owner accounts",
+  },
+  {
+    label: "Subscription Plans",
+    href: `${SUPER_ADMIN_PATH}/subscription-plans`,
+    icon: CreditCard,
+    description: "SaaS plan tiers, pricing & GST",
+  },
+  {
+    label: "Platform Payments",
+    href: `${SUPER_ADMIN_PATH}/platform-payments`,
+    icon: Receipt,
+    description: "Razorpay transaction ledger",
   },
   {
     label: "Schedule calls",

@@ -66,6 +66,7 @@ export const navGroups: NavGroup[] = [
       // { label: "Trainers", href: "/trainers", icon: UserCog },
       // { label: "Classes", href: "/classes", icon: GraduationCap },
       { label: "Staff", href: "/staff", icon: UserCog, roles: ["ADMIN"] },
+      { label: "Subscription", href: "/subscription", icon: CreditCard, roles: ["ADMIN"] },
       { label: "Settings", href: "/settings", icon: Settings },
     ],
   },
