@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import Link from "next/link";
+import Script from "next/script";
 import { ArrowLeft } from "lucide-react";
 import DarkGoldLogoHorizontal from "../../../public/logo_hr";
 import { SessionProvider } from "@/components/auth/SessionProvider";
@@ -8,6 +9,7 @@ import { ToggleTheme } from "@/components/lightswind/toggle-theme";
 export default function BillingLayout({ children }: { children: ReactNode }) {
   return (
     <SessionProvider>
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" id="razorpay-checkout-sdk" />
       <div className="min-h-screen bg-black text-white flex flex-col">
         {/* Minimal distraction-free header */}
         <header className="border-b border-zinc-800/80 bg-zinc-950/80 backdrop-blur px-4 sm:px-8 py-3.5 flex items-center justify-between sticky top-0 z-40">

@@ -4,6 +4,7 @@ import {
   ChevronLeft,
   PanelLeftClose,
   PanelLeftOpen,
+  Sparkles,
   X,
 } from "lucide-react";
 import Link from "next/link";
@@ -13,6 +14,7 @@ import { navGroups } from "@/lib/nav";
 import { cn } from "@/lib/cn";
 import { useSession } from "./auth/SessionProvider";
 import { ToggleTheme } from "./lightswind/toggle-theme";
+import { Button } from "./ui/Button";
 import DarkGoldLogo from "../../public/logo";
 import DarkGoldLogoHorizontal from "../../public/logo_hr";
 
@@ -225,29 +227,28 @@ export function Sidebar({
         </nav>
 
         {/* Premium upsell */}
-        {/* <div className={cn("px-3", collapsed && "lg:px-2")}>
-          <div
-            className={cn(
-              "rounded-xl border border-gold/20 bg-gradient-to-b from-gold/[0.12] to-transparent p-4",
-              collapsed && "lg:hidden",
-            )}
-          >
-            <div className="flex items-center gap-1.5">
-              <Sparkles className="size-3.5 text-gold" strokeWidth={1.75} aria-hidden />
-              <p className="text-[12px] font-semibold text-gold">Ironclad Pro</p>
+        {user?.role === "ADMIN" && (
+          <div className={cn("px-3 mb-2", collapsed && "lg:hidden")}>
+            <div className="rounded-xl border border-amber-500/20 bg-gradient-to-b from-amber-500/10 to-transparent p-3.5 shadow-sm">
+              <div className="flex items-center gap-1.5">
+                <Sparkles className="size-3.5 text-amber-400" strokeWidth={1.75} aria-hidden />
+                <p className="text-[12px] font-semibold text-amber-300">Upgrade Plan</p>
+              </div>
+              <p className="mt-1 text-[11px] leading-relaxed text-zinc-400">
+                Unlock automated receipts, AI analytics & unlimited members.
+              </p>
+              <Link href="/upgrade" className="block mt-2.5">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  className="w-full bg-amber-500 hover:bg-amber-400 text-black font-semibold text-xs py-1.5 shadow-md shadow-amber-500/10"
+                >
+                  Upgrade Now
+                </Button>
+              </Link>
             </div>
-            <p className="mt-1.5 text-[11px] leading-relaxed text-subtle">
-              AI insights, priority support & unlimited staff.
-            </p>
-            <Button
-              variant="primary"
-              size="sm"
-              className="mt-3 w-full"
-            >
-              Upgrade plan
-            </Button>
           </div>
-        </div> */}
+        )}
 
         {/* Collapse toggle (desktop only) + theme switch on phones */}
         <div className="flex shrink-0 items-center gap-2 border-t border-line/60 p-3">

@@ -138,11 +138,13 @@ export default function UpgradePage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8 items-stretch">
           {plans.map((p) => {
             const isCurrent = subscription?.planName === p.name && subscription?.entitled;
+            const isSelected = selectedPlan?.id === p.id;
             return (
               <PlanCard
                 key={p.id}
                 plan={p}
                 isCurrent={isCurrent}
+                isSelected={isSelected}
                 onSelect={(selected) => setSelectedPlan(selected)}
               />
             );

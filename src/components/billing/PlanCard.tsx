@@ -9,21 +9,25 @@ import { cn } from "@/lib/cn";
 type PlanCardProps = {
   plan: BillingPlan;
   isCurrent?: boolean;
+  isSelected?: boolean;
   onSelect: (plan: BillingPlan) => void;
   loading?: boolean;
 };
 
-export function PlanCard({ plan, isCurrent = false, onSelect, loading = false }: PlanCardProps) {
+export function PlanCard({ plan, isCurrent = false, isSelected = false, onSelect, loading = false }: PlanCardProps) {
   const isPopular = plan.code === "PRO" || plan.slug === "pro";
   const priceRupees = Math.round(plan.pricePaise / 100);
 
   return (
     <div
+      onClick={() => !isCurrent && onSelect(plan)}
       className={cn(
-        "relative flex flex-col justify-between rounded-2xl border p-6 transition-all duration-200",
-        isPopular
-          ? "border-amber-500/50 bg-gradient-to-b from-amber-950/20 via-zinc-900 to-zinc-950 shadow-xl shadow-amber-500/10"
-          : "border-zinc-800 bg-zinc-900/60 hover:border-zinc-700",
+        "relative flex flex-col justify-between rounded-2xl border p-6 transition-all duration-200 cursor-pointer",
+        isSelected
+          ? "border-amber-400 ring-2 ring-amber-500/50 bg-gradient-to-b from-amber-950/30 via-zinc-900 to-zinc-950 shadow-2xl shadow-amber-500/20"
+          : isPopular
+            ? "border-amber-500/50 bg-gradient-to-b from-amber-950/20 via-zinc-900 to-zinc-950 shadow-xl shadow-amber-500/10 hover:border-amber-500/80"
+            : "border-zinc-800 bg-zinc-900/60 hover:border-zinc-700",
       )}
     >
       {isPopular && (
@@ -77,18 +81,23 @@ export function PlanCard({ plan, isCurrent = false, onSelect, loading = false }:
       <div className="mt-8 pt-4">
         <Button
           type="button"
-          onClick={() => onSelect(plan)}
+          onClick={(e) => {
+            e.stopPropagation();
+            onSelect(plan);
+          }}
           disabled={loading || isCurrent}
-          variant={isPopular ? "primary" : "secondary"}
+          variant={isSelected || isPopular ? "primary" : "secondary"}
           className={cn(
             "w-full py-2.5 font-semibold text-sm rounded-xl transition-all",
-            isPopular
-              ? "bg-amber-500 text-black hover:bg-amber-400 shadow-lg shadow-amber-500/20"
-              : "bg-zinc-800 text-white hover:bg-zinc-700",
+            isSelected
+              ? "bg-amber-400 text-black shadow-lg shadow-amber-500/30 font-bold"
+              : isPopular
+                ? "bg-amber-500 text-black hover:bg-amber-400 shadow-lg shadow-amber-500/20"
+                : "bg-zinc-800 text-white hover:bg-zinc-700",
             isCurrent && "opacity-50 cursor-not-allowed",
           )}
         >
-          {isCurrent ? "Current Plan" : "Choose " + plan.name}
+          {isCurrent ? "Current Plan" : isSelected ? "Selected Plan" : "Choose " + plan.name}
         </Button>
       </div>
     </div>

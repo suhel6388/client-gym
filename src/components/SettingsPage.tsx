@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  CreditCard,
   Info,
   MessageCircle,
   Plus,
@@ -8,8 +9,10 @@ import {
   Save,
   Sparkles,
 } from "lucide-react";
+import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useWhatsAppRenewalTemplate } from "@/hooks/use-whatsapp-template";
+import { useSubscription } from "@/hooks/useSubscription";
 import {
   DEFAULT_WHATSAPP_RENEWAL_TEMPLATE,
   MAX_RENEWAL_TEMPLATE_LENGTH,
@@ -34,6 +37,7 @@ const PREVIEW_CONTEXT = {
 
 export function SettingsPage() {
   const toast = useToast();
+  const { subscription } = useSubscription();
   const storedTemplate = useWhatsAppRenewalTemplate();
   const [template, setTemplate] = useState(storedTemplate);
   const [hydrated, setHydrated] = useState(false);
@@ -117,6 +121,47 @@ export function SettingsPage() {
         <p className="mt-1.5 text-sm text-subtle">
           Manage how your gym communicates with members.
         </p>
+      </div>
+
+      {/* SaaS Subscription & Plan Overview */}
+      <div className="mt-6 lg:mt-8">
+        <DashboardCard
+          title="Gym CRM Subscription & Plan"
+          subtitle="Manage your SaaS subscription tier, feature entitlements, and renewals"
+          icon={CreditCard}
+        >
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-line/60 bg-card p-4">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <span className="font-bold text-ink text-base">
+                  {subscription?.planName || (subscription?.isTrial ? "Free Trial" : "DarkGold CRM Plan")}
+                </span>
+                <span className="rounded-full bg-gold/15 px-2 py-0.5 text-xs font-semibold text-gold border border-gold/30">
+                  {subscription?.status || "ACTIVE"}
+                </span>
+              </div>
+              <p className="text-xs text-subtle">
+                {subscription?.remainingDays != null
+                  ? `${subscription.remainingDays} days remaining in current billing cycle`
+                  : "Active subscription"}
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2.5">
+              <Link href="/upgrade">
+                <Button variant="primary" size="sm" className="gap-1.5 bg-amber-500 hover:bg-amber-400 text-black font-semibold text-xs">
+                  <Sparkles className="size-3.5" />
+                  Upgrade Plan
+                </Button>
+              </Link>
+              <Link href="/subscription">
+                <Button variant="secondary" size="sm" className="text-xs">
+                  Invoices & History
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </DashboardCard>
       </div>
 
       <div className="mt-6 lg:mt-8">

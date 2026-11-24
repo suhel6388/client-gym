@@ -6,19 +6,19 @@ import {
   CheckCheck,
   ChevronDown,
   ChevronRight,
-  CreditCard,
   IndianRupee,
   LogOut,
   Menu,
   PanelLeftClose,
   PanelLeftOpen,
   Plus,
-  Settings,
+  Sparkles,
   Trash2,
   User,
   Volume2,
   VolumeX,
 } from "lucide-react";
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { openCreateMember } from "@/lib/events";
@@ -350,20 +350,20 @@ export function TopNavbar({
                 <p className="mt-0.5 truncate text-xs text-faint">{displayEmail}</p>
               </div>
               {[
-                { icon: User, label: "My profile" },
-                { icon: IndianRupee, label: "Billing & plans" },
-                { icon: CreditCard, label: "Payment methods" },
-                { icon: Settings, label: "Settings", danger: false },
-              ].map(({ icon: Icon, label }) => (
-                <button
+                { icon: User, label: "Settings", href: "/settings" },
+                { icon: IndianRupee, label: "Subscription & Plans", href: "/subscription" },
+                { icon: Sparkles, label: "Upgrade Plan", href: "/upgrade" },
+              ].map(({ icon: Icon, label, href }) => (
+                <Link
                   key={label}
-                  type="button"
+                  href={href}
+                  onClick={() => setProfileOpen(false)}
                   role="menuitem"
                   className="flex w-full items-center gap-2.5 px-4 py-2 text-left text-[13px] text-subtle transition-colors hover:bg-card-hover hover:text-ink"
                 >
                   <Icon className="size-4" strokeWidth={1.75} aria-hidden />
                   {label}
-                </button>
+                </Link>
               ))}
               <div className="mt-1 border-t border-line/60 pt-1.5">
                 <button
