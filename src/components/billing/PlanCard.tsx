@@ -97,7 +97,7 @@ export function PlanCard({ plan, isCurrent = false, isSelected = false, onSelect
             isCurrent && "opacity-50 cursor-not-allowed",
           )}
         >
-          {isCurrent ? "Current Plan" : isSelected ? "Selected Plan" : "Choose " + plan.name}
+          {isCurrent ? "Current Plan" : isSelected ? "✓ Plan Selected" : "Select Plan"}
         </Button>
       </div>
     </div>
