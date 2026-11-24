@@ -9,6 +9,7 @@ import {
   Lightbulb,
   type LucideIcon,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 /* ---------- Data ---------- */
 
@@ -130,7 +131,7 @@ const PRIMARY_BUTTON =
 
 export default function GymPricing() {
   const prefersReduced = useReducedMotion();
-
+const router= useRouter()
   const text = prefersReduced ? reduced : textItem;
   const card = prefersReduced ? reduced : cardItem;
   const trust = prefersReduced ? reduced : trustItem;
@@ -233,6 +234,7 @@ export default function GymPricing() {
               </ul>
 
               <button
+                onClick={() => router.push("/dashboard")}
                 type="button"
                 className={`mt-8 w-full rounded-lg px-4 py-3 text-sm font-semibold transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-lp-gold-highlight ${
                   plan.popular
