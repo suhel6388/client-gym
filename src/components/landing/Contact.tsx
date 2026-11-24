@@ -93,11 +93,10 @@ export default function GymContact() {
   
              <Image
                src={ATHLETE_SRC}
-               alt=""
+               alt="DarkGold Gym fitness training background"
                fill
-               priority
+               loading="lazy"
                unoptimized
-            
                className="object-cover object-[62%_0%] opacity-10"
              />
         

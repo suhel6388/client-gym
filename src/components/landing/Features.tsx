@@ -130,7 +130,7 @@ export default function GymFeatures() {
         >
           <Image
             src={FEATURE_IMAGE}
-            alt="Athlete preparing a barbell lift in a dark gym"
+            alt="DarkGold Gym Management Software member and strength workout tracking"
             fill
             unoptimized
             sizes="(min-width: 1024px) 36vw, 100vw"

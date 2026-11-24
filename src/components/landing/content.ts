@@ -12,12 +12,12 @@ import {
 export const HERO_COPY = {
   badge: "All-in-One Gym Management Software",
   headline: {
-    lead: "Simplify Your Gym.",
-    continuation: "Grow",
-    brand: " Your Business.",
+    lead: "Smart Gym Management Software",
+    continuation: "to Grow",
+    brand: " Your Fitness Business",
   },
   description:
-    "The all-in-one gym CRM to manage members, attendance, payments, workouts, trainers and grow your fitness business effortlessly.",
+    "Manage gym members, attendance, payments, trainers, workout plans and memberships with DarkGold Gym CRM. Simplify gym operations with smart gym management software.",
   primaryCta: { label: "Start Free Trial", href: "/signup" },
   secondaryCta: { label: "Schedule a Call" },
 };

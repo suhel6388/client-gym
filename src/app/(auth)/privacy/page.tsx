@@ -4,6 +4,10 @@ import { AuthCard } from "@/components/auth/AuthCard";
 
 export const metadata: Metadata = {
   title: "Privacy Policy",
+  description: "Read the Privacy Policy for DarkGold Gym CRM and Gym Management Platform.",
+  alternates: {
+    canonical: "https://darkgoldgym.duckdns.org/privacy/",
+  },
 };
 
 export default function PrivacyPage() {

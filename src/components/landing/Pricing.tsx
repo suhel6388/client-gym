@@ -168,7 +168,7 @@ export default function GymPricing() {
             variants={text}
             className="mt-3 text-balance text-3xl font-semibold tracking-[-0.02em] sm:text-4xl"
           >
-            Choose the plan that&apos;s right for you
+            Choose the Right Gym Management Plan
           </motion.h2>
 
           <motion.p variants={text} className="mt-3 text-sm text-lp-muted">

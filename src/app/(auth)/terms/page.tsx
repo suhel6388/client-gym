@@ -4,6 +4,10 @@ import { AuthCard } from "@/components/auth/AuthCard";
 
 export const metadata: Metadata = {
   title: "Terms of Service",
+  description: "Read the Terms of Service for DarkGold Gym CRM and Gym Management Platform.",
+  alternates: {
+    canonical: "https://darkgoldgym.duckdns.org/terms/",
+  },
 };
 
 export default function TermsPage() {

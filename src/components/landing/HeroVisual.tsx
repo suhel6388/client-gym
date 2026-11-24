@@ -127,7 +127,7 @@ export function HeroVisual() {
         {ATHLETE_AVAILABLE && (
           <Image
             src={ATHLETE_SRC}
-            alt=""
+            alt="DarkGold Gym CRM dashboard preview with fitness athlete"
             fill
             priority
             unoptimized

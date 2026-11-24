@@ -33,9 +33,9 @@ export default function GymReward() {
             <Trophy className="size-8" strokeWidth={1.4} aria-hidden />
           </span>
           <div>
-            <h3 className="text-balance text-2xl font-semibold tracking-[-0.02em] sm:text-3xl">
+            <h2 className="text-balance text-2xl font-semibold tracking-[-0.02em] sm:text-3xl">
               Ready to take your gym to the next level?
-            </h3>
+            </h2>
             <p className="mt-2 text-sm text-lp-gold-highlight">
               Start your 14-day free trial today. No credit card required.
             </p>

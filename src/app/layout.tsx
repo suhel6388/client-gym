@@ -17,12 +17,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://darkgoldgym.duckdns.org"),
   title: {
-    default: "DarkGoldGym — Gym Management",
-    template: "%s · DarkGoldGym",
+    default: "Gym Management Software India | DarkGold Gym CRM",
+    template: "%s · DarkGold Gym CRM",
   },
   description:
-    "Premium gym management dashboard — members, memberships, revenue and renewals at a glance.",
+    "Manage gym members, attendance, payments, trainers, workout plans and memberships with DarkGold Gym CRM. Simplify gym operations with smart gym management software.",
 };
 
 export const viewport: Viewport = {
