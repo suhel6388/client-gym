@@ -344,10 +344,10 @@ export default function SubscriptionPage() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="rounded-xl border border-zinc-800/80 bg-[#0E0E11] p-4">
               <div className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-wider text-zinc-400">
-                <Calendar className="h-3.5 w-3.5 text-amber-400" /> Start Date
+                <Calendar className="h-3.5 w-3.5 text-amber-400" /> Purchased Date
               </div>
               <p className="mt-2 text-base sm:text-lg font-bold text-white">
-                {formatDate(startDate)}
+                {formatDate(subscription?.lastPurchasedAt || startDate)}
               </p>
             </div>
 

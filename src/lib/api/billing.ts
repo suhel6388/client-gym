@@ -89,6 +89,7 @@ export type SubscriptionSummary = {
   pricePaise?: number;
   currency?: string;
   cancelAtPeriodEnd?: boolean;
+  lastPurchasedAt?: string | null;
 };
 
 export type SubscriptionHistoryItem = {
@@ -96,6 +97,7 @@ export type SubscriptionHistoryItem = {
   orderId?: string | null;
   paymentId?: string | null;
   amount: number;
+  amountPaise?: number;
   currency: string;
   status: string;
   createdAt: string;

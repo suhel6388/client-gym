@@ -89,30 +89,36 @@ export function PaymentHistoryTable() {
         <table className="w-full text-left text-xs sm:text-sm text-zinc-300">
           <thead className="bg-[#0E0E11] border-b border-zinc-800 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
             <tr>
-              <th className="py-3.5 px-4">Date</th>
+              <th className="py-3.5 px-4">Purchase Date</th>
               <th className="py-3.5 px-4">Plan</th>
-              <th className="py-3.5 px-4">Order ID</th>
+              <th className="py-3.5 px-4">Payment / Order ID</th>
               <th className="py-3.5 px-4">Amount</th>
               <th className="py-3.5 px-4">Status</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-800/70">
             {payments.map((p) => {
-              const dateStr = p.createdAt
-                ? new Date(p.createdAt).toLocaleDateString("en-IN", {
+              const rawDate = p.verifiedAt || p.createdAt;
+              const dateStr = rawDate
+                ? new Date(rawDate).toLocaleDateString("en-IN", {
                     day: "numeric",
                     month: "short",
                     year: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
                   })
                 : "—";
 
+              const amountPaise = p.amountPaise ?? p.amount ?? 0;
+              const refId = p.paymentId || p.orderId || "—";
+
               return (
                 <tr key={p.id} className="hover:bg-zinc-800/30 transition-colors">
-                  <td className="py-3.5 px-4 text-zinc-400 font-mono text-xs">{dateStr}</td>
-                  <td className="py-3.5 px-4 font-medium text-white">{p.planName || p.plan?.name || "Subscription"}</td>
-                  <td className="py-3.5 px-4 font-mono text-xs text-zinc-500">{p.orderId || "—"}</td>
-                  <td className="py-3.5 px-4 font-semibold text-white">
-                    ₹{(p.amount / 100).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
+                  <td className="py-3.5 px-4 text-zinc-300 font-medium text-xs">{dateStr}</td>
+                  <td className="py-3.5 px-4 font-semibold text-white">{p.planName || p.plan?.name || "Subscription"}</td>
+                  <td className="py-3.5 px-4 font-mono text-xs text-amber-400/90">{refId}</td>
+                  <td className="py-3.5 px-4 font-bold text-white">
+                    ₹{(amountPaise / 100).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
                   </td>
                   <td className="py-3.5 px-4">{getStatusBadge(p.status)}</td>
                 </tr>
