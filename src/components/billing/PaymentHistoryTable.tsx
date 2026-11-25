@@ -17,7 +17,7 @@ export function PaymentHistoryTable() {
         setLoading(true);
         const res = await fetchPaymentHistory(1, 50);
         if (active) {
-          setPayments(res.data || []);
+          setPayments(Array.isArray(res?.data) ? res.data : []);
         }
       } catch (err: unknown) {
         if (active) setError(err instanceof Error ? err.message : "Failed to load payment history");

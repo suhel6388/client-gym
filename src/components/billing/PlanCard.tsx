@@ -68,7 +68,7 @@ export function PlanCard({ plan, isCurrent = false, isSelected = false, onSelect
             What&apos;s included:
           </p>
           <ul className="space-y-2.5">
-            {plan.features?.map((feature, idx) => (
+            {(Array.isArray(plan.features) ? plan.features : []).map((feature, idx) => (
               <li key={idx} className="flex items-start gap-2.5 text-xs sm:text-sm text-ink/90">
                 <Check className="h-4 w-4 shrink-0 text-amber-500 mt-0.5" />
                 <span>{feature}</span>

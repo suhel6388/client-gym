@@ -58,7 +58,8 @@ export default function SubscriptionPage() {
         setPlansLoading(true);
         const data = await fetchBillingPlans();
         if (active) {
-          const sorted = [...data].sort(
+          const list = Array.isArray(data) ? data : [];
+          const sorted = [...list].sort(
             (a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0),
           );
           setPlans(sorted);

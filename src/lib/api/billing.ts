@@ -163,11 +163,32 @@ export function fetchMySubscription(signal?: AbortSignal) {
 }
 
 /** GET /platform/payments — authenticated gym's payment ledger */
-export function fetchPaymentHistory(page = 1, limit = 20) {
-  return apiRequest<{
-    data: SubscriptionHistoryItem[];
+export async function fetchPaymentHistory(page = 1, limit = 20): Promise<{
+  data: SubscriptionHistoryItem[];
+  pagination?: { page: number; limit: number; total: number; totalPages: number };
+}> {
+  const res = await apiRequest<{
+    data?:
+      | SubscriptionHistoryItem[]
+      | {
+          payments?: SubscriptionHistoryItem[];
+          pagination?: { page: number; limit: number; total: number; totalPages: number };
+        };
+    payments?: SubscriptionHistoryItem[];
     pagination?: { page: number; limit: number; total: number; totalPages: number };
   }>(`/platform/payments?page=${page}&limit=${limit}`, { unwrap: false });
+
+  const inner = res?.data;
+  if (Array.isArray(inner)) {
+    return { data: inner, pagination: res?.pagination };
+  }
+  if (inner && typeof inner === "object" && Array.isArray(inner.payments)) {
+    return { data: inner.payments, pagination: inner.pagination ?? res?.pagination };
+  }
+  if (Array.isArray(res?.payments)) {
+    return { data: res.payments, pagination: res?.pagination };
+  }
+  return { data: [] };
 }
 
 /** POST /subscription/cancel — cancel at end of current period */
