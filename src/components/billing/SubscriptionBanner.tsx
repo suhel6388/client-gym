@@ -23,7 +23,7 @@ export function SubscriptionBanner() {
         </div>
         <div className="flex items-center gap-3">
           <Link
-            href="/upgrade"
+            href="/subscription#plans"
             className="inline-flex items-center gap-1.5 rounded-lg bg-rose-600 px-3 py-1 text-xs font-semibold text-white shadow-sm hover:bg-rose-500 transition-colors"
           >
             Renew Now <ArrowRight className="h-3 w-3" />
@@ -47,7 +47,7 @@ export function SubscriptionBanner() {
       </div>
       <div className="flex items-center gap-2.5">
         <Link
-          href="/upgrade"
+          href="/subscription#plans"
           className="inline-flex items-center gap-1 rounded-lg bg-amber-500 px-3 py-1 text-xs font-semibold text-black hover:bg-amber-400 transition-colors"
         >
           Renew / Upgrade <ArrowRight className="h-3 w-3" />

@@ -199,7 +199,7 @@ const normalizeError = (error: unknown): ApiError => {
         !currentPath.startsWith("/login") &&
         !currentPath.startsWith("/auth")
       ) {
-        window.location.href = "/upgrade";
+        window.location.href = "/subscription#plans";
       }
     }
 

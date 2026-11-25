@@ -26,10 +26,10 @@ export function SubscriptionGuard({ children }: { children: ReactNode }) {
     if (sessionStatus === "loading" || subLoading) return;
     if (isSuperAdmin) return;
 
-    // If subscription is resolved and gym is not entitled, send them to upgrade
+    // If subscription is resolved and gym is not entitled, send them to subscription plans
     if (!entitled) {
       if (!pathname?.startsWith("/upgrade") && !pathname?.startsWith("/subscription")) {
-        router.replace("/upgrade");
+        router.replace("/subscription#plans");
       }
     }
   }, [sessionStatus, subLoading, entitled, isSuperAdmin, pathname, router]);

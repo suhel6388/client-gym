@@ -24,10 +24,10 @@ export function PlanCard({ plan, isCurrent = false, isSelected = false, onSelect
       className={cn(
         "relative flex flex-col justify-between rounded-2xl border p-6 transition-all duration-200 cursor-pointer",
         isSelected
-          ? "border-amber-400 ring-2 ring-amber-500/50 bg-gradient-to-b from-amber-950/30 via-zinc-900 to-zinc-950 shadow-2xl shadow-amber-500/20"
+          ? "border-amber-400 ring-2 ring-amber-500/50 bg-gradient-to-b from-amber-500/15 via-card to-card shadow-2xl shadow-amber-500/15"
           : isPopular
-            ? "border-amber-500/50 bg-gradient-to-b from-amber-950/20 via-zinc-900 to-zinc-950 shadow-xl shadow-amber-500/10 hover:border-amber-500/80"
-            : "border-zinc-800 bg-zinc-900/60 hover:border-zinc-700",
+            ? "border-amber-500/50 bg-gradient-to-b from-amber-500/10 via-card to-card shadow-xl shadow-amber-500/10 hover:border-amber-500/80"
+            : "border-line bg-card hover:border-line-strong",
       )}
     >
       {isPopular && (
@@ -40,37 +40,37 @@ export function PlanCard({ plan, isCurrent = false, isSelected = false, onSelect
 
       <div>
         <div className="flex items-center justify-between">
-          <h3 className="text-xl font-bold text-white">{plan.name}</h3>
+          <h3 className="text-xl font-bold text-ink">{plan.name}</h3>
           {isCurrent && (
-            <Badge tone="success" className="border border-emerald-500/40 text-emerald-400 text-xs">
+            <Badge tone="success" className="border border-emerald-500/40 text-emerald-500 text-xs">
               Current Plan
             </Badge>
           )}
         </div>
 
         {plan.description && (
-          <p className="mt-2 text-xs sm:text-sm text-zinc-400 min-h-[40px] leading-relaxed">
+          <p className="mt-2 text-xs sm:text-sm text-subtle min-h-[40px] leading-relaxed">
             {plan.description}
           </p>
         )}
 
         <div className="mt-6 flex items-baseline gap-1.5">
-          <span className="text-3xl sm:text-4xl font-extrabold text-white tracking-tight">
+          <span className="text-3xl sm:text-4xl font-extrabold text-ink tracking-tight">
             ₹{priceRupees.toLocaleString("en-IN")}
           </span>
-          <span className="text-xs sm:text-sm text-zinc-400">
+          <span className="text-xs sm:text-sm text-subtle">
             /{plan.durationMonths === 1 ? "month" : `${plan.durationMonths} months`}
           </span>
         </div>
 
-        <div className="mt-6 border-t border-zinc-800/80 pt-6">
-          <p className="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-3">
+        <div className="mt-6 border-t border-line pt-6">
+          <p className="text-xs font-semibold uppercase tracking-wider text-faint mb-3">
             What&apos;s included:
           </p>
           <ul className="space-y-2.5">
             {plan.features?.map((feature, idx) => (
-              <li key={idx} className="flex items-start gap-2.5 text-xs sm:text-sm text-zinc-300">
-                <Check className="h-4 w-4 shrink-0 text-amber-400 mt-0.5" />
+              <li key={idx} className="flex items-start gap-2.5 text-xs sm:text-sm text-ink/90">
+                <Check className="h-4 w-4 shrink-0 text-amber-500 mt-0.5" />
                 <span>{feature}</span>
               </li>
             ))}
@@ -93,7 +93,7 @@ export function PlanCard({ plan, isCurrent = false, isSelected = false, onSelect
               ? "bg-amber-400 text-black shadow-lg shadow-amber-500/30 font-bold"
               : isPopular
                 ? "bg-amber-500 text-black hover:bg-amber-400 shadow-lg shadow-amber-500/20"
-                : "bg-zinc-800 text-white hover:bg-zinc-700",
+                : "",
             isCurrent && "opacity-50 cursor-not-allowed",
           )}
         >

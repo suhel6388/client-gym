@@ -148,7 +148,7 @@ export function SettingsPage() {
             </div>
 
             <div className="flex items-center gap-2.5">
-              <Link href="/upgrade">
+              <Link href="/subscription#plans">
                 <Button variant="primary" size="sm" className="gap-1.5 bg-amber-500 hover:bg-amber-400 text-black font-semibold text-xs">
                   <Sparkles className="size-3.5" />
                   Upgrade Plan
@@ -156,7 +156,7 @@ export function SettingsPage() {
               </Link>
               <Link href="/subscription">
                 <Button variant="secondary" size="sm" className="text-xs">
-                  Invoices & History
+                  Invoices &amp; History
                 </Button>
               </Link>
             </div>

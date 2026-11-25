@@ -237,7 +237,7 @@ export function Sidebar({
               <p className="mt-1 text-[11px] leading-relaxed text-zinc-400">
                 Unlock automated receipts, AI analytics & unlimited members.
               </p>
-              <Link href="/upgrade" className="block mt-2.5">
+              <Link href="/subscription#plans" className="block mt-2.5">
                 <Button
                   variant="primary"
                   size="sm"

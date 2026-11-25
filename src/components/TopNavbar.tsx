@@ -352,7 +352,7 @@ export function TopNavbar({
               {[
                 { icon: User, label: "Settings", href: "/settings" },
                 { icon: IndianRupee, label: "Subscription & Plans", href: "/subscription" },
-                { icon: Sparkles, label: "Upgrade Plan", href: "/upgrade" },
+                { icon: Sparkles, label: "Upgrade Plan", href: "/subscription#plans" },
               ].map(({ icon: Icon, label, href }) => (
                 <Link
                   key={label}
