@@ -10,6 +10,8 @@ import { useSession } from "@/components/auth/SessionProvider";
 type CheckoutButtonProps = {
   plan: BillingPlan;
   couponCode?: string | null;
+  onStart?: () => void;
+  onDismiss?: () => void;
   onSuccess?: () => void;
   onError?: (err: Error) => void;
   className?: string;
@@ -19,6 +21,8 @@ type CheckoutButtonProps = {
 export function CheckoutButton({
   plan,
   couponCode,
+  onStart,
+  onDismiss,
   onSuccess,
   onError,
   className,
@@ -30,6 +34,7 @@ export function CheckoutButton({
   const handleCheckout = async () => {
     try {
       setLoading(true);
+      onStart?.();
 
       // 1. Generate Order on the backend
       const orderRes = await createPlatformOrder(plan.id, couponCode);
@@ -50,6 +55,7 @@ export function CheckoutButton({
         },
         onDismiss: () => {
           setLoading(false);
+          onDismiss?.();
         },
         onSuccess: async (razorpayResponse) => {
           try {

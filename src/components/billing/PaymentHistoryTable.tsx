@@ -57,7 +57,7 @@ export function PaymentHistoryTable() {
 
   if (loading) {
     return (
-      <div className="rounded-xl border border-line bg-card p-8 text-center text-sm text-subtle">
+      <div className="rounded-[14px] border border-zinc-800 bg-[#141418] p-8 text-center text-sm text-zinc-400">
         Loading payment transactions...
       </div>
     );
@@ -65,7 +65,7 @@ export function PaymentHistoryTable() {
 
   if (error) {
     return (
-      <div className="rounded-xl border border-rose-500/40 bg-rose-500/10 p-6 text-center text-sm text-rose-500">
+      <div className="rounded-[14px] border border-rose-500/40 bg-rose-950/20 p-6 text-center text-sm text-rose-300">
         {error}
       </div>
     );
@@ -73,10 +73,10 @@ export function PaymentHistoryTable() {
 
   if (payments.length === 0) {
     return (
-      <div className="rounded-xl border border-line bg-card p-12 text-center">
-        <Receipt className="mx-auto h-8 w-8 text-faint mb-2" />
-        <h4 className="text-sm font-semibold text-ink">No payment history yet</h4>
-        <p className="text-xs text-subtle mt-1">
+      <div className="rounded-[14px] border border-zinc-800 bg-[#141418] p-12 text-center">
+        <Receipt className="mx-auto h-8 w-8 text-zinc-600 mb-2" />
+        <h4 className="text-sm font-semibold text-white">No payment history yet</h4>
+        <p className="text-xs text-zinc-400 mt-1">
           When you purchase or renew a subscription plan, invoices and transaction records will appear here.
         </p>
       </div>
@@ -84,10 +84,10 @@ export function PaymentHistoryTable() {
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border border-line bg-card shadow-card">
+    <div className="overflow-hidden rounded-[14px] border border-zinc-800 bg-[#141418] shadow-xl">
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-xs sm:text-sm text-ink">
-          <thead className="bg-canvas/70 border-b border-line text-xs font-semibold text-faint uppercase tracking-wider">
+        <table className="w-full text-left text-xs sm:text-sm text-zinc-300">
+          <thead className="bg-[#0E0E11] border-b border-zinc-800 text-xs font-semibold text-zinc-400 uppercase tracking-wider">
             <tr>
               <th className="py-3.5 px-4">Date</th>
               <th className="py-3.5 px-4">Plan</th>
@@ -96,7 +96,7 @@ export function PaymentHistoryTable() {
               <th className="py-3.5 px-4">Status</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-line">
+          <tbody className="divide-y divide-zinc-800/70">
             {payments.map((p) => {
               const dateStr = p.createdAt
                 ? new Date(p.createdAt).toLocaleDateString("en-IN", {
@@ -107,11 +107,11 @@ export function PaymentHistoryTable() {
                 : "—";
 
               return (
-                <tr key={p.id} className="hover:bg-card-hover transition-colors">
-                  <td className="py-3.5 px-4 text-subtle font-mono text-xs">{dateStr}</td>
-                  <td className="py-3.5 px-4 font-medium text-ink">{p.planName || p.plan?.name || "Subscription"}</td>
-                  <td className="py-3.5 px-4 font-mono text-xs text-faint">{p.orderId || "—"}</td>
-                  <td className="py-3.5 px-4 font-semibold text-ink">
+                <tr key={p.id} className="hover:bg-zinc-800/30 transition-colors">
+                  <td className="py-3.5 px-4 text-zinc-400 font-mono text-xs">{dateStr}</td>
+                  <td className="py-3.5 px-4 font-medium text-white">{p.planName || p.plan?.name || "Subscription"}</td>
+                  <td className="py-3.5 px-4 font-mono text-xs text-zinc-500">{p.orderId || "—"}</td>
+                  <td className="py-3.5 px-4 font-semibold text-white">
                     ₹{(p.amount / 100).toLocaleString("en-IN", { minimumFractionDigits: 2 })}
                   </td>
                   <td className="py-3.5 px-4">{getStatusBadge(p.status)}</td>

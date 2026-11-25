@@ -52,11 +52,14 @@ export function useSubscription() {
     }
   }, [authStatus, loadSubscription]);
 
-  const remainingDays = subscription?.remainingDays ?? 0;
+  const remainingDays = subscription?.remainingDays ?? subscription?.daysLeft ?? 0;
+  const totalDays = subscription?.totalDays ?? 0;
+  const elapsedDays =
+    subscription?.elapsedDays ??
+    (totalDays > 0 ? Math.min(totalDays, Math.max(0, totalDays - remainingDays)) : 0);
   const isExpiringSoon =
-    Boolean(subscription?.entitled) &&
-    remainingDays > 0 &&
-    remainingDays <= 7;
+    subscription?.isExpiringSoon ??
+    (Boolean(subscription?.entitled) && remainingDays > 0 && remainingDays <= 7);
   const isExpired = subscription ? !subscription.entitled : false;
 
   return {
@@ -67,6 +70,8 @@ export function useSubscription() {
     isExpiringSoon,
     isExpired,
     remainingDays,
+    totalDays,
+    elapsedDays,
     refresh: loadSubscription,
   };
 }

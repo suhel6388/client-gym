@@ -15,7 +15,9 @@ export type BillingPlan = {
   features: string[];
   isActive?: boolean;
   displayOrder?: number;
+  maxMembers?: number | null;
   maxStaff?: number | null;
+  maxTrainers?: number | null;
   maxBranches?: number | null;
 };
 
@@ -68,12 +70,18 @@ export type VerifyPaymentResponse = {
 };
 
 export type SubscriptionSummary = {
-  id: string;
-  status: "TRIALING" | "ACTIVE" | "EXPIRED" | "CANCELLED" | "SUSPENDED" | "PAST_DUE";
+  id: string | null;
+  status: "TRIALING" | "ACTIVE" | "EXPIRED" | "CANCELLED" | "SUSPENDED" | "PAST_DUE" | "NONE";
   entitled: boolean;
   reason: string;
   remainingDays: number;
+  daysLeft?: number;
+  totalDays?: number;
+  elapsedDays?: number;
+  isExpiringSoon?: boolean;
   isTrial: boolean;
+  startsAt?: string | null;
+  expiresAt?: string | null;
   trialEndsAt?: string | null;
   currentPeriodEnd?: string | null;
   graceEndsAt?: string | null;
