@@ -368,10 +368,10 @@ export function PlatformGymDetailView({ gymId }: { gymId: string }) {
                       : "—"
                   }
                 />
-                <InfoRow
+                {/* <InfoRow
                   label="Cancel at period end"
                   value={subscription.cancelAtPeriodEnd ? "Yes" : "No"}
-                />
+                /> */}
               </dl>
               <dl className="divide-y divide-line/40">
                 <InfoRow
